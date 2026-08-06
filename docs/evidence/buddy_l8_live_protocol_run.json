@@ -44,5 +44,7 @@
   ],
   "parity_cert_green": false,
   "job2_owns_open": false,
-  "live_verdict": "PASS"
+  "live_verdict": "PASS",
+  "python": "Python 3.x",
+  "root": "<repo-root>"
 }

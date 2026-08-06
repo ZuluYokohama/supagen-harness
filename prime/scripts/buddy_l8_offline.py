@@ -51,7 +51,7 @@ def main() -> int:
     ap.add_argument(
         "--role",
         default="author_offline_protocol_runner",
-        help="recorded in evidence; use independent_buddy only if truly external",
+        help="label only; independent_buddy is never true without attestation env",
     )
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
@@ -75,22 +75,38 @@ def main() -> int:
     }
     # golden may be nested under harness smoke already; still explicit
     all_ok = all(s.get("ok") for s in steps.values())
+    # Never claim independent_buddy from a free-form --role string alone
+    attested = os.environ.get("BUDDY_L8_ATTESTATION", "").strip()
+    independent = bool(
+        attested
+        and attested.startswith("signed:")
+        and len(attested) > 20
+    )
     rec = {
-        "role": a.role,
-        "independent_buddy": a.role == "independent_buddy",
+        "role": a.role if a.role != "independent_buddy" or independent else "author_offline_protocol_runner",
+        "independent_buddy": independent,
         "protocol": "docs/BUDDY_L8_SIGNOFF.md",
         "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "python": py,
-        "root": str(ROOT),
+        "python": f"Python {sys.version_info.major}.{sys.version_info.minor}",
+        "root": "<repo-root>",
+        "isolation": {
+            "golden_schema_only": True,
+            "attested_independent": independent,
+        },
         "checks": {
             k: {"ok": v["ok"], "rc": v["rc"], "seconds": v["seconds"]}
             for k, v in steps.items()
         },
-        "tails": {k: v["tail"][-400:] for k, v in steps.items()},
+        # tails may contain paths — keep short and avoid full absolute roots
+        "tails": {
+            k: (v["tail"][-400:].replace(str(ROOT), "<repo-root>").replace(py, "<python>"))
+            for k, v in steps.items()
+        },
         "offline_verdict": "PASS" if all_ok else "FAIL",
         "note": (
             "Offline L8-01…04 only. Live L8-05…08 require LMS/jina. "
-            "Production OPEN marketing remains NO-GO."
+            "Production OPEN marketing remains NO-GO. "
+            "independent_buddy requires BUDDY_L8_ATTESTATION=signed:…"
         ),
         "law": "this artifact is package portability evidence, not production OPEN",
     }

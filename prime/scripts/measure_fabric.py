@@ -44,15 +44,27 @@ def nli_htp_parity_pass(*, max_age_h: float = 168.0) -> dict[str, Any]:
         cert = json.loads(PARITY_CERT.read_text(encoding="utf-8"))
         age_h = (time.time() - PARITY_CERT.stat().st_mtime) / 3600.0
         min_rate = float(os.environ.get("PRIME_NLI_HTP_MIN_HIT", "0.9"))
-        hits = int(cert.get("hits") or 0)
-        n = int(cert.get("n") or 0)
-        rate = (hits / n) if n else 0.0
-        green = (
+        hits = int(cert.get("hits") or cert.get("label_parity_n") or 0)
+        n = int(cert.get("n") or cert.get("label_parity_den") or 0)
+        rate = float(
+            cert.get("label_parity_rate")
+            if cert.get("label_parity_rate") is not None
+            else ((hits / n) if n else 0.0)
+        )
+        # Fail-closed: green only with complete same-run evidence fields
+        required_ok = (
             bool(cert.get("ok"))
             and rate >= min_rate
             and age_h <= max_age_h
             and cert.get("job2_owns_open") is not True
+            and cert.get("cpu_fallback") is False
+            and bool(cert.get("qnn_ep_registered") or cert.get("on_qnn"))
+            and bool(cert.get("held_out") or cert.get("label_parity_rate") is not None)
+            and bool(cert.get("recipe") or cert.get("model_id"))
+            and not bool(cert.get("probe_only") or cert.get("strict_qnn_failed"))
+            and not bool(cert.get("uncalibrated_probe"))
         )
+        green = required_ok
         out.update(
             {
                 "ok": green,
@@ -62,7 +74,9 @@ def nli_htp_parity_pass(*, max_age_h: float = 168.0) -> dict[str, Any]:
                 "hit_rate": round(rate, 3),
                 "recipe": cert.get("recipe"),
                 "verdict": cert.get("verdict"),
-                "reason": "pass" if green else "cert_not_green",
+                "cpu_fallback": cert.get("cpu_fallback"),
+                "held_out": cert.get("held_out"),
+                "reason": "pass" if green else "cert_not_green_or_incomplete",
             }
         )
         return out
@@ -123,29 +137,60 @@ def fabric_status() -> dict[str, Any]:
 
 def write_parity_cert_from_report(report_path: Path | str) -> dict[str, Any]:
     """
-    Convert npu_nli_qdq report → parity cert (green only if hits pass threshold).
+    Convert npu_nli_qdq report → parity cert.
+    Green only with held-out ORT label_parity_rate + no CPU fallback probe.
     Never sets job2_owns_open.
     """
+    from datetime import datetime, timezone
+
     report_path = Path(report_path)
     rep = json.loads(report_path.read_text(encoding="utf-8"))
     run = rep.get("run") or {}
-    hits = int(run.get("hits") or 0)
-    n = int(run.get("n") or 0)
+    hits = int(run.get("label_parity_n") or run.get("hits") or 0)
+    n = int(run.get("label_parity_den") or run.get("n") or 0)
     min_rate = float(os.environ.get("PRIME_NLI_HTP_MIN_HIT", "0.9"))
-    rate = (hits / n) if n else 0.0
+    rate = float(
+        run.get("label_parity_rate")
+        if run.get("label_parity_rate") is not None
+        else ((hits / n) if n else 0.0)
+    )
+    probe_only = bool(run.get("probe_only") or run.get("strict_qnn_failed"))
+    cpu_fallback = probe_only or bool(run.get("cpu_fallback"))
+    green = bool(
+        run.get("ok")
+        and rate >= min_rate
+        and hits >= 2
+        and not probe_only
+        and not cpu_fallback
+        and bool(run.get("held_out") or run.get("label_parity_rate") is not None)
+        and bool(run.get("qnn_ep_registered") or run.get("on_qnn"))
+    )
     cert = {
-        "ok": bool(run.get("ok") and rate >= min_rate and hits >= 2),
+        "ok": green,
         "hits": hits,
         "n": n,
         "hit_rate": round(rate, 3),
-        "recipe": rep.get("recipe") or {
+        "label_parity_rate": round(rate, 3),
+        "label_parity_n": hits,
+        "label_parity_den": n,
+        "held_out": bool(run.get("held_out")),
+        "recipe": rep.get("recipe")
+        or {
             "act": (rep.get("quantize") or {}).get("act"),
             "weight": (rep.get("quantize") or {}).get("weight"),
         },
+        "model_id": (rep.get("export") or {}).get("model_id")
+        or "cross-encoder/nli-deberta-v3-base",
         "verdict": rep.get("verdict"),
-        "qnn_ep_registered": run.get("qnn_ep_registered") or run.get("on_qnn"),
+        "qnn_ep_registered": bool(run.get("qnn_ep_registered") or run.get("on_qnn")),
+        "on_qnn": bool(run.get("on_qnn") or run.get("qnn_ep_registered")),
+        "cpu_fallback": cpu_fallback,
+        "probe_only": probe_only,
+        "strict_qnn_failed": bool(run.get("strict_qnn_failed")),
+        "uncalibrated_probe": not green,
         "job2_owns_open": False,
-        "source_report": str(report_path),
+        "measured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "source_report": "<repo>/docs/evidence/npu/ or prime/state/npu_nli_qdq_report.json",
         "law": "parity cert is measure-only; never production OPEN authority",
     }
     PARITY_CERT.parent.mkdir(parents=True, exist_ok=True)

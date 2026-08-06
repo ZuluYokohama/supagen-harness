@@ -31,5 +31,8 @@
     "n_critical_fail": 0
   },
   "job2_owns_open": false,
-  "note": "Independent buddy signature still required for D15 full close; this is author live re-measure only"
+  "note": "Independent buddy signature still required for D15 full close; this is author live re-measure only",
+  "python": "Python 3.x",
+  "root": "<repo-root>",
+  "independent_buddy": false
 }

@@ -3,13 +3,24 @@
   "hits": 0,
   "n": 3,
   "hit_rate": 0.0,
+  "label_parity_rate": 0.0,
+  "label_parity_n": 0,
+  "label_parity_den": 3,
+  "held_out": true,
   "recipe": {
     "act": "uint16",
     "weight": "uint8"
   },
+  "model_id": "cross-encoder/nli-deberta-v3-base",
   "verdict": "NPU_NLI_PARTIAL",
   "qnn_ep_registered": true,
+  "on_qnn": true,
+  "cpu_fallback": false,
+  "probe_only": false,
+  "strict_qnn_failed": false,
+  "uncalibrated_probe": true,
   "job2_owns_open": false,
-  "source_report": "prime\\state\\npu_nli_qdq_report.json",
+  "measured_at": "2026-08-06T13:41:46.750606Z",
+  "source_report": "<repo>/docs/evidence/npu/ or prime/state/npu_nli_qdq_report.json",
   "law": "parity cert is measure-only; never production OPEN authority"
 }

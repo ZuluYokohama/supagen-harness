@@ -18,7 +18,11 @@
 | golden soft PASS without schema flag | **Fixed** | fail-closed incomplete |
 | D1 range None critical PASS | **Fixed** | applied_rule + critical=False |
 | dim=768 | **Fixed** | dim=1024 |
-| D17 WARN as n_fail | **Fixed** | n_warn separate |
+| D17 WARN as n_fail | **Fixed** | n_warn separate; `n_pass+n_warn+n_fail==n_cells` asserted |
+| Job2 auto QNN EP | **Fixed** | `predict(force_cpu=True)` default; QNN refused on product path |
+| Parity cert incomplete green | **Fixed** | fail-closed fields: held_out, cpu_fallback=false, no probe_only |
+| Buddy independent_buddy free-form | **Fixed** | requires BUDDY_L8_ATTESTATION=signed:… |
+| LFM in PRESERVE | **Fixed** | LFM fallback scout-only |
 | Evidence user paths | **Fixed** | sanitized + logical IDs |
 | nomic fallback in jina bakeoff | **Fixed** | family_mismatch reject |
 | ORT probs key case | **Fixed** | normalized |

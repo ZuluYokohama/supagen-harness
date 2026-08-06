@@ -71,8 +71,7 @@ def register() -> dict[str, Any]:
             "lib": "<onnxruntime_qnn>/onnxruntime_providers_qnn.dll" if lib else None,
             "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll" if htp else None,
             "htp_exists": htp_ok,
-            "htp_dll_resolved": htp,  # local-only; strip before public evidence
-            "lib_resolved": lib,
+            # Resolved filesystem paths stay process-local only (not in public status)
             "n_qnn_devices": n_qnn,
             "devices": [
                 {"ep_name": d["ep_name"]} for d in devs

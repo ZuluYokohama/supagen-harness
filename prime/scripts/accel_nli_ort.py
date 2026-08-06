@@ -182,14 +182,38 @@ def load_session(*, force_cpu: bool = False) -> dict[str, Any]:
     }
 
 
-def predict(premise: str, hypothesis: str) -> dict[str, Any]:
+def predict(
+    premise: str,
+    hypothesis: str,
+    *,
+    force_cpu: bool = True,
+) -> dict[str, Any]:
+    """
+    Product Job2 default: force_cpu=True → CPUExecutionProvider only.
+    Explicit non-CPU EPs require force_cpu=False and PRIME_ACCEL=qnn|npu|dml.
+    """
     import numpy as np
 
-    st = load_session()
+    # Product default is always CPU-only. Only explicit PRIME_ACCEL may open other EPs.
+    pref = (os.environ.get("PRIME_ACCEL") or "auto").lower()
+    if force_cpu or pref in ("auto", "cpu", ""):
+        force_cpu = True
+    st = load_session(force_cpu=force_cpu)
     if not st.get("ok"):
         return {"ok": False, "error": st.get("error"), "engine": "ort_nli"}
     global _SESSION, _META, _TOK
     assert _SESSION and _META and _TOK
+    # Hard reject: product path must never land on QNN without force_cpu=False + explicit pref
+    active = (st.get("active_provider") or "")
+    if force_cpu and "QNN" in str(active):
+        return {
+            "ok": False,
+            "error": f"refused QNN provider on product path: {active}",
+            "engine": "ort_nli",
+            "label": "unknown",
+            "agrees": False,
+            "gate": "NEED_INFO",
+        }
     t0 = time.time()
     max_len = int(_META.get("max_length") or 256)
     enc = _TOK(

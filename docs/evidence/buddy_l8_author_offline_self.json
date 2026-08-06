@@ -11,5 +11,8 @@
   "live_L8_05_08": "author kit prior session 21/21 + dual_enter NEED_INFO + NLI STOP",
   "timestamp": "2026-08-06T13:10:20.798756Z",
   "commit": "ca8b30d",
-  "note": "Independent buddy signature still required for D15 full close"
+  "note": "Independent buddy signature still required for D15 full close",
+  "python": "Python 3.x",
+  "root": "<repo-root>",
+  "independent_buddy": false
 }

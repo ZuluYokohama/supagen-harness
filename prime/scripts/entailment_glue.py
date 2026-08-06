@@ -362,7 +362,7 @@ def _nli_one_way(
         "false",
         "no",
     ):
-        r = nli_ort(premise, hypothesis)
+        r = nli_ort(premise, hypothesis, force_cpu=True)
         if r.get("ok"):
             return r
         if prefer == "ort":
@@ -435,8 +435,17 @@ def mutual_entailment(
     }
 
 
-def nli_ort(premise: str, hypothesis: str) -> dict[str, Any]:
-    """ONNX Runtime DeBERTa NLI (CPU ORT default; DML/QNN when EP works)."""
+def nli_ort(
+    premise: str,
+    hypothesis: str,
+    *,
+    force_cpu: bool = True,
+) -> dict[str, Any]:
+    """ONNX Runtime DeBERTa NLI.
+
+    Product/auto path: force_cpu=True (CPUExecutionProvider only).
+    Explicit non-CPU requires force_cpu=False and PRIME_ACCEL opt-in.
+    """
     fail = {
         "ok": False,
         "job": "agreement_nli",
@@ -447,11 +456,12 @@ def nli_ort(premise: str, hypothesis: str) -> dict[str, Any]:
         "gate": "NEED_INFO",
         "not_open_authority": True,
         "job2_owns_open": False,
+        "force_cpu": force_cpu,
     }
     try:
         from accel_nli_ort import predict
 
-        r = predict(premise, hypothesis)
+        r = predict(premise, hypothesis, force_cpu=force_cpu)
         if not r.get("ok"):
             fail["error"] = str(r.get("error") or "ort_nli_failed")[:300]
             return fail
@@ -460,6 +470,12 @@ def nli_ort(premise: str, hypothesis: str) -> dict[str, Any]:
         out.setdefault("job", "agreement_nli")
         out.setdefault("not_open_authority", True)
         out["job2_owns_open"] = False
+        out["force_cpu"] = force_cpu
+        # Belt-and-suspenders: refuse QNN on product path
+        prov = str(out.get("provider") or "")
+        if force_cpu and "QNN" in prov:
+            fail["error"] = f"refused QNN on product Job2 path: {prov}"
+            return fail
         return out
     except Exception as e:
         fail["error"] = str(e)[:300]
@@ -515,40 +531,44 @@ def glue_agreement(
     else:
         _htp_refused = None
 
-    if prefer == "ort":
-        r = nli_ort(human, domain)
+    def _annotate(r: dict[str, Any]) -> dict[str, Any]:
+        out = dict(r)
+        out["job2_owns_open"] = False
+        out.setdefault("not_open_authority", True)
         if _htp_refused is not None:
-            r = dict(r)
-            r["htp_refused"] = _htp_refused
-            r["job2_owns_open"] = False
-        return r
+            out["htp_refused"] = _htp_refused
+        return out
+
+    if prefer == "ort":
+        return _annotate(nli_ort(human, domain, force_cpu=True))
     if prefer in ("cross_encoder", "auto"):
-        # Prefer ORT when model exported (faster warm path); fall back CE
+        # Prefer ORT CPU when model exported; fall back CE
         if prefer == "auto" and _os.environ.get("PRIME_NLI_ORT", "1").strip() not in (
             "0",
             "false",
             "no",
         ):
-            r_ort = nli_ort(human, domain)
+            r_ort = nli_ort(human, domain, force_cpu=True)
             if r_ort.get("ok"):
-                if _htp_refused is not None:
-                    r_ort = dict(r_ort)
-                    r_ort["htp_refused"] = _htp_refused
-                    r_ort["job2_owns_open"] = False
-                return r_ort
+                return _annotate(r_ort)
         r = nli_cross_encoder(human, domain)
         if r.get("ok") or prefer == "cross_encoder":
-            if _htp_refused is not None:
-                r = dict(r)
-                r["htp_refused"] = _htp_refused
-                r["job2_owns_open"] = False
-            return r
-    r = nli_lfm(human, domain, base=base)
-    if _htp_refused is not None and isinstance(r, dict):
-        r = dict(r)
-        r["htp_refused"] = _htp_refused
-        r["job2_owns_open"] = False
-    return r
+            return _annotate(r)
+    # LFM fallback only in SCOUT fiber (never PRESERVE / identity path)
+    fiber = (_os.environ.get("PRIME_FIBER_MODE") or "scout").lower().strip()
+    if fiber != "scout":
+        return _annotate(
+            {
+                "ok": False,
+                "job": "agreement_nli",
+                "engine": "lfm_nli",
+                "error": f"lfm_nli refused in fiber_mode={fiber} (scout only)",
+                "label": "unknown",
+                "agrees": False,
+                "gate": "NEED_INFO",
+            }
+        )
+    return _annotate(nli_lfm(human, domain, base=base))
 
 
 def interface_jaccard(a: str, b: str, symbols: list[str] | None = None) -> dict[str, Any]:
