@@ -2,17 +2,30 @@
   "artifact": "DOMAIN_COMPLETION_CERTIFICATE",
   "pr": "https://github.com/ZuluYokohama/supagen-harness/pull/1",
   "branch": "vv/dual-metric-npu-measure-fabric",
-  "timestamp": "2026-08-06T13:37:10.811069Z",
+  "timestamp": "2026-08-06T13:45:00Z",
   "seal": "GO_MEASURE",
   "production_open": "NO-GO",
   "matrix": {
     "go_no_go": "GO_MEASURE",
     "n_pass": 18,
     "n_fail": 0,
-    "n_critical_fail": 0
+    "n_critical_fail": 0,
+    "evidence_path": "docs/VV_RUN_RESULTS.md",
+    "generator": "prime/scripts/vv_full_matrix.py"
   },
-  "contract_live_author": "21/21 prior + law path recheck",
-  "disposition_verifier": "PASS",
+  "contract_live": {
+    "pass": 21,
+    "fail": 0,
+    "live": true,
+    "measured_count": "21/21",
+    "evidence_path": "docs/evidence/buddy_l8_live_protocol_run.json",
+    "recheck": "law_path_auto_cpu_htp_refuse"
+  },
+  "disposition_verifier": {
+    "status": "PASS",
+    "command": "python prime/scripts/verify_cr_disposition.py",
+    "evidence": "CI step CR disposition verifier"
+  },
   "job2_auto_ep": "CPUExecutionProvider",
   "htp_refuse": true,
   "e3_residual": "accepted",
@@ -22,6 +35,7 @@
     "cosine never OPEN",
     "Job2 owns agreement not OPEN",
     "auto never QNN",
-    "HTP only after nli_htp_parity_pass"
+    "HTP only after nli_htp_parity_pass",
+    "product nli_ort force_cpu=True"
   ]
 }

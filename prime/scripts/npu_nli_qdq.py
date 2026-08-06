@@ -60,6 +60,51 @@ CALIB_PAIRS = [
     ),
 ]
 
+# Held-out pairs: must not share normalized text with CALIB_PAIRS (either side).
+# Used only for label-parity vs ORT CPU — never for QDQ calibration.
+HELD_OUT_PAIRS: list[tuple[str, str, str]] = [
+    (
+        "Water freezes at zero degrees Celsius under standard pressure.",
+        "Ice melts at one hundred degrees Celsius under standard pressure.",
+        "contradiction",
+    ),
+    (
+        "The certificate face may STOP when mutual entailment fails.",
+        "When mutual entailment fails, the certificate face is allowed to STOP.",
+        "entailment",
+    ),
+    (
+        "Hexagon HTP stress proved accelerator execute cycles on QDQ MatMul.",
+        "Task Manager NPU counters are the sole proof of Hexagon HTP execution.",
+        "contradiction",
+    ),
+]
+
+
+def _norm_pair_text(s: str) -> str:
+    return " ".join((s or "").lower().split())
+
+
+def validate_held_out_disjoint(
+    calib: list[tuple[str, str]] = CALIB_PAIRS,
+    held: list[tuple[str, str, str]] = HELD_OUT_PAIRS,
+) -> None:
+    """Fail hard if any held-out premise/hypothesis appears in calib texts."""
+    calib_norm = set()
+    for a, b in calib:
+        calib_norm.add(_norm_pair_text(a))
+        calib_norm.add(_norm_pair_text(b))
+    for a, b, _lab in held:
+        na, nb = _norm_pair_text(a), _norm_pair_text(b)
+        if na in calib_norm or nb in calib_norm:
+            raise ValueError(
+                f"HELD_OUT text overlaps CALIB_PAIRS: {a!r} / {b!r}"
+            )
+
+
+# Import-time integrity for the held-out bank
+validate_held_out_disjoint()
+
 
 def export_fixed() -> dict[str, Any]:
     import torch
@@ -310,28 +355,17 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
             "ms": round(ms, 2),
         }
 
-    # Held-out pairs (not in CALIB_PAIRS) for accuracy-style probe vs ORT CPU authority
-    HELD_OUT = [
-        (
-            "Aboutness must not promote OPEN; NLI owns agreement.",
-            "Cosine similarity alone may promote production OPEN.",
-            "contradiction",
-        ),
-        (
-            "Restrict then measure then audit before any OPEN decision.",
-            "Skip restrict and force OPEN without audit.",
-            "contradiction",
-        ),
-        (
-            "Jina embeddings score topical aboutness for retrieval only.",
-            "Jina embeddings are used only for retrieval aboutness, not agreement.",
-            "entailment",
-        ),
-    ]
-    # ORT CPU labels as parity authority (not calib self-hit)
+    # Held-out pairs (module HELD_OUT_PAIRS; validated disjoint from CALIB_PAIRS)
+    HELD_OUT = list(HELD_OUT_PAIRS)
+    validate_held_out_disjoint()
+    # ORT CPU labels as parity authority — always force_cpu
     ort_predict = None
     try:
-        from accel_nli_ort import predict as ort_predict  # type: ignore
+        from accel_nli_ort import predict as _ort_predict  # type: ignore
+
+        def ort_predict(prem: str, hyp: str):
+            return _ort_predict(prem, hyp, force_cpu=True)
+
     except Exception:
         ort_predict = None
 
@@ -345,6 +379,8 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
                 o = ort_predict(a, b)
                 p["ort_label"] = o.get("label")
                 p["ort_ok"] = o.get("ok")
+                p["ort_force_cpu"] = True
+                p["ort_provider"] = o.get("provider")
                 p["parity_with_ort"] = bool(o.get("ok") and o.get("label") == p["label"])
             except Exception as e:
                 p["ort_error"] = str(e)[:120]
