@@ -37,7 +37,7 @@
 ## Hard residuals (accepted / optional)
 
 1. **E3 NPU Job2 label parity** — accepted residual; product HTP refused (`RESIDUAL_ACCEPTANCE_E3.md`).  
-2. **Independent external buddy signature** — optional dual-sign; offline+live protocol runners PASS on author kit.  
+2. **Independent human dual-sign** — optional; clean-clone offline L8-01…04 **PASS** (`buddy_l8_clean_clone_offline.json`).  
 3. **CI golden** — schema-only by design.
 
 ---

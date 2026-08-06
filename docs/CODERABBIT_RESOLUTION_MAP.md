@@ -27,6 +27,11 @@
 | tier_b miss contra gate | **Fixed** | nli_catches_contradiction required |
 | empty adv-lexical crash | **Fixed** | fail artifact |
 | NPU Job2 label parity | **Accepted residual** | `RESIDUAL_ACCEPTANCE_E3.md` + red parity cert |
-| Independent buddy L8 | **Pending external** | author self-evidence only |
+| Independent buddy L8 | **Package portability proven** | clean-clone offline L8-01…04 PASS; human dual-sign optional |
+| Smoke double quantize | **Fixed** | single `quantize()` pass |
+| Profile full-file load | **Fixed** | stream scan `n_lines_scanned` |
+| PowerShell `;` vs `,` | **Fixed** | calculated properties use commas |
 
-Stale inline comments may still map to new line numbers after re-review; this table is the authoritative disposition until CR re-submits on current HEAD.
+**Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`
+
+Stale inline comments may still map to new line numbers after re-review; this table + verifier are authoritative until CR re-submits on current HEAD.

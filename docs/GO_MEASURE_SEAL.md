@@ -47,8 +47,9 @@ It does **not** authorize production OPEN claims.
 **Contract live:** 21/21  
 **Buddy offline protocol:** PASS (`docs/evidence/buddy_l8_offline_protocol_run.json`)  
 **Buddy live protocol (author):** PASS (`docs/evidence/buddy_l8_live_protocol_run.json`)  
+**Clean shallow clone offline:** PASS (`docs/evidence/buddy_l8_clean_clone_offline.json`) — independent-style tree, L8-01…04  
 
-Independent external buddy signature remains optional polish for D15 full dual-sign; instrument law is sealed without it.
+Independent human dual-sign remains optional; package portability is proven on clean clone.
 
 ---
 
