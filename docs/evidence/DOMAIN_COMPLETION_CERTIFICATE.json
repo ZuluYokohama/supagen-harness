@@ -19,9 +19,9 @@
     "live": true,
     "measured_count": "21/21",
     "run_id": "contract_live_author_kit",
-    "commit": "6cb4877b2abb4362b26ac098e0687c486f3a8bca",
-    "tree": "9af988eb8d0be6494b9bf66c8a748a17365dce92",
-    "commit_hint": "6cb4877",
+    "commit": "b41b1d513905e5bd161e78961ae307c691495707",
+    "tree": "a66ff8e69202e4cc881f1ef42ab74a0f8aeea419",
+    "commit_hint": "b41b1d5",
     "evidence_path": "docs/evidence/buddy_l8_live_protocol_run.json",
     "recheck": "law_path_auto_cpu_htp_refuse",
     "job2_force_cpu": true
@@ -43,6 +43,6 @@
     "HTP only after nli_htp_parity_pass",
     "product nli_ort force_cpu=True"
   ],
-  "head": "6cb4877b2abb4362b26ac098e0687c486f3a8bca",
+  "head": "b41b1d513905e5bd161e78961ae307c691495707",
   "d17_integrity": "docs/evidence/vv_push_domains_integrity.json"
 }
