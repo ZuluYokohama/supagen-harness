@@ -221,7 +221,7 @@ We have **throughput + HTP-cycle** evidence only — **no controlled CPU-vs-HTP 
 | E0 | Plugin register + tiny QDQ HTP | QNN in providers + profile HVX | **DONE** |
 | E1 | Sustained stress visible / profiled | 45s burst + `htp_profile.csv` | **DONE** |
 | E2 | Fix DeBERTa QDQ calib + export | quantize → 198 MB QDQ; HTP session OK | **DONE** |
-| E3 | Job2 NLI on HTP with label parity | **PARTIAL** — runs on QNN @~32ms; logits collapsed (need UINT16 act / better calib / distill head) | **NOW** |
+| E3 | Job2 NLI on HTP with label parity | **PARTIAL** — UINT8: logits collapse ~0.51; **UINT16 act** (2026-08-06): uncollapsed but labels inverted (0/3 hits, ~32ms). Still **not** product. Next: calib / distill | **NOW** |
 | E4 | Always-on NPU judge while frankenstein loaded | free_gb + identity p stable | pending |
 | E5 | Batch mutual NLI lattice (n=16 claims) throughput | pairs/s vs CPU | pending |
 | E6 | Distill stance head (tiny) for adv twins | adv STOP rate ≥ DeBERTa, ms << | pending |

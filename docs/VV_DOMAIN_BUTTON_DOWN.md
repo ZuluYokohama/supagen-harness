@@ -70,7 +70,7 @@ Follow-up also: atomic truth_plane JSON, accel 60s cache, jina live meta, npu re
 
 ## Hard residuals (do not paper over)
 
-1. **NPU Job2 label parity** — QDQ DeBERTa on HTP collapses logits (neutral≈0.51). CPU ORT/CE remains authority. Evidence: `docs/evidence/npu/npu_nli_qdq_report.json`.  
+1. **NPU Job2 label parity** — UINT8 QDQ collapses logits (~0.51); UINT16 uncollapses but **inverts labels** (0/3 hits). CPU ORT/CE remains authority. Evidence: `docs/evidence/npu/npu_nli_qdq*.json`.  
 2. **Buddy lab L8-08** — external clean install not signed in this PR.  
 3. **CI golden** — schema-only by design; full sandbox seal is author/field only.
 

@@ -122,15 +122,33 @@ def export_fixed() -> dict[str, Any]:
     return {"ok": True, **meta}
 
 
-def quantize_qdq(fp_path: Path) -> dict[str, Any]:
+def quantize_qdq(
+    fp_path: Path,
+    *,
+    act: str = "uint8",
+    weight: str = "uint8",
+) -> dict[str, Any]:
     import numpy as np
     from transformers import AutoTokenizer
     from onnxruntime.quantization import QuantType, quantize
     from onnxruntime.quantization.calibrate import CalibrationDataReader
 
     tok = AutoTokenizer.from_pretrained(HF_ID)
-    qdq = OUT_DIR / "model.qdq.onnx"
+    # Separate artifacts per quant recipe so UINT8 residual stays for comparison
+    suffix = f"a{act}_w{weight}".replace("int", "i").replace("uint", "u")
+    qdq = OUT_DIR / f"model.qdq.{suffix}.onnx"
+    if act == "uint8" and weight == "uint8":
+        qdq = OUT_DIR / "model.qdq.onnx"  # legacy default path
     t0 = time.time()
+    act_map = {
+        "uint8": QuantType.QUInt8,
+        "uint16": QuantType.QUInt16,
+        "int8": QuantType.QInt8,
+        "int16": QuantType.QInt16,
+    }
+    w_map = dict(act_map)
+    act_t = act_map.get(act.lower(), QuantType.QUInt8)
+    w_t = w_map.get(weight.lower(), QuantType.QUInt8)
 
     # Discover actual input names from the ONNX (preproc may drop token_type_ids)
     import onnx
@@ -193,12 +211,12 @@ def quantize_qdq(fp_path: Path) -> dict[str, Any]:
         cfg = get_qnn_qdq_config(
             str(src),
             reader,
-            activation_type=QuantType.QUInt8,
-            weight_type=QuantType.QUInt8,
+            activation_type=act_t,
+            weight_type=w_t,
         )
         reader.rewind()
         quantize(str(src), str(qdq), cfg)
-        method = "qnn_qdq_config"
+        method = f"qnn_qdq_config act={act} w={weight}"
         input_names_used = _input_names(src)
     except Exception as e:
         from onnxruntime.quantization import QuantFormat, quantize_static
@@ -209,10 +227,10 @@ def quantize_qdq(fp_path: Path) -> dict[str, Any]:
             str(qdq),
             reader,
             quant_format=QuantFormat.QDQ,
-            activation_type=QuantType.QUInt8,
-            weight_type=QuantType.QUInt8,
+            activation_type=act_t,
+            weight_type=w_t,
         )
-        method = f"quantize_static_fallback ({e})"
+        method = f"quantize_static_fallback act={act} w={weight} ({e})"
         input_names_used = _input_names(fp_path)
 
     return {
@@ -220,6 +238,8 @@ def quantize_qdq(fp_path: Path) -> dict[str, Any]:
         "qdq": str(qdq),
         "qdq_mb": round(qdq.stat().st_size / 1e6, 1),
         "method": method,
+        "act": act,
+        "weight": weight,
         "input_names": input_names_used,
         "seconds": round(time.time() - t0, 1),
     }
@@ -318,11 +338,28 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
 
 
 def main() -> int:
+    import argparse
+    import os
+
+    ap = argparse.ArgumentParser(description="DeBERTa QDQ → Hexagon HTP NLI")
+    ap.add_argument("--act", default=os.environ.get("PRIME_NLI_QDQ_ACT", "uint8"))
+    ap.add_argument("--weight", default=os.environ.get("PRIME_NLI_QDQ_WEIGHT", "uint8"))
+    ap.add_argument("--skip-export", action="store_true", help="reuse existing FP32")
+    args = ap.parse_args()
+
     t0 = time.time()
-    report: dict[str, Any] = {}
+    report: dict[str, Any] = {"recipe": {"act": args.act, "weight": args.weight}}
     print("1) export fixed-shape FP32…", flush=True)
     try:
-        ex = export_fixed()
+        fp_existing = OUT_DIR / "model_fp32_fixed.onnx"
+        if args.skip_export and fp_existing.is_file():
+            meta = {}
+            mp = OUT_DIR / "meta.json"
+            if mp.is_file():
+                meta = json.loads(mp.read_text(encoding="utf-8"))
+            ex = {"ok": True, "fp32": str(fp_existing), "reused": True, **meta}
+        else:
+            ex = export_fixed()
     except Exception as e:
         report = {"ok": False, "error": f"export: {e}"}
         REPORT.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -331,9 +368,9 @@ def main() -> int:
     report["export"] = ex
     print(json.dumps(ex, indent=2), flush=True)
 
-    print("2) QDQ quantize…", flush=True)
+    print(f"2) QDQ quantize act={args.act} weight={args.weight}…", flush=True)
     try:
-        q = quantize_qdq(Path(ex["fp32"]))
+        q = quantize_qdq(Path(ex["fp32"]), act=args.act, weight=args.weight)
     except Exception as e:
         report["ok"] = False
         report["error"] = f"quantize: {e}"
