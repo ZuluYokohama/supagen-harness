@@ -1,8 +1,8 @@
 {
   "artifact": "DOMAIN_COMPLETION_CERTIFICATE",
   "pr": "1",
-  "branch": "vv/dual-metric-npu-measure-fabric",
-  "timestamp": "2026-08-06T22:15:45.025411Z",
+  "branch": "main",
+  "timestamp": "2026-08-06T23:38:29.359332Z",
   "seal": "GO_MEASURE",
   "production_open": "NO-GO",
   "matrix": {
@@ -29,7 +29,7 @@
   "disposition_verifier": {
     "status": "PASS",
     "command": "python prime/scripts/verify_cr_disposition.py",
-    "checks": "78+"
+    "checks": "84/84"
   },
   "job2_auto_ep": "CPUExecutionProvider",
   "htp_refuse": true,
@@ -48,5 +48,8 @@
   "d17_integrity": "docs/evidence/vv_push_domains_integrity.json",
   "merged_pr": "https://github.com/ZuluYokohama/supagen-harness/pull/1",
   "merge_commit": "2de430129db22878b14084dc4be4b122ac7ab9c0",
-  "seal_note": "contract_live.commit is PR content seal e884b7c (pre-squash); merge is squash 2de4301 on main"
+  "seal_note": "contract_live.commit is PR content seal e884b7c (pre-squash); merge is squash 2de4301 on main",
+  "status": "MERGED",
+  "main_tip": "fc5eb635c501a8e1ea63030d186ff57df62745a0",
+  "main_tree": "abfda21a6f7ec3d954b1ddaaaf671910a22b534d"
 }

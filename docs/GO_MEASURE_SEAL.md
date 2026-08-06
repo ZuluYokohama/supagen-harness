@@ -1,12 +1,14 @@
 # GO_MEASURE seal — dual-metric instrument law
 
-**PR:** https://github.com/ZuluYokohama/supagen-harness/pull/1  
-**Branch:** `vv/dual-metric-npu-measure-fabric`  
+**PR:** https://github.com/ZuluYokohama/supagen-harness/pull/1 — **MERGED** (squash `2de4301`)  
+**Landed on:** `main`  
 **Seal class:** **GO_MEASURE** (instrument advertise)  
 **Not sealed:** production OPEN marketing  
-**HEAD (content seal):** `e884b7c` (nli_eval QDQ cliff + CPU gate design law); tip must remain ancestor-bound via DOMAIN cert  
+**Content seal (pre-squash):** `e884b7c` (nli_eval QDQ cliff + CPU gate design law)  
+**Main tip after land + CI fix:** see `docs/evidence/DOMAIN_COMPLETION_CERTIFICATE.json` (`merge_commit`, `main_tip`)  
 **D17 portable:** `docs/evidence/vv_push_domains_integrity.json` (header counts must match cell recount)  
-**E3 residual locus:** static QDQ geometry (CPU-EP same graph); product HTP refused permanently 
+**E3 residual locus:** static QDQ geometry (CPU-EP same graph); product HTP refused permanently  
+
 
 ---
 
