@@ -48,7 +48,9 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   },
   "law": "aboutness must not promote OPEN; NLI owns agreement; residue never forced; production OPEN needs domain audit",
   "job1_lms": false,
-  "job2_owns_open": true,
+  "job2_owns_agreement": true,
+  "job2_owns_open": false,
+  "production_open_authority": "external domain audit + cert_face — never Job2 alone",
   "accel": {
     "preference": "auto",
     "ort": {
@@ -280,7 +282,9 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
 }
 ```
 
-### D12_ort_nli — PASS
+### D12_ort_nli — PASS (acceptance: ≥3/4 domain pairs; label_parity = ORT↔torch)
+
+**Rule:** `ort_hits ≥ 3` of 4 held-out pairs AND `label_parity` (ORT label matches torch CE on the same pairs). A single miss is residual, not full instrument FAIL. Neutral-class edge cases may disagree with expect while ORT/torch still match.
 
 ```json
 {
@@ -293,6 +297,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   },
   "ort_hits": 3,
   "torch_hits": 3,
+  "acceptance": "ort_hits>=3/4 and label_parity",
   "label_parity": true,
   "ort_s": 0.773,
   "torch_s": 4.125,

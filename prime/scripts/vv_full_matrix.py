@@ -51,10 +51,14 @@ def d0_architecture() -> dict:
 
     arch = architecture_map()
     frank = frankenstein_loaded()
-    # honesty: Job1 not LMS, Job2 owns agreement
+    j2 = arch["job2_agreement"]
+    # honesty: Job1 not LMS; Job2 owns agreement but never production OPEN alone
+    owns_agree = j2.get("owns_agreement", j2.get("owns_open_gate")) is True
+    owns_open = j2.get("owns_open_gate") is True  # must be False
     ok = (
         arch["job1_aboutness"]["lms"] is False
-        and arch["job2_agreement"]["owns_open_gate"] is True
+        and owns_agree
+        and not owns_open
         and "must not promote OPEN" in arch["law"]
     )
     return _gate(
@@ -65,7 +69,9 @@ def d0_architecture() -> dict:
             "frankenstein": frank,
             "law": arch["law"],
             "job1_lms": arch["job1_aboutness"]["lms"],
-            "job2_owns_open": arch["job2_agreement"]["owns_open_gate"],
+            "job2_owns_agreement": owns_agree,
+            "job2_owns_open": owns_open,
+            "production_open_authority": "external domain audit + cert_face",
             "accel": accel_status(),
         },
     )

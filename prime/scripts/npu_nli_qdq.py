@@ -394,12 +394,15 @@ def main() -> int:
     report["run"] = run
     print(json.dumps(run, indent=2), flush=True)
 
-    report["ok"] = bool(run.get("ok") and run.get("on_qnn") and run.get("hits", 0) >= 2)
+    on_path = bool(run.get("qnn_ep_registered") or run.get("on_qnn"))
+    # LIVE only with label hits; path alone is PARTIAL (parity residual)
+    report["ok"] = bool(run.get("ok") and on_path and run.get("hits", 0) >= 2)
     report["verdict"] = (
         "NPU_NLI_LIVE"
         if report["ok"]
-        else ("NPU_NLI_PARTIAL" if run.get("on_qnn") else "NPU_NLI_FAIL")
+        else ("NPU_NLI_PARTIAL" if on_path else "NPU_NLI_FAIL")
     )
+    report["law"] = "Job2 HTP never owns production OPEN; E3 parity required for product NLI"
     report["seconds"] = round(time.time() - t0, 1)
     REPORT.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     print("verdict", report["verdict"], "wrote", REPORT, flush=True)

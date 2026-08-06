@@ -127,12 +127,14 @@ def architecture_map() -> dict[str, Any]:
         "job2_agreement": {
             "engine": "DeBERTa cross-encoder NLI (prefer); LFM NLI fallback",
             "lms": "fallback only",
-            "owns_open_gate": True,
+            "owns_agreement": True,
+            "owns_open_gate": False,  # never production OPEN authority alone
+            "note": "agreement measure only; production OPEN needs domain audit + cert_face",
         },
         "npu_hexagon": {
             "present": "Snapdragon X Plus Hexagon",
             "used_today": "measure fabric (HTP QDQ stress/smoke); not product NLI",
-            "path": "onnxruntime-qnn plugin + QDQ graphs; CPU remains OPEN authority until E3 parity",
+            "path": "onnxruntime-qnn plugin + QDQ graphs; CPU ORT/CE = agreement authority; E3 parity required for HTP Job2",
             "run_id": "npu-htp-2026-08-06",
             "target_jobs": ["Job2 NLI (post-parity)", "always-on measure fabric"],
         },

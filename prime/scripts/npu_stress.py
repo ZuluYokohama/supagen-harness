@@ -107,16 +107,23 @@ def build_heavy_qdq() -> Path:
         )
         reader.rewind()
         quantize(src, str(qdq_tmp), cfg)
-    except Exception:
+    except Exception as e_qnn:
         reader.rewind()
-        quantize_static(
-            str(fp),
-            str(qdq_tmp),
-            reader,
-            quant_format=QuantFormat.QDQ,
-            activation_type=QuantType.QUInt8,
-            weight_type=QuantType.QUInt8,
-        )
+        try:
+            quantize_static(
+                str(fp),
+                str(qdq_tmp),
+                reader,
+                quant_format=QuantFormat.QDQ,
+                activation_type=QuantType.QUInt8,
+                weight_type=QuantType.QUInt8,
+            )
+        except Exception as e_static:
+            raise RuntimeError(
+                f"QDQ quantize failed: qnn_path={e_qnn}; static={e_static}"
+            ) from e_static
+        # record that we fell back so operators see why
+        print(f"warn: qnn_qdq_config failed ({e_qnn}); used quantize_static", flush=True)
     if not qdq_tmp.is_file() or qdq_tmp.stat().st_size < 100:
         raise RuntimeError(f"QDQ quantize failed or empty: {qdq_tmp}")
     qdq_tmp.replace(qdq)

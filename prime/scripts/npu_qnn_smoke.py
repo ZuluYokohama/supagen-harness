@@ -34,53 +34,21 @@ OUT = ROOT.parent / "state" / "npu_qnn_smoke.json"
 
 
 def register_qnn() -> dict:
-    import onnxruntime as ort
-    import onnxruntime_qnn as qnn
-
-    lib = qnn.get_library_path()
-    name = "QNNExecutionProvider"
+    """Delegate to npu_qnn.register() — single source of truth for plugin EP."""
     try:
-        ort.register_execution_provider_library(name, lib)
+        from npu_qnn import register
+
+        r = register()
+        # Sanitize absolute paths for any report that embeds this dict
+        out = dict(r)
+        if out.get("lib"):
+            out["lib"] = "<onnxruntime_qnn>/onnxruntime_providers_qnn.dll"
+        if out.get("htp_dll"):
+            out["htp_dll"] = "<onnxruntime_qnn>/QnnHtp.dll"
+        out["providers_list"] = out.get("providers_builtin") or out.get("providers_list")
+        return out
     except Exception as e:
-        # API does not guarantee "already" text — verify devices after failure
-        try:
-            devs_try = list(ort.get_ep_devices())
-            if not any(d.ep_name == name for d in devs_try):
-                return {
-                    "ok": False,
-                    "error": f"register failed: {e}",
-                    "lib": lib,
-                    "ort": ort.__version__,
-                    "qnn": getattr(qnn, "__version__", None),
-                }
-        except Exception as e2:
-            return {
-                "ok": False,
-                "error": f"register failed: {e}; devices: {e2}",
-                "lib": lib,
-                "ort": ort.__version__,
-                "qnn": getattr(qnn, "__version__", None),
-            }
-    devs = []
-    for d in ort.get_ep_devices():
-        devs.append(
-            {
-                "ep_name": d.ep_name,
-                "repr": str(d),
-            }
-        )
-    htp = qnn.get_qnn_htp_path()
-    return {
-        "ok": True,
-        "ort": ort.__version__,
-        "qnn": getattr(qnn, "__version__", None),
-        "lib": lib,
-        "htp_dll": htp,
-        "htp_exists": Path(htp).is_file() if htp else False,
-        "devices": devs,
-        "n_qnn_devices": sum(1 for d in devs if d["ep_name"] == name),
-        "providers_list": ort.get_available_providers(),
-    }
+        return {"ok": False, "error": f"npu_qnn.register: {e}"}
 
 
 def build_and_quantize() -> dict:
@@ -268,20 +236,22 @@ def run_on_htp(qdq_path: str, *, disable_cpu_fallback: bool = False) -> dict:
     elapsed = time.time() - t1
     y = out[0]
     qnn_ep_registered = any("QNN" in p for p in providers_used)
+    session_create_s = max(0.0, (time.time() - t0) - elapsed)
     return {
         "ok": True,
         "api": api,
         "providers_used": providers_used,
         "qnn_ep_registered": qnn_ep_registered,
         "on_qnn_ep": qnn_ep_registered,  # legacy alias
-        "htp_dll": htp,
+        "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll",
         "htp_exists": reg.get("htp_exists"),
+        "strict_qnn_error": err,  # preserved when classic fell back to CPU path
         "input_shape": shape,
         "output_shape": list(y.shape),
         "runs": n,
         "total_s": round(elapsed, 4),
         "ms_per_run": round(elapsed * 1000 / n, 3),
-        "session_create_s": round(t0 and (time.time() - t0 - elapsed), 3),
+        "session_create_s": round(session_create_s, 3),
         "reg_devices": reg.get("n_qnn_devices"),
         "note": (
             "qnn_ep_registered means QNN is in the session provider list — "

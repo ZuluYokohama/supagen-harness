@@ -61,20 +61,27 @@ def register() -> dict[str, Any]:
 
         devs = [{"ep_name": d.ep_name, "repr": str(d)} for d in ort.get_ep_devices()]
         n_qnn = sum(1 for d in devs if d["ep_name"] == name)
+        htp_ok = Path(htp).is_file() if htp else False
         _LAST = {
             "ok": n_qnn > 0,
             "registered": _REGISTERED,
             "ort": ort.__version__,
             "qnn": getattr(qnn, "__version__", None),
-            "lib": lib,
-            "htp_dll": htp,
-            "htp_exists": Path(htp).is_file() if htp else False,
+            # Logical identifiers only in status surfaces (no user-profile paths)
+            "lib": "<onnxruntime_qnn>/onnxruntime_providers_qnn.dll" if lib else None,
+            "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll" if htp else None,
+            "htp_exists": htp_ok,
+            "htp_dll_resolved": htp,  # local-only; strip before public evidence
+            "lib_resolved": lib,
             "n_qnn_devices": n_qnn,
-            "devices": devs,
+            "devices": [
+                {"ep_name": d["ep_name"]} for d in devs
+            ],  # drop pointer reprs
             "providers_builtin": ort.get_available_providers(),
             "note": (
                 "HTP=Hexagon NPU. Use QDQ quantized ONNX only. "
-                "No process named npu — activity is HTP subsystem."
+                "No process named npu — activity is HTP subsystem. "
+                "qnn_ep_registered ≠ HTP cycle proof — use htp_profile."
             ),
         }
         return _LAST
@@ -111,6 +118,7 @@ def session_qdq(
     if not selected:
         return {"ok": False, "error": "no QNN devices", "reg": reg}
 
+    # Session needs real filesystem path; status surfaces use logical names only
     ep_options = {
         "backend_path": htp,
         "htp_performance_mode": "burst" if burst else "balanced",

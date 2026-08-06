@@ -28,10 +28,10 @@ This sheet buttons down every domain of relevance. Status = author measures + st
 | **D12 KB family/dim** | **PASS** | reembed jina dim 1024 |
 | **D13 Compute∶HW** | **PASS (doc)** | device-split; power ethics = **hypothesis**; E3 parity gate for HTP NLI |
 | **D14 Ops/secrets** | **PASS** | gguf/onnx gitignored; NPU evidence under `docs/evidence/npu/` |
-| **D15 Docs honesty** | **PASS w/ residual** | GO_MEASURE ≠ production OPEN; buddy protocol `BUDDY_L8_SIGNOFF.md`; NPU parity explicit residual |
+| **D15 Docs honesty** | **PASS (law text)** / **PENDING (buddy L8)** | GO_MEASURE ≠ production OPEN; independent buddy unsigned; NPU parity residual explicit |
 
 **Aggregate for advertise of dual-metric instrument law:** **GO_MEASURE (provisional)** — full offline golden seal not on CI; buddy L8 unsigned.  
-**Aggregate for production OPEN marketing:** **NO-GO** until buddy L8 signed + NPU parity residual accepted/closed + CR clean on HEAD.
+**Aggregate for production OPEN marketing:** **NO-GO** until independent buddy L8 signed + NPU parity residual accepted/closed + CR clean on HEAD.
 
 ---
 

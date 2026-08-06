@@ -429,10 +429,15 @@ def glue_agreement(
     """
     from metric_text import strip_envelope, strip_prompt_chrome
 
-    human = strip_prompt_chrome(
-        strip_envelope(human) if (human or "").strip().startswith("{") else (human or "")
-    )
-    domain = strip_envelope(domain) if domain else ""
+    def _clean(s: str) -> str:
+        s = s or ""
+        if s.strip().startswith("{"):
+            s = strip_envelope(s)
+        return strip_prompt_chrome(s)
+
+    # Symmetric chrome strip on both stalks before agreement measure
+    human = _clean(human)
+    domain = _clean(domain)
     if prefer == "mutual":
         return mutual_entailment(human, domain)
     if prefer == "ort":

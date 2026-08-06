@@ -92,14 +92,16 @@ Name the plane **Measure Fabric** — NPU-first instruments, CPU arbiter.
    ┌────────────┐  ┌────────────┐  ┌────────────┐
    │ Job1 ABOUT │  │ Job1.5 RR  │  │ Job2 AGREE │
    │ embed      │  │ rerank     │  │ NLI/mutual │
-   │ prefer NPU │  │ prefer NPU │  │ prefer NPU │
-   │ else CPU   │  │ else CPU   │  │ else CPU   │
+   │ CPU today  │  │ CPU today  │  │ CPU authority│
+   │ (NPU later │  │ (NPU later │  │ HTP only if │
+   │  measure)  │  │  measure)  │  │ E3 parity✓) │
    └─────┬──────┘  └─────┬──────┘  └─────┬──────┘
          │               │               │
          └───────────────┼───────────────┘
                          ▼
                  ┌──────────────────┐
                  │ cert_face (CPU)  │  contradiction→STOP; cos never OPEN
+                 │ external domain  │  production OPEN ≠ Job2 alone
                  └──────────────────┘
 ```
 
@@ -248,12 +250,13 @@ def nli(premise, hyp):
     # qdq_nli_ready() / session-loads is NOT enough — DeBERTa QDQ currently
     # collapses logits (neutral≈0.51) even when HTP runs.
     if has_htp() and nli_htp_parity_pass():   # E3 gate; currently FALSE
-        r = nli_htp(premise, hyp)              # measure fabric only
+        r = nli_htp(premise, hyp)              # measure fabric only — not OPEN
         if r.ok: return r
     if ort_cpu_ready():
-        return nli_ort_cpu(premise, hyp)       # OPEN authority default
+        return nli_ort_cpu(premise, hyp)       # agreement measure default
     return nli_cross_encoder(...)              # torch CE
-    # never: cosine; cert_face always CPU/external
+    # never: cosine; never Job2 alone → production OPEN
+    # cert_face + external domain audit own OPEN|STOP
 ```
 
 ---
