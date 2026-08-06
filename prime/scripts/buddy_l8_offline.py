@@ -25,25 +25,57 @@ ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE = ROOT / "docs" / "evidence"
 
 
-def _run(cmd: list[str], env: dict) -> dict:
+def _decode_stream(s: str | bytes | None) -> str:
+    if s is None:
+        return ""
+    if isinstance(s, bytes):
+        return s.decode("utf-8", errors="replace")
+    return str(s)
+
+
+def _run(cmd: list[str], env: dict, timeout: float | None = None) -> dict:
+    """Run a protocol step with optional timeout (default PRIME_BUDDY_L8_TIMEOUT or 300s)."""
+    if timeout is None:
+        try:
+            timeout = float(os.environ.get("PRIME_BUDDY_L8_TIMEOUT", "300"))
+        except ValueError:
+            timeout = 300.0
     t0 = time.time()
-    p = subprocess.run(
-        cmd,
-        cwd=str(ROOT),
-        env=env,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    out = (p.stdout or "") + ("\n" + p.stderr if p.stderr else "")
-    return {
-        "cmd": cmd,
-        "rc": p.returncode,
-        "seconds": round(time.time() - t0, 2),
-        "tail": out[-1200:],
-        "ok": p.returncode == 0,
-    }
+    try:
+        p = subprocess.run(
+            cmd,
+            cwd=str(ROOT),
+            env=env,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout if timeout and timeout > 0 else None,
+        )
+        out = _decode_stream(p.stdout) + (
+            "\n" + _decode_stream(p.stderr) if p.stderr else ""
+        )
+        return {
+            "cmd": cmd,
+            "rc": p.returncode,
+            "seconds": round(time.time() - t0, 2),
+            "tail": out[-1200:],
+            "ok": p.returncode == 0,
+            "timeout_s": timeout,
+        }
+    except subprocess.TimeoutExpired as e:
+        out = _decode_stream(e.stdout) + (
+            "\n" + _decode_stream(e.stderr) if e.stderr else ""
+        )
+        return {
+            "cmd": cmd,
+            "rc": 124,
+            "seconds": round(time.time() - t0, 2),
+            "tail": (out + f"\nTIMEOUT after {timeout}s")[-1200:],
+            "ok": False,
+            "timeout_s": timeout,
+            "error": "timeout",
+        }
 
 
 def main() -> int:

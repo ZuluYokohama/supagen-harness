@@ -281,20 +281,25 @@ def main() -> int:
     # FAIL only — WARN is residual path, not n_fail
     n_fail = sum(1 for c in cells if c.get("status") == "FAIL")
     n_crit = sum(1 for c in cells if c.get("critical") and c.get("status") == "FAIL")
-    # Integrity: every cell counted exactly once
-    assert n_pass + n_warn + n_fail == len(cells), (
-        f"count integrity: pass={n_pass} warn={n_warn} fail={n_fail} cells={len(cells)}"
+    n_other = sum(
+        1
+        for c in cells
+        if c.get("status") not in ("PASS", "WARN", "FAIL")
     )
+    # Integrity without assert: count_ok feeds report.ok / go_no_go (persist NO_GO)
+    count_ok = (n_pass + n_warn + n_fail == len(cells)) and n_other == 0
+    law_ok = n_crit == 0 and count_ok
     report = {
-        "ok": n_crit == 0,
-        "go_no_go": "GO_MEASURE" if n_crit == 0 else "NO_GO",
+        "ok": law_ok,
+        "go_no_go": "GO_MEASURE" if law_ok else "NO_GO",
         "n_pass": n_pass,
         "n_warn": n_warn,
         "n_fail": n_fail,
+        "n_other_status": n_other,
         "n_cells": len(cells),
         "n_critical_fail": n_crit,
         "count_rule": "WARN does not increment n_fail; n_pass+n_warn+n_fail==n_cells",
-        "count_ok": n_pass + n_warn + n_fail == len(cells),
+        "count_ok": count_ok,
         "seconds": round(time.time() - t0, 1),
         "cells": cells,
         "law": "aboutness must not promote OPEN; NLI owns agreement; residue never forced",

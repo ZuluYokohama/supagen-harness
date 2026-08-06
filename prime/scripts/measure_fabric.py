@@ -51,15 +51,18 @@ def nli_htp_parity_pass(*, max_age_h: float = 168.0) -> dict[str, Any]:
             if cert.get("label_parity_rate") is not None
             else ((hits / n) if n else 0.0)
         )
-        # Fail-closed: green only with complete same-run evidence fields
+        # Fail-closed: green only with complete same-run evidence fields.
+        # held_out is mandatory (not OR with label_parity_rate alone); n>=2.
         required_ok = (
             bool(cert.get("ok"))
             and rate >= min_rate
+            and n >= 2
             and age_h <= max_age_h
             and cert.get("job2_owns_open") is not True
             and cert.get("cpu_fallback") is False
             and bool(cert.get("qnn_ep_registered") or cert.get("on_qnn"))
-            and bool(cert.get("held_out") or cert.get("label_parity_rate") is not None)
+            and bool(cert.get("held_out"))
+            and cert.get("label_parity_rate") is not None
             and bool(cert.get("recipe") or cert.get("model_id"))
             and not bool(cert.get("probe_only") or cert.get("strict_qnn_failed"))
             and not bool(cert.get("uncalibrated_probe"))
@@ -157,13 +160,16 @@ def write_parity_cert_from_report(report_path: Path | str) -> dict[str, Any]:
     )
     probe_only = bool(run.get("probe_only") or run.get("strict_qnn_failed"))
     cpu_fallback = probe_only or bool(run.get("cpu_fallback"))
+    # held_out mandatory; rate present; n>=2 — no OR bypass via rate alone
     green = bool(
         run.get("ok")
         and rate >= min_rate
         and hits >= 2
+        and n >= 2
         and not probe_only
         and not cpu_fallback
-        and bool(run.get("held_out") or run.get("label_parity_rate") is not None)
+        and bool(run.get("held_out"))
+        and run.get("label_parity_rate") is not None
         and bool(run.get("qnn_ep_registered") or run.get("on_qnn"))
     )
     cert = {

@@ -546,6 +546,30 @@ def glue_agreement(
             out["htp_refused"] = _htp_refused
         return out
 
+    known = {
+        "auto",
+        "ort",
+        "cross_encoder",
+        "lfm",
+        "mutual",
+        "htp",
+        "hexagon",
+        "npu",
+    }
+    # After HTP remap, prefer may be "auto"; unknown values never reach LFM
+    if prefer not in known:
+        return _annotate(
+            {
+                "ok": False,
+                "job": "agreement_nli",
+                "engine": "none",
+                "error": f"unknown prefer={prefer!r}; allowed={sorted(known)}",
+                "label": "unknown",
+                "agrees": False,
+                "gate": "NEED_INFO",
+            }
+        )
+
     if prefer == "ort":
         return _annotate(nli_ort(human, domain, force_cpu=True))
     if prefer in ("cross_encoder", "auto"):
@@ -561,7 +585,21 @@ def glue_agreement(
         r = nli_cross_encoder(human, domain)
         if r.get("ok") or prefer == "cross_encoder":
             return _annotate(r)
-    # LFM fallback only in SCOUT fiber (never PRESERVE / identity path)
+        # prefer=auto only continues to LFM scout fallback
+
+    # prefer=lfm explicit, or prefer=auto after ORT+CE exhaustion — SCOUT only
+    if prefer not in ("auto", "lfm"):
+        return _annotate(
+            {
+                "ok": False,
+                "job": "agreement_nli",
+                "engine": "none",
+                "error": f"prefer={prefer!r} produced no usable agreement path",
+                "label": "unknown",
+                "agrees": False,
+                "gate": "NEED_INFO",
+            }
+        )
     fiber = (_os.environ.get("PRIME_FIBER_MODE") or "scout").lower().strip()
     if fiber != "scout":
         return _annotate(

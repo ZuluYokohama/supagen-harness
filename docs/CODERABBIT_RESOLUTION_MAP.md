@@ -38,8 +38,12 @@
 | HELD_OUT overlaps CALIB | **Fixed** (`43c8ce3`) | `validate_held_out_disjoint()` + CI runtime check |
 | ORT parity without force_cpu | **Fixed** (`43c8ce3`/`4110aee`) | held-out loop always `force_cpu=True` |
 | Free-form contract_live_author | **Fixed** (`43c8ce3`) | structured `contract_live` object |
-| D4 `preserve_ok` always true | **Fixed** (this HEAD) | `"frankenstein" in preserve_key` only; no `or bool(key)` |
+| D4 `preserve_ok` always true | **Fixed** | `"frankenstein" in preserve_key` only; no `or bool(key)` |
 | gitignore drops NPU proofs | **Documented** | proofs under `docs/evidence/npu/` (tracked); `prime/state/npu/` scratch only |
+| buddy_l8 `_run` no timeout | **Fixed** | `PRIME_BUDDY_L8_TIMEOUT` (default 300s); TimeoutExpired → failed step |
+| unknown `prefer` → LFM | **Fixed** | reject unknown with NEED_INFO; LFM only auto fallback or prefer=lfm |
+| E3 held_out OR rate bypass | **Fixed** | `held_out` mandatory + `label_parity_rate` present + `n>=2` |
+| D17 count assert not gate | **Fixed** | runtime `count_ok`; false → `ok=false` / `NO_GO` |
 
 **Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`  
 Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (+ D4 frankenstein-only + evidence archive note).

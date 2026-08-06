@@ -96,6 +96,18 @@ def main() -> int:
         ),
         "npu_evidence_archive_note": "docs/evidence/npu" in t(".gitignore")
         or "docs/evidence/npu/" in t(".gitignore"),
+        "buddy_l8_timeout": "TimeoutExpired" in t("prime/scripts/buddy_l8_offline.py")
+        and "PRIME_BUDDY_L8_TIMEOUT" in t("prime/scripts/buddy_l8_offline.py"),
+        "prefer_unknown_reject": "unknown prefer=" in t("prime/scripts/entailment_glue.py"),
+        "held_out_mandatory": (
+            'bool(cert.get("held_out"))' in t("prime/scripts/measure_fabric.py")
+            and 'or cert.get("label_parity_rate") is not None)'
+            not in t("prime/scripts/measure_fabric.py")
+        ),
+        "count_ok_no_assert": (
+            "count_ok" in t("prime/scripts/vv_push_domains.py")
+            and "assert n_pass + n_warn + n_fail" not in t("prime/scripts/vv_push_domains.py")
+        ),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---
