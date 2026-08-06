@@ -108,6 +108,8 @@ def main() -> int:
             "count_ok" in t("prime/scripts/vv_push_domains.py")
             and "assert n_pass + n_warn + n_fail" not in t("prime/scripts/vv_push_domains.py")
         ),
+        "rerank_rev_required": "refuse trust_remote_code without PRIME_JINA_RERANK_REV"
+        in t("prime/scripts/rerank_service.py"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---

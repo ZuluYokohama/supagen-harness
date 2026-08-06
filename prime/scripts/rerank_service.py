@@ -27,11 +27,11 @@ _ENGINE: dict[str, Any] | None = None
 _FAIL_TS: float = 0.0
 _FAIL_BACKOFF_S = float(os.environ.get("PRIME_RERANK_FAIL_BACKOFF_S", "60"))
 
-# Only allow trust_remote_code for these exact Hub IDs (pinned revision optional via env)
+# Only allow trust_remote_code for these exact Hub IDs.
+# Revision MUST be pinned (PRIME_JINA_RERANK_REV = commit SHA or tag). Empty rev
+# refuses the jina AutoModel path and falls through to CrossEncoder candidates.
 TRUSTED_REMOTE = {
-    "jinaai/jina-reranker-v3": os.environ.get(
-        "PRIME_JINA_RERANK_REV", ""
-    ),  # empty = default branch tip; set to commit SHA in production
+    "jinaai/jina-reranker-v3": (os.environ.get("PRIME_JINA_RERANK_REV") or "").strip(),
 }
 
 DEFAULT_MODELS = [
@@ -71,23 +71,31 @@ def _load_engine() -> dict[str, Any]:
 
         last_err = ""
         for mid in candidates:
-            # path A: jina AutoModel.rerank API
+            # path A: jina AutoModel.rerank API (trust_remote only with pinned rev)
             if mid in TRUSTED_REMOTE or mid.startswith("jinaai/jina-reranker"):
                 if mid not in TRUSTED_REMOTE and mid != "jinaai/jina-reranker-v3":
                     last_err = f"{mid}: not in TRUSTED_REMOTE allowlist"
+                    continue
+                rev = TRUSTED_REMOTE.get(mid) or (
+                    (os.environ.get("PRIME_JINA_RERANK_REV") or "").strip()
+                    if mid == "jinaai/jina-reranker-v3"
+                    else ""
+                )
+                if not rev:
+                    last_err = (
+                        f"{mid}: refuse trust_remote_code without PRIME_JINA_RERANK_REV pin"
+                    )
                     continue
                 try:
                     from transformers import AutoModel
                     import torch
 
                     t0 = time.time()
-                    rev = TRUSTED_REMOTE.get(mid) or None
                     kw: dict[str, Any] = {
                         "trust_remote_code": True,
                         "dtype": torch.float32,
+                        "revision": rev,
                     }
-                    if rev:
-                        kw["revision"] = rev
                     model = AutoModel.from_pretrained(mid, **kw)
                     model.eval()
 
@@ -117,7 +125,7 @@ def _load_engine() -> dict[str, Any]:
                         "model": mid,
                         "predict": _jina_predict,
                         "load_s": round(time.time() - t0, 1),
-                        "revision": rev or "default",
+                        "revision": rev,
                     }
                     _FAIL_TS = 0.0
                     return _ENGINE

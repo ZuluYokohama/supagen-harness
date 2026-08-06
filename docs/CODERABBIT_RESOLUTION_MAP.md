@@ -44,6 +44,7 @@
 | unknown `prefer` → LFM | **Fixed** | reject unknown with NEED_INFO; LFM only auto fallback or prefer=lfm |
 | E3 held_out OR rate bypass | **Fixed** | `held_out` mandatory + `label_parity_rate` present + `n>=2` |
 | D17 count assert not gate | **Fixed** | runtime `count_ok`; false → `ok=false` / `NO_GO` |
+| rerank trust_remote unpinned | **Fixed** | refuse jina AutoModel path unless `PRIME_JINA_RERANK_REV` set; CE fallback |
 
 **Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`  
 Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (+ D4 frankenstein-only + evidence archive note).
