@@ -34,14 +34,34 @@ def gate(name: str, ok: bool, detail: dict, critical: bool = True) -> dict:
 
 
 def p1_jina_small() -> dict:
-    from jina_service import ensure_jina, stop_jina, _first_file, _gguf_candidates
+    from jina_service import ensure_jina, stop_jina
     from nomic_metric import aboutness
 
-    gguf = _first_file(_gguf_candidates())
+    # Prefer public status over private helpers
+    try:
+        from jina_service import active_gguf_path  # type: ignore
+
+        gguf = active_gguf_path()
+    except Exception:
+        gguf = None
+        try:
+            st = __import__("jina_service", fromlist=["jina_status"]).jina_status()
+            g = (st.get("gguf") or st.get("model") or "") if isinstance(st, dict) else ""
+            gguf = g or None
+        except Exception:
+            gguf = None
     is_small = bool(gguf and "small" in str(gguf).lower())
-    # force restart to pick new gguf
+    # Bounded wait for port release after stop (not fixed sleep only)
     stop_jina()
-    time.sleep(1)
+    deadline = time.time() + 8.0
+    while time.time() < deadline:
+        try:
+            import urllib.request
+
+            urllib.request.urlopen("http://127.0.0.1:8765/health", timeout=0.4)
+            time.sleep(0.25)
+        except Exception:
+            break
     ej = ensure_jina(force_restart=True)
     floor = aboutness(
         "E_ref meets production readiness criteria under measured audit.",
@@ -93,31 +113,42 @@ def p1_jina_small() -> dict:
 
 def p2_preserve_smoke() -> dict:
     """Load frankenstein alone briefly; do not full identity chain (long)."""
-    from residency import seamless_substrate, unload_heavies
+    from residency import seamless_substrate
     from truth_plane import frankenstein_loaded, frankenstein_required
 
     t0 = time.time()
-    # unload scouts first
+    sub: dict = {}
+    frank: dict = {}
+    fiber: dict = {}
+    scout: dict = {}
+    ok = False
+    err: str | None = None
     try:
         sub = seamless_substrate(fiber_mode="preserve")
+        frank = frankenstein_loaded()
+        fiber = sub.get("fiber") or {}
+        model = (fiber.get("model") or "").lower()
+        ok = (
+            bool(sub.get("ok"))
+            and sub.get("preserve_alone") is True
+            and "frankenstein" in model
+            and frank.get("loaded") is True
+            and frankenstein_required("preserve")
+        )
     except Exception as e:
-        return gate("P2_preserve_smoke", False, {"error": str(e)})
-    frank = frankenstein_loaded()
-    fiber = sub.get("fiber") or {}
-    model = (fiber.get("model") or "").lower()
-    ok = (
-        bool(sub.get("ok") or fiber.get("ok"))
-        and "frankenstein" in model
-        and frank.get("loaded") is True
-        and frankenstein_required("preserve")
-    )
-    # return to scout so daily path free
-    try:
-        from residency import seamless_substrate as ss
-
-        scout = ss(fiber_mode="scout")
-    except Exception as e:
-        scout = {"error": str(e)}
+        err = str(e)
+    finally:
+        # Always restore scout fiber (even on intermediate raise)
+        try:
+            scout = seamless_substrate(fiber_mode="scout")
+        except Exception as e:
+            scout = {"error": str(e)}
+    if err:
+        return gate(
+            "P2_preserve_smoke",
+            False,
+            {"error": err, "restored_scout": scout},
+        )
     return gate(
         "P2_preserve_smoke",
         ok,
@@ -125,6 +156,7 @@ def p2_preserve_smoke() -> dict:
             "preserve_fiber": fiber,
             "frankenstein": frank,
             "substrate_errors": sub.get("errors"),
+            "preserve_alone": sub.get("preserve_alone"),
             "restored_scout": {
                 "ok": (scout.get("ok") if isinstance(scout, dict) else False),
                 "fiber": (scout.get("fiber") or {}).get("model")
@@ -140,37 +172,48 @@ def p2_preserve_smoke() -> dict:
 def p3_truth_enter() -> dict:
     from truth_plane import request_plane
 
-    os.environ["PRIME_TRUTH_LOOP"] = "1"
-    os.environ["PRIME_FAST_ENTER"] = "1"
-    os.environ["PRIME_FIBER_MODE"] = "scout"
-    card = request_plane(
-        "Aboutness must not promote OPEN; NLI owns agreement. "
-        "Refuse force-OPEN without mutual entailment.",
-        mode="scout",
-        domain="technology",
-        truth_loop_enabled=True,
-    )
-    face = (card.get("cert_face") or {}).get("face")
-    op = card.get("operator_summary") or {}
-    # must not production OPEN; CANDIDATE or NEED_INFO or STOP ok
-    ok = face in ("NEED_INFO", "STOP", "OPEN_CANDIDATE") and face != "OPEN"
-    # if face OPEN_CANDIDATE, nli must agree
-    if face == "OPEN_CANDIDATE":
-        ok = ok and bool(op.get("nli_agrees") or (card.get("agreement") or {}).get("agrees"))
-    return gate(
-        "P3_truth_plane_enter",
-        ok,
-        {
-            "face": face,
-            "operator": op,
-            "nli": (card.get("agreement") or {}).get("label"),
-            "nli_engine": (card.get("agreement") or {}).get("engine"),
-            "mutual_gate": (card.get("mutual_agreement") or {}).get("gate"),
-            "truth_loop": bool(card.get("truth_loop")),
-            "fiber_mode": card.get("fiber_mode"),
-            "elapsed_s": card.get("elapsed_s"),
-        },
-    )
+    env_keys = ("PRIME_TRUTH_LOOP", "PRIME_FAST_ENTER", "PRIME_FIBER_MODE")
+    prior = {k: os.environ.get(k) for k in env_keys}
+    try:
+        os.environ["PRIME_TRUTH_LOOP"] = "1"
+        os.environ["PRIME_FAST_ENTER"] = "1"
+        os.environ["PRIME_FIBER_MODE"] = "scout"
+        card = request_plane(
+            "Aboutness must not promote OPEN; NLI owns agreement. "
+            "Refuse force-OPEN without mutual entailment.",
+            mode="scout",
+            domain="technology",
+            truth_loop_enabled=True,
+        )
+        face = (card.get("cert_face") or {}).get("face")
+        op = card.get("operator_summary") or {}
+        # must not production OPEN; CANDIDATE or NEED_INFO or STOP ok
+        ok = face in ("NEED_INFO", "STOP", "OPEN_CANDIDATE") and face != "OPEN"
+        if face == "OPEN_CANDIDATE":
+            ok = ok and bool(
+                op.get("nli_agrees") or (card.get("agreement") or {}).get("agrees")
+            )
+        return gate(
+            "P3_truth_plane_enter",
+            ok,
+            {
+                "face": face,
+                "operator": op,
+                "nli": (card.get("agreement") or {}).get("label"),
+                "nli_engine": (card.get("agreement") or {}).get("engine")
+                or op.get("nli_engine"),
+                "mutual_gate": (card.get("mutual_agreement") or {}).get("gate"),
+                "truth_loop": bool(card.get("truth_loop")),
+                "fiber_mode": card.get("fiber_mode"),
+                "elapsed_s": card.get("elapsed_s"),
+            },
+        )
+    finally:
+        for k, v in prior.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
 
 
 def p4_negative_open_pack() -> dict:

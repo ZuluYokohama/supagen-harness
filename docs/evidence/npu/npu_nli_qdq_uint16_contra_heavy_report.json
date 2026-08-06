@@ -124,5 +124,8 @@
   "law": "Job2 HTP never owns production OPEN; E3 held-out ORT parity required; LIVENESS_PROBE \u2260 calibrated agreement authority",
   "job2_owns_open": false,
   "seconds": 136.9,
-  "archive_note": "contra-heavy CALIB 32 pairs UINT16/UINT8 HTP; parity 1/4"
+  "archive_note": "contra-heavy CALIB 32 pairs UINT16/UINT8 HTP; parity 1/4",
+  "qdq_sha256": "82e50289cbb6d16a2f361235a89279d71dc790f327aadc26f5f86bf091d28c0d",
+  "qdq_bytes": 296157762,
+  "held_out_manifest_sha256": "2ed1e87281a369fef554b0ec9c24aaf89b2edb60df36266313f06ea689465525"
 }

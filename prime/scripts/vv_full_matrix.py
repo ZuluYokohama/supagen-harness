@@ -892,6 +892,7 @@ def run_all() -> dict:
         "d1_aboutness",
         "d7_package_contract",
         "d8_accel_npu",
+        "d9_adv_lexical",
         "d12_ort_nli",
         "d15_jina_small_bakeoff",
         "d16_kb_family_1024",
@@ -1010,7 +1011,7 @@ def _write_md(report: dict) -> None:
         "- ORT fail → WARN (CE remains product authority); never `job2_owns_open`",
         "- Product path: `force_cpu=True` only; HTP only after E3 green parity cert",
         "",
-        f"Artifact JSON: `prime/state/vv_full_matrix.json`",
+        "Artifact JSON: `prime/state/vv_full_matrix.json`",
         "",
     ]
     MD_OUT.write_text("\n".join(lines), encoding="utf-8")

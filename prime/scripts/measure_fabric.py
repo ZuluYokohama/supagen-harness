@@ -67,11 +67,10 @@ def nli_htp_parity_pass(*, max_age_h: float = 168.0) -> dict[str, Any]:
             and not bool(cert.get("probe_only") or cert.get("strict_qnn_failed"))
             and not bool(cert.get("uncalibrated_probe"))
             and cert.get("ort_force_cpu") is True  # parity authority must be CPU ORT
-            and (
-                not cert.get("labels_covered")
-                or set(cert.get("labels_covered") or [])
-                >= {"contradiction", "entailment", "neutral"}
-            )
+            # labels_covered mandatory and complete (no silent empty pass)
+            and bool(cert.get("labels_covered"))
+            and set(cert.get("labels_covered") or [])
+            >= {"contradiction", "entailment", "neutral"}
         )
         green = required_ok
         out.update(
@@ -169,7 +168,8 @@ def write_parity_cert_from_report(report_path: Path | str) -> dict[str, Any]:
     ort_force_cpu = run.get("ort_force_cpu") is True
     # Label coverage: require all three NLI labels in held-out bank when present
     labels_covered = set(run.get("labels_covered") or [])
-    labels_ok = not labels_covered or labels_covered >= {
+    # Mandatory complete coverage — empty labels_covered is never OK
+    labels_ok = labels_covered >= {
         "contradiction",
         "entailment",
         "neutral",
@@ -217,7 +217,7 @@ def write_parity_cert_from_report(report_path: Path | str) -> dict[str, Any]:
         "ort_force_cpu": ort_force_cpu,
         "job2_owns_open": False,
         "measured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "source_report": "<repo>/docs/evidence/npu/ or prime/state/npu_nli_qdq_report.json",
+        "source_report": "docs/evidence/npu/npu_nli_qdq_uint16_contra_heavy_report.json",
         "law": "parity cert is measure-only; never production OPEN authority",
     }
     PARITY_CERT.parent.mkdir(parents=True, exist_ok=True)

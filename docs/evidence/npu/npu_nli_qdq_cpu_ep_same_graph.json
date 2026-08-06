@@ -1,7 +1,7 @@
 {
   "artifact": "npu_nli_qdq_cpu_ep_same_graph",
   "measured_at": "2026-08-06T14:45:23.871381Z",
-  "qdq": "<repo>/prime/state/ort_models/nli-deberta-v3-base-qdq/model.qdq.aui16_wui8.onnx",
+  "qdq": "prime/state/ort_models/nli-deberta-v3-base-qdq/model.qdq.aui16_wui8.onnx",
   "provider": "CPUExecutionProvider",
   "held_out_n": 4,
   "hits": 1,
@@ -25,5 +25,8 @@
     }
   ],
   "conclusion": "Same miss pattern as HTP \u2192 residual is static QDQ of DeBERTa, not Hexagon execution.",
-  "product_law": "CPU FP32 ORT / CE remain Job2 authority until green parity cert"
+  "product_law": "CPU FP32 ORT / CE remain Job2 authority until green parity cert",
+  "qdq_sha256": "82e50289cbb6d16a2f361235a89279d71dc790f327aadc26f5f86bf091d28c0d",
+  "qdq_bytes": 296157762,
+  "held_out_manifest_sha256": "2ed1e87281a369fef554b0ec9c24aaf89b2edb60df36266313f06ea689465525"
 }

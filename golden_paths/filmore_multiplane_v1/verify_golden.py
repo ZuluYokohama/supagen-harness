@@ -57,6 +57,21 @@ def main() -> int:
         )
         print("GOLDEN VERIFY FAIL")
         return 1
+    # Required structure fields before full-seal indexing
+    for req in ("sha256", "required_ids", "n_claims"):
+        if req not in claims_art:
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "error": f"claims_artifact missing required field: {req}",
+                        "keys": list(claims_art.keys())[:20],
+                    },
+                    indent=2,
+                )
+            )
+            print("GOLDEN VERIFY FAIL")
+            return 1
     # Prefer portable roots: GOLDEN_SANDBOX_ROOT, monorepo extract, legacy absolute.
     # CI/buddy without field dumps: schema-only PASS when sandbox missing.
     # Force schema-only: GOLDEN_SANDBOX_ROOT=0 or GOLDEN_SCHEMA_ONLY=1

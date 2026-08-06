@@ -66,6 +66,15 @@
 | disposition string-only | **Fixed** | runtime incomplete-labels + D17 recompute checks |
 | D17 empty cells PASS | **Fixed** | `cells_ok` requires non-empty list |
 | evidence absolute paths | **Fixed** | `_rel_path` on export/qdq; scrub archives |
+| substrate_ok soft OR | **Fixed** | fiber.ok only |
+| nli_engine warm probe | **Fixed** | agreement engine first |
+| preserve_alone any frankenstein | **Fixed** | selected model alone |
+| labels_covered optional | **Fixed** | mandatory complete set for green |
+| push_domains env/scout leak | **Fixed** | finally restore env + scout fiber |
+| jina pool/gguf mismatch | **Fixed** | force restart when meta differs |
+| golden claims structure | **Fixed** | require sha256, required_ids, n_claims |
+| ensure invalid mode | **Fixed** | reject non scout/preserve |
+| QDQ SHA isolation | **Fixed** | qdq_sha256 + held_out_manifest_sha256 on evidence |
 
 **Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`  
 Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (+ D4 frankenstein-only + evidence archive note).

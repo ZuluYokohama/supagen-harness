@@ -310,25 +310,39 @@ def ensure_jina(
                     except Exception:
                         live_meta = {}
                 hyp = live_meta.get("hyperparams") or {}
-                out = {
-                    "ok": True,
-                    "started": False,
-                    "status": "already_running",
-                    "base": BASE,
-                    "dim": p.get("dim"),
-                    "latency_ms": p.get("latency_ms"),
-                    "gguf": live_meta.get("gguf"),
-                    "model_field": p.get("model_field"),
-                    "hyperparams": {
-                        "context_length": live_meta.get("ctx") or hyp.get("context_length") or CTX,
-                        "pooling": hyp.get("pooling")
-                        or os.environ.get("PRIME_JINA_POOLING", "last"),
-                        "prefixes": PREFIX,
-                    },
-                    "seamless": True,
-                }
-                _LAST_ENSURE = out
-                return out
+                want_pool = os.environ.get("PRIME_JINA_POOLING", "last")
+                live_pool = hyp.get("pooling") or want_pool
+                # Desired GGUF from env / candidates when set
+                want_gguf = (os.environ.get("PRIME_JINA_GGUF") or "").strip()
+                live_gguf = str(live_meta.get("gguf") or "")
+                config_mismatch = False
+                if live_pool != want_pool:
+                    config_mismatch = True
+                if want_gguf and live_gguf and want_gguf not in live_gguf and live_gguf not in want_gguf:
+                    config_mismatch = True
+                if config_mismatch:
+                    force_restart = True
+                else:
+                    out = {
+                        "ok": True,
+                        "started": False,
+                        "status": "already_running",
+                        "base": BASE,
+                        "dim": p.get("dim"),
+                        "latency_ms": p.get("latency_ms"),
+                        "gguf": live_meta.get("gguf"),
+                        "model_field": p.get("model_field"),
+                        "hyperparams": {
+                            "context_length": live_meta.get("ctx")
+                            or hyp.get("context_length")
+                            or CTX,
+                            "pooling": live_pool,
+                            "prefixes": PREFIX,
+                        },
+                        "seamless": True,
+                    }
+                    _LAST_ENSURE = out
+                    return out
             # zombie: pid alive, port dead → force restart
             if PID_FILE.is_file():
                 try:

@@ -196,7 +196,8 @@ def dual_enter(
                 fiber_m = (substrate.get("fiber") or {}).get("model")
                 if fiber_m:
                     chat_model = fiber_m
-                substrate_ok = bool(plane.get("ok") or substrate.get("ok"))
+                # Fiber result is the residency authority (not plane ok OR soft ok)
+                substrate_ok = bool((substrate.get("fiber") or {}).get("ok"))
             else:
                 from residency import seamless_substrate
 
@@ -206,7 +207,7 @@ def dual_enter(
                 if substrate.get("fiber", {}).get("model"):
                     chat_model = substrate["fiber"]["model"]
                 substrate["fiber_mode"] = mode
-                substrate_ok = bool(substrate.get("ok"))
+                substrate_ok = bool((substrate.get("fiber") or {}).get("ok"))
         except Exception as e:
             substrate = {"ok": False, "error": str(e), "fiber_mode": mode}
             substrate_ok = False
@@ -470,7 +471,14 @@ def dual_enter(
         }
         op = card.get("operator_summary")
         if isinstance(op, dict):
-            op["nli_engine"] = (instruments.get("nli") or {}).get("engine")
+            # Prefer the engine that produced this card's agreement (request path)
+            agree = card.get("agreement") or {}
+            if agree.get("engine") or agree.get("provider"):
+                op["nli_engine"] = agree.get("engine") or agree.get("provider")
+                op["nli_engine_source"] = "request_agreement"
+            else:
+                op["nli_engine"] = (instruments.get("nli") or {}).get("engine")
+                op["nli_engine_source"] = "warm_probe_only"
             op["rerank_model"] = (instruments.get("rerank") or {}).get("model")
     return card
 

@@ -13,10 +13,12 @@ Slim copies of measured Hexagon HTP proofs. Full ONNX/QDQ weights and full `htp_
 | `npu_nli_qdq_report.json` | DeBERTa QDQ **UINT8** on HTP: session OK, logits collapse ~neutral 0.51 |
 | `npu_nli_qdq_uint16_report.json` | DeBERTa QDQ **act=UINT16 w=UINT8** (early): session OK ~32ms; **labels inverted** (0/3) |
 | `npu_nli_qdq_uint16_expanded_calib_report.json` | Expanded CALIB (18) UINT16/UINT8 HTP: parity **1/4** |
-| `npu_nli_qdq_cpu_ep_same_graph.json` | **Isolation:** same QDQ file on **CPU EP** also **1/4** — residual is quant, not HTP |
+| `npu_nli_qdq_uint16_contra_heavy_report.json` | Contra-heavy CALIB 32 UINT16/UINT8 HTP: held-out **1/4**, all 3 labels covered |
+| `npu_nli_qdq_cpu_ep_same_graph.json` | Isolation: same QDQ on **CPU EP** **1/4** + `qdq_sha256` / held-out digest |
+| `nli_htp_parity_cert.json` | E3 parity certificate consumed by `measure_fabric` (currently red) |
 
 **E3 residual (accepted for GO_MEASURE):** label-parity **still FAIL** (must be ≥0.9 for green).  
-Progress: 0/3 invert → **1/4** after calib work; **CPU-EP on same QDQ matches HTP** → do not blame Hexagon routing.  
+Progress: 0/3 invert → **1/4** after calib work; **CPU-EP on same QDQ matches HTP** when `qdq_sha256` matches → residual is **quant geometry**, not Hexagon routing.  
 FP32 ORT CPU on same pairs: **PASS**. Product: `measure_fabric` red cert → HTP refused.  
 Next: QAI Hub / distill student / keep CPU ORT — static calib expansion alone insufficient.
 

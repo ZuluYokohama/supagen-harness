@@ -332,31 +332,34 @@ def seamless_substrate(
         out["fiber"] = {"ok": False, "error": str(e)}
         out["errors"].append(f"fiber:{e}")
 
-    # Measure preserve residency from catalog after promote (not unload RCs alone)
+    # Measure preserve residency: selected model alone (not any PRESERVE_KEYS match)
     if mode == "preserve" and out.get("preserve_alone") is not False:
         try:
             from lms_layers import l1_catalog
 
             cat2 = l1_catalog(base=base)
+            selected = (model or (out.get("fiber") or {}).get("model") or "").lower()
             loaded_keys = [
                 (m.get("key") or "").lower()
                 for m in (cat2.get("models") or [])
                 if m.get("loaded") and m.get("type") != "embedding"
             ]
-            frank_loaded = any(
-                any(p in k for p in PRESERVE_KEYS) for k in loaded_keys
+            selected_loaded = bool(selected) and any(
+                selected in k or k in selected for k in loaded_keys
             )
+            # Any other loaded chat model is foreign (including other frankenstein variants)
             foreign = [
                 k
                 for k in loaded_keys
-                if not any(p in k for p in PRESERVE_KEYS)
-                and "jina" not in k
+                if "jina" not in k
                 and "embed" not in k
+                and not (selected and (selected in k or k in selected))
             ]
-            alone = frank_loaded and not foreign
+            alone = selected_loaded and not foreign
             out["preserve_alone"] = alone
             out["preserve_residency"] = {
-                "frankenstein_loaded": frank_loaded,
+                "selected": selected,
+                "selected_loaded": selected_loaded,
                 "foreign_loaded": foreign,
             }
             if not alone:
