@@ -223,19 +223,44 @@ def main() -> int:
         from pathlib import Path as _P
 
         tmp = _P(tempfile.gettempdir()) / "prime_fake_parity_cert.json"
-        # incomplete: no held_out, labels incomplete
-        tmp.write_text(
-            '{"ok": true, "label_parity_rate": 1.0, "hits": 3, "n": 3, '
-            '"cpu_fallback": false, "qnn_ep_registered": true, '
-            '"ort_force_cpu": true, "held_out": false, '
-            '"labels_covered": ["entailment"], "recipe": {"act": "uint8"}}',
-            encoding="utf-8",
-        )
         old_cert = _mf2.PARITY_CERT
         _mf2.PARITY_CERT = tmp  # type: ignore[assignment]
         try:
-            bad = _mf2.nli_htp_parity_pass()
-            runtime["runtime_incomplete_labels_not_green"] = not bool(bad.get("ok"))
+            # Case A: incomplete labels_covered (held_out true, rate 1.0) must stay red
+            tmp.write_text(
+                '{"ok": true, "label_parity_rate": 1.0, "hits": 3, "n": 3, '
+                '"cpu_fallback": false, "qnn_ep_registered": true, '
+                '"ort_force_cpu": true, "held_out": true, '
+                '"labels_covered": ["entailment"], "recipe": {"act": "uint8"}, '
+                '"model_id": "x", "probe_only": false, "uncalibrated_probe": false}',
+                encoding="utf-8",
+            )
+            bad_lab = _mf2.nli_htp_parity_pass()
+            # Case B: empty labels_covered must stay red
+            tmp.write_text(
+                '{"ok": true, "label_parity_rate": 1.0, "hits": 3, "n": 3, '
+                '"cpu_fallback": false, "qnn_ep_registered": true, '
+                '"ort_force_cpu": true, "held_out": true, '
+                '"labels_covered": [], "recipe": {"act": "uint8"}, '
+                '"model_id": "x", "probe_only": false, "uncalibrated_probe": false}',
+                encoding="utf-8",
+            )
+            bad_empty = _mf2.nli_htp_parity_pass()
+            # Case C: missing labels_covered key must stay red
+            tmp.write_text(
+                '{"ok": true, "label_parity_rate": 1.0, "hits": 3, "n": 3, '
+                '"cpu_fallback": false, "qnn_ep_registered": true, '
+                '"ort_force_cpu": true, "held_out": true, '
+                '"recipe": {"act": "uint8"}, "model_id": "x", '
+                '"probe_only": false, "uncalibrated_probe": false}',
+                encoding="utf-8",
+            )
+            bad_miss = _mf2.nli_htp_parity_pass()
+            runtime["runtime_incomplete_labels_not_green"] = (
+                not bool(bad_lab.get("ok"))
+                and not bool(bad_empty.get("ok"))
+                and not bool(bad_miss.get("ok"))
+            )
         finally:
             _mf2.PARITY_CERT = old_cert  # type: ignore[assignment]
             try:

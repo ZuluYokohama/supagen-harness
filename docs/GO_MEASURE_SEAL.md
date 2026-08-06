@@ -4,7 +4,9 @@
 **Branch:** `vv/dual-metric-npu-measure-fabric`  
 **Seal class:** **GO_MEASURE** (instrument advertise)  
 **Not sealed:** production OPEN marketing  
-**HEAD (seal refresh):** run `git rev-parse --short HEAD` on branch; CI must pass `verify_cr_disposition` + offline verify  
+**HEAD (seal refresh):** `6cb4877`+ on branch; CI must pass `verify_cr_disposition` + offline verify  
+**D17 portable:** `docs/evidence/vv_push_domains_integrity.json`  
+**E3 residual locus:** static QDQ geometry (CPU-EP same graph); product HTP refused  
 
 ---
 

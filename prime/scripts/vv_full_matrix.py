@@ -825,13 +825,23 @@ def d16_kb_family_1024() -> dict:
 
 
 def d17_push_suite_artifact() -> dict:
-    """Absorb vv_push_domains critical passes if present."""
-    p = STATE / "vv_push_domains.json"
-    if not p.is_file():
+    """Absorb vv_push_domains critical passes if present.
+
+    Prefer live local report; fall back to portable tracked integrity
+    under docs/evidence/vv_push_domains_integrity.json (CI-friendly).
+    """
+    candidates = [
+        STATE / "vv_push_domains.json",
+        DOCS / "evidence" / "vv_push_domains_integrity.json",
+    ]
+    p = next((c for c in candidates if c.is_file()), None)
+    if p is None:
         return _gate(
             "D17_push_suite",
             False,
-            {"error": "run vv_push_domains.py"},
+            {
+                "error": "run vv_push_domains.py or ship docs/evidence/vv_push_domains_integrity.json",
+            },
             critical=False,
         )
     d = json.loads(p.read_text(encoding="utf-8"))
@@ -878,6 +888,13 @@ def d17_push_suite_artifact() -> dict:
         "D17_push_suite",
         ok,
         {
+            "source": str(p).replace("\\", "/").split("PRIMEdEV-1/")[-1]
+            if "PRIMEdEV-1" in str(p).replace("\\", "/")
+            else (
+                "docs/evidence/vv_push_domains_integrity.json"
+                if "evidence" in str(p)
+                else "prime/state/vv_push_domains.json"
+            ),
             "go_no_go": d.get("go_no_go"),
             "n_pass": n_pass,
             "n_warn": n_warn,

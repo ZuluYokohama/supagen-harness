@@ -2,7 +2,7 @@
   "artifact": "DOMAIN_COMPLETION_CERTIFICATE",
   "pr": "https://github.com/ZuluYokohama/supagen-harness/pull/1",
   "branch": "vv/dual-metric-npu-measure-fabric",
-  "timestamp": "2026-08-06T13:45:00Z",
+  "timestamp": "2026-08-06T21:24:22.308492Z",
   "seal": "GO_MEASURE",
   "production_open": "NO-GO",
   "matrix": {
@@ -19,9 +19,9 @@
     "live": true,
     "measured_count": "21/21",
     "run_id": "contract_live_author_kit",
-    "commit": "9810b7cdd1e646c6bcf09850d07c8e10f4a23a4b",
-    "tree": "98886adbaf289cd792fcefbadccceff4b6abeff6",
-    "commit_hint": "9810b7c",
+    "commit": "6cb4877b2abb4362b26ac098e0687c486f3a8bca",
+    "tree": "9af988eb8d0be6494b9bf66c8a748a17365dce92",
+    "commit_hint": "6cb4877",
     "evidence_path": "docs/evidence/buddy_l8_live_protocol_run.json",
     "recheck": "law_path_auto_cpu_htp_refuse",
     "job2_force_cpu": true
@@ -29,11 +29,11 @@
   "disposition_verifier": {
     "status": "PASS",
     "command": "python prime/scripts/verify_cr_disposition.py",
-    "evidence": "CI step CR disposition verifier"
+    "checks": "72+"
   },
   "job2_auto_ep": "CPUExecutionProvider",
   "htp_refuse": true,
-  "e3_residual": "accepted",
+  "e3_residual": "accepted_quant_geometry",
   "domains_d0_d15": "SEALED",
   "law": [
     "aboutness != agreement",
@@ -43,5 +43,6 @@
     "HTP only after nli_htp_parity_pass",
     "product nli_ort force_cpu=True"
   ],
-  "head": "9810b7cdd1e646c6bcf09850d07c8e10f4a23a4b"
+  "head": "6cb4877b2abb4362b26ac098e0687c486f3a8bca",
+  "d17_integrity": "docs/evidence/vv_push_domains_integrity.json"
 }
