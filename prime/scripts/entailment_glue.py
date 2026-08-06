@@ -221,10 +221,21 @@ import os as _os
 DEFAULT_NLI_MODEL = _os.environ.get(
     "PRIME_NLI_MODEL", "cross-encoder/nli-deberta-v3-base"
 )
+def _env_float(name: str, default: float) -> float:
+    """Parse env float; invalid/missing → default (never break import)."""
+    raw = _os.environ.get(name)
+    if raw is None or raw == "":
+        return default
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return default
+
+
 # Mutual entailment confidence floor for "agrees" (dual direction)
-MUTUAL_P = float(_os.environ.get("PRIME_NLI_MUTUAL_P", "0.80"))
+MUTUAL_P = _env_float("PRIME_NLI_MUTUAL_P", 0.80)
 # One-way entailment floor — must match accel_nli_ort.ONEWAY_P
-ONEWAY_P = float(_os.environ.get("PRIME_NLI_ONEWAY_P", "0.45"))
+ONEWAY_P = _env_float("PRIME_NLI_ONEWAY_P", 0.45)
 
 _CE_CACHE: dict[str, Any] = {}
 _CE_GLOBAL = __import__("threading").Lock()

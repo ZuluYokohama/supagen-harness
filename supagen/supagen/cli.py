@@ -294,7 +294,10 @@ def main(argv: list[str] | None = None) -> int:
         "--mode",
         choices=("scout", "preserve"),
         default=None,
-        help="SCOUT=small fiber (default); PRESERVE=frankenstein alone",
+        help=(
+            "SCOUT=small fiber; PRESERVE=frankenstein alone. "
+            "When omitted: PRIME_FIBER_MODE env if set, else scout"
+        ),
     )
     p.add_argument("--purpose", default="chat")
     p.add_argument("--no-jina", action="store_true")

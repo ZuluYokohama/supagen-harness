@@ -377,15 +377,26 @@ def d6_identity_floors() -> dict:
         except Exception as e:
             detail[k] = {"present": True, "error": str(e)}
             continue
-        # flexible extract — holonomy_v3 schemas
-        p_val = (
-            d.get("identity_closure_p")
-            or d.get("identity_closure")
-            or d.get("identity_p")
-            or d.get("p")
-            or d.get("gate_p")
-            or (d.get("summary") or {}).get("identity_p")
-            or (d.get("result") or {}).get("identity_p")
+        # flexible extract — holonomy_v3 schemas (0.0 is a valid measured p)
+        def _first_num(*keys_objs):
+            for obj, key in keys_objs:
+                if not isinstance(obj, dict):
+                    continue
+                if key in obj and obj[key] is not None:
+                    try:
+                        return float(obj[key])
+                    except (TypeError, ValueError):
+                        continue
+            return None
+
+        p_val = _first_num(
+            (d, "identity_closure_p"),
+            (d, "identity_closure"),
+            (d, "identity_p"),
+            (d, "p"),
+            (d, "gate_p"),
+            (d.get("summary") or {}, "identity_p"),
+            (d.get("result") or {}, "identity_p"),
         )
         # frankenstein chain: depths.N.identity_closure
         if p_val is None and isinstance(d.get("depths"), dict):
@@ -762,10 +773,12 @@ def d16_kb_family_1024() -> dict:
         idx = load_index(path)
         live = probe_jina()
         live_dim = live.get("dim")
+        # Missing live_dim must not silently pass — require measured dim match
         ok = (
             idx.get("embed_family") == "jina"
             and live.get("ok")
-            and (not live_dim or idx.get("dim") == live_dim)
+            and live_dim is not None
+            and idx.get("dim") == live_dim
         )
         return _gate(
             "D16_kb_family_1024",

@@ -240,17 +240,20 @@ def p6_qnn_probe() -> dict:
 
     prov = ort.get_available_providers()
     has_qnn = any("QNN" in p or "qnn" in p for p in prov)
+    # Do not assert unprobed silicon — only report measured EP presence
     return gate(
         "P6_hexagon_qnn",
         has_qnn,  # will WARN if false
         {
             "providers": prov,
-            "hexagon_present_hw": True,
+            "qnn_ep_registered": has_qnn,
+            "hexagon_hw_probed": False,
+            "hexagon_present_hw": None,  # unknown without HTP profile / register
             "qnn_ep": has_qnn,
             "residual": (
                 None
                 if has_qnn
-                else "onnxruntime-qnn installed but QNNExecutionProvider not in providers on this ARM64 build"
+                else "QNNExecutionProvider not in available providers on this build"
             ),
         },
         critical=False,

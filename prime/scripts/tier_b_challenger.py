@@ -319,6 +319,9 @@ def main() -> int:
             >= 0.9,
             "nli_catches_contradiction": (nli.get("adversarial_contra_rate") or 0)
             >= 0.9,
+            # D3 also enforces negation block-open (align verdict with matrix)
+            "nli_blocks_negation_open": (nli.get("negation_block_open_rate") or 0)
+            >= 0.9,
             "rerank_prefers_benign": (rr.get("prefer_benign_rate") or 0) >= 0.8,
             "tier_b_ready": False,  # filled below
             "reading": "",
@@ -328,12 +331,13 @@ def main() -> int:
     rerank_ok = bool(rr.get("model")) and bool(v["rerank_prefers_benign"])
     v["rerank_available"] = bool(rr.get("model"))
     v["rerank_residual"] = None if rr.get("model") else "reranker_unavailable"
-    # Full tier_b_ready: Job1 floor + both D3 NLI gates + rerank with model present
+    # Full tier_b_ready: Job1 floor + D3 NLI gates (adv + negation) + rerank
     # (unavailable reranker is residual — not a silent pass)
     v["tier_b_ready"] = bool(
         v["jina_floor_usable"]
         and v["nli_blocks_adversarial_open"]
         and v["nli_catches_contradiction"]
+        and v["nli_blocks_negation_open"]
         and rerank_ok
     )
     # Core dual-metric law can still be green without Job1.5
@@ -341,6 +345,7 @@ def main() -> int:
         v["jina_floor_usable"]
         and v["nli_blocks_adversarial_open"]
         and v["nli_catches_contradiction"]
+        and v["nli_blocks_negation_open"]
     )
     report["ok"] = bool(v["tier_b_ready"])
     parts = []

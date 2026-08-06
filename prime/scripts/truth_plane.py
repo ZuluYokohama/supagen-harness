@@ -359,7 +359,13 @@ def truth_loop(
     """
     from entailment_glue import mutual_entailment, nli_cross_encoder
 
-    max_rounds = max_rounds or int(os.environ.get("PRIME_TRUTH_ROUNDS", "3"))
+    try:
+        raw_r = os.environ.get("PRIME_TRUTH_ROUNDS", "3")
+        max_rounds = max_rounds or int(raw_r)
+    except (TypeError, ValueError):
+        max_rounds = 3
+    if max_rounds < 1:
+        max_rounds = 3
     domain = domain if domain in TRUTH_DOMAINS else "general"
     history: list[dict[str, Any]] = []
     final: list[dict[str, Any]] = []
@@ -574,11 +580,17 @@ def request_plane(
     op["fiber_ctx"] = fiber_blk.get("loaded_ctx") or op.get("fiber_ctx")
     op["frankenstein_loaded"] = (sub.get("frankenstein") or {}).get("loaded")
     op["frankenstein_required"] = frankenstein_required(fiber_mode)
-    # Prefer live agreement engine over warm-probe instrument metadata
+    # Prefer live agreement engine; never report warm-probe as the request engine
     agree = card.get("agreement") or {}
     warm_nli = ((sub.get("instruments") or {}).get("nli") or {})
-    op["nli_engine"] = agree.get("engine") or warm_nli.get("engine")
-    op["nli_model"] = agree.get("model") or warm_nli.get("model")
+    if agree.get("engine") or agree.get("model") or agree.get("label"):
+        op["nli_engine"] = agree.get("engine") or agree.get("provider") or "agreement"
+        op["nli_model"] = agree.get("model")
+        op["nli_engine_source"] = "request_agreement"
+    else:
+        op["nli_engine"] = warm_nli.get("engine")
+        op["nli_model"] = warm_nli.get("model")
+        op["nli_engine_source"] = "warm_probe_only"
     op["rerank_model"] = ((sub.get("instruments") or {}).get("rerank") or {}).get("model")
     op["jina"] = ((sub.get("substrate") or {}).get("jina") or {}).get("status")
     op["truth_loop"] = bool(card.get("truth_loop"))
@@ -624,10 +636,13 @@ if __name__ == "__main__":
     ap.add_argument("--loop", action="store_true")
     a = ap.parse_args()
     if a.cmd == "map":
+        fm = resolve_fiber_mode(a.mode)
         print(json.dumps({
             "architecture": architecture_map(),
-            "fiber_mode": resolve_fiber_mode(a.mode),
-            "frankenstein": frankenstein_loaded(),
+            "fiber_mode": fm,
+            # same resolved mode for required + loaded (avoid mixed scout/preserve)
+            "frankenstein": frankenstein_loaded(mode=fm),
+            "frankenstein_required": frankenstein_required(fm),
             "accel": accel_status(),
         }, indent=2))
     elif a.cmd == "accel":
