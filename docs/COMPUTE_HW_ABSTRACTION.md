@@ -2,7 +2,8 @@
 
 **Date:** 2026-08-06  
 **Host:** ASUS Zenbook A14 · Snapdragon X Plus X1P42100 · Hexagon NPU · Adreno X1-45 · Oryon 8c  
-**Status:** HTP path **measured live** (`npu_stress`, `htp_profile.csv`). Product instruments partially mapped.
+**Authoritative QNN run:** **`npu-htp-2026-08-06`** · packages `onnxruntime==1.24.4` + `onnxruntime-qnn==2.4.0` · evidence `docs/evidence/npu/`  
+**Status:** HTP path **measured live** (`npu_stress`, `htp_profile.csv`). Product NLI on HTP **not** parity-green.
 
 This is not a product pitch. It is a substrate map for *novel use* of the NPU inside the dual-metric / OPEN|STOP stack we already run.
 
@@ -10,7 +11,7 @@ This is not a product pitch. It is a substrate map for *novel use* of the NPU in
 
 ## 0. What we already proved on *this* machine
 
-| Fact | Evidence |
+| Fact | Evidence (run `npu-htp-2026-08-06`) |
 |------|----------|
 | Hexagon present | PnP `ComputeAccelerator` OK |
 | QNN plugin EP works | `onnxruntime 1.24.4` + `onnxruntime-qnn 2.4.0` → 3 QNN devices after `register()` |
@@ -182,12 +183,12 @@ Move judge to HTP → identity ladder can run **without stealing RAM from franke
 
 **Novel:** identity measurement becomes a **background instrument**, not a thrash event.
 
-### 4.6 **Power-aware OPEN|STOP ethics**
+### 4.6 **Power-aware OPEN|STOP ethics** (hypothesis — unmeasured)
 
-NPU joules << CPU for continuous audit.  
-Always-on **law enforcement** (never cos→OPEN, adversarial twin STOP) becomes thermally free.
+**Unmeasured hypothesis:** NPU joules may be ≪ CPU for continuous audit; always-on law enforcement *might* be thermally cheaper.  
+We have **throughput + HTP-cycle** evidence only — **no controlled CPU-vs-HTP power (W / mJ) bench** on this kit yet. Do not treat “thermally free” as an established project result.
 
-**Novel:** *residue never forced* as a **always-on physical process**, not an intermittent script.
+**Still true by law (CPU authority):** never cos→OPEN; adversarial twin STOP; residue never forced — independent of NPU joules.
 
 ### 4.7 **What not to force onto NPU**
 
@@ -239,17 +240,20 @@ prime/scripts/
   accel_nli_ort.py     # CPU ORT path            (exists)
 ```
 
-**Routing policy (pseudocode):**
+**Routing policy (pseudocode) — E3 parity gate required for HTP ownership:**
 
 ```python
 def nli(premise, hyp):
-    if has_htp() and qdq_nli_ready():
-        r = nli_htp(premise, hyp)          # measure on Hexagon
+    # HTP only when explicit label-parity + calibration PASS (E3 green).
+    # qdq_nli_ready() / session-loads is NOT enough — DeBERTa QDQ currently
+    # collapses logits (neutral≈0.51) even when HTP runs.
+    if has_htp() and nli_htp_parity_pass():   # E3 gate; currently FALSE
+        r = nli_htp(premise, hyp)              # measure fabric only
         if r.ok: return r
     if ort_cpu_ready():
-        return nli_ort_cpu(premise, hyp)   # current authority
-    return nli_cross_encoder(...)          # torch CE
-    # never: cosine
+        return nli_ort_cpu(premise, hyp)       # OPEN authority default
+    return nli_cross_encoder(...)              # torch CE
+    # never: cosine; cert_face always CPU/external
 ```
 
 ---

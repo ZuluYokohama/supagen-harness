@@ -302,6 +302,14 @@ def ensure_jina(
         if not force_restart:
             p = probe_jina(timeout=2.5)
             if p.get("ok"):
+                # Reconcile with live meta (actual GGUF/pooling that is running)
+                live_meta: dict[str, Any] = {}
+                if META_FILE.is_file():
+                    try:
+                        live_meta = json.loads(META_FILE.read_text(encoding="utf-8"))
+                    except Exception:
+                        live_meta = {}
+                hyp = live_meta.get("hyperparams") or {}
                 out = {
                     "ok": True,
                     "started": False,
@@ -309,9 +317,12 @@ def ensure_jina(
                     "base": BASE,
                     "dim": p.get("dim"),
                     "latency_ms": p.get("latency_ms"),
+                    "gguf": live_meta.get("gguf"),
+                    "model_field": p.get("model_field"),
                     "hyperparams": {
-                        "context_length": CTX,
-                        "pooling": os.environ.get("PRIME_JINA_POOLING", "last"),
+                        "context_length": live_meta.get("ctx") or hyp.get("context_length") or CTX,
+                        "pooling": hyp.get("pooling")
+                        or os.environ.get("PRIME_JINA_POOLING", "last"),
                         "prefixes": PREFIX,
                     },
                     "seamless": True,

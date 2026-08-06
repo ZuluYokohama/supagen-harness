@@ -45,6 +45,8 @@ def build_heavy_qdq() -> Path:
 
     fp = STATE / "heavy_chain.onnx"
     qdq = STATE / "heavy_chain.qdq.onnx"
+    # Quantize into temp then atomic replace — avoid partial QDQ opened by stress_htp
+    qdq_tmp = STATE / "heavy_chain.qdq.onnx.tmp"
 
     nodes = []
     inits = []
@@ -87,6 +89,8 @@ def build_heavy_qdq() -> Path:
             self.i = 0
 
     reader = Reader()
+    if qdq_tmp.is_file():
+        qdq_tmp.unlink(missing_ok=True)
     try:
         from onnxruntime.quantization.execution_providers.qnn import (
             get_qnn_qdq_config,
@@ -102,17 +106,20 @@ def build_heavy_qdq() -> Path:
             src, reader, activation_type=QuantType.QUInt8, weight_type=QuantType.QUInt8
         )
         reader.rewind()
-        quantize(src, str(qdq), cfg)
+        quantize(src, str(qdq_tmp), cfg)
     except Exception:
         reader.rewind()
         quantize_static(
             str(fp),
-            str(qdq),
+            str(qdq_tmp),
             reader,
             quant_format=QuantFormat.QDQ,
             activation_type=QuantType.QUInt8,
             weight_type=QuantType.QUInt8,
         )
+    if not qdq_tmp.is_file() or qdq_tmp.stat().st_size < 100:
+        raise RuntimeError(f"QDQ quantize failed or empty: {qdq_tmp}")
+    qdq_tmp.replace(qdq)
     return qdq
 
 

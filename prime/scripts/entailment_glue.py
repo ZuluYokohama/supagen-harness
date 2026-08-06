@@ -225,11 +225,21 @@ DEFAULT_NLI_MODEL = _os.environ.get(
 MUTUAL_P = float(_os.environ.get("PRIME_NLI_MUTUAL_P", "0.80"))
 
 _CE_CACHE: dict[str, Any] = {}
-_CE_LOCK = __import__("threading").Lock()
+_CE_GLOBAL = __import__("threading").Lock()
+_CE_MODEL_LOCKS: dict[str, Any] = {}
 
 
 def _get_cross_encoder(model_name: str):
-    with _CE_LOCK:
+    """Load CrossEncoder with per-model lock so different models can load concurrently."""
+    # Fast path: cache hit without any lock contention on unrelated models
+    if model_name in _CE_CACHE:
+        return _CE_CACHE[model_name]
+    with _CE_GLOBAL:
+        lock = _CE_MODEL_LOCKS.get(model_name)
+        if lock is None:
+            lock = __import__("threading").Lock()
+            _CE_MODEL_LOCKS[model_name] = lock
+    with lock:
         if model_name in _CE_CACHE:
             return _CE_CACHE[model_name]
         from sentence_transformers import CrossEncoder  # type: ignore

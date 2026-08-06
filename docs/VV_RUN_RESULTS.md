@@ -48,15 +48,14 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   "job1_lms": false,
   "job2_owns_open": true,
   "accel": {
-    "preference": "cpu",
+    "preference": "auto",
     "ort": {
       "version": "1.24.4",
-      "providers": [
+      "providers_builtin": [
         "DmlExecutionProvider",
         "CPUExecutionProvider"
       ],
-      "dml": true,
-      "note": "Dml often \u2192 Adreno; true Hexagon needs QNN EP"
+      "dml": true
     },
     "torch": {
       "version": "2.12.0+cpu",
@@ -64,7 +63,13 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
       "threads": 8,
       "threads_set": 4
     },
-    "hexagon_path": "not_wired_qnn"
+    "hexagon_npu": {
+      "ok": true,
+      "n_qnn_devices": 3,
+      "qnn_ver": "2.4.0",
+      "registered": true,
+      "note": "run npu-htp-2026-08-06; Job2 NLI parity residual"
+    }
   }
 }
 ```
@@ -200,19 +205,18 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
 }
 ```
 
-### D8_accel_npu — PASS
+### D8_accel_npu — PASS (path) / residual (Job2 parity)
 
 ```json
 {
-  "preference": "cpu",
+  "preference": "auto",
   "ort": {
     "version": "1.24.4",
-    "providers": [
+    "providers_builtin": [
       "DmlExecutionProvider",
       "CPUExecutionProvider"
     ],
-    "dml": true,
-    "note": "Dml often \u2192 Adreno; true Hexagon needs QNN EP"
+    "dml": true
   },
   "torch": {
     "version": "2.12.0+cpu",
@@ -220,10 +224,15 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
     "threads": 4,
     "threads_set": 4
   },
-  "hexagon_path": "not_wired_qnn",
-  "hexagon_wired": false,
-  "residual": "QNN EP for Hexagon not wired; Job2/1.5 on torch CPU",
-  "next": "export NLI/rerank ONNX when Py3.14+protobuf allows, or use QNN EP package"
+  "hexagon_npu": {
+    "ok": true,
+    "n_qnn_devices": 3,
+    "qnn_ver": "2.4.0",
+    "registered": true,
+    "run_id": "npu-htp-2026-08-06"
+  },
+  "residual": "Job2 DeBERTa QDQ on HTP: label parity FAIL — CPU ORT/CE remains OPEN authority",
+  "next": "E3: UINT16 act / better calib / distill stance head before product HTP NLI"
 }
 ```
 

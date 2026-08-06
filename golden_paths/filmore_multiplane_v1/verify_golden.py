@@ -71,21 +71,47 @@ def main() -> int:
 
     check("certificate_present", CERT_PATH.is_file())
 
-    # Buddy/CI kits without field sandbox: verify certificate schema only (soft PASS)
+    # Fail-closed: schema-only PASS only when explicitly requested.
+    # Implicit missing sandbox without GOLDEN_SCHEMA_ONLY → incomplete (non-zero).
     if not sandbox.is_dir():
         planes = {p["id"] for p in cert.get("planes", [])}
         for need in ("tool_magpi", "wits_surface", "decoder_rt"):
             check(f"plane_declared_{need}", need in planes)
         check("golden_claim_id_set", bool(cert.get("golden_claim_id")))
         check("claims_artifact_meta", bool(cert.get("claims_artifact")))
+        if not schema_only:
+            check(
+                "sandbox_required_or_schema_only",
+                False,
+                "set GOLDEN_SCHEMA_ONLY=1 for portable CI, or GOLDEN_SANDBOX_ROOT to full seal",
+            )
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "incomplete": True,
+                        "skipped_sandbox": True,
+                        "sandbox": str(sandbox),
+                        "checks": checks,
+                        "note": (
+                            "Sandbox extract not present and GOLDEN_SCHEMA_ONLY not set — "
+                            "fail-closed (incomplete). CI sets GOLDEN_SCHEMA_ONLY=1."
+                        ),
+                    },
+                    indent=2,
+                )
+            )
+            print("GOLDEN VERIFY INCOMPLETE (no sandbox; not schema-only mode)")
+            return 2
         print(
             json.dumps(
                 {
                     "ok": ok,
+                    "schema_only": True,
                     "skipped_sandbox": True,
                     "sandbox": str(sandbox),
                     "checks": checks,
-                    "note": "Sandbox extract not present — schema-only golden (set GOLDEN_SANDBOX_ROOT for full seal)",
+                    "note": "Explicit GOLDEN_SCHEMA_ONLY — certificate schema only (not full seal)",
                 },
                 indent=2,
             )

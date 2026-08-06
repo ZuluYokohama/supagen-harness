@@ -21,10 +21,11 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e ./supagen
           python -m supagen bootstrap
-      - name: Offline contract + smoke + harness
+      - name: Offline contract + smoke + golden schema-only
         env:
           SUPAGEN_ROOT: ${{ github.workspace }}
           PRIMEDEV_ROOT: ${{ github.workspace }}
-          # No field sandbox dumps on buddy/CI — certificate schema only
+          # Portable CI: certificate schema only (not full sandbox seal).
+          # Full golden seal requires GOLDEN_SANDBOX_ROOT + field extract.
           GOLDEN_SCHEMA_ONLY: "1"
         run: python -m supagen verify

@@ -56,8 +56,9 @@ def _cmd_ensure(args: argparse.Namespace) -> int:
         purpose=args.purpose,
         jina=not args.no_jina,
         lms=not args.no_lms,
+        fiber_mode=getattr(args, "mode", None),
     )
-    print(json.dumps(r, indent=2))
+    print(json.dumps(r, indent=2, default=str))
     return 0 if r.get("ok") else 1
 
 
@@ -289,6 +290,12 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("ensure", help="jina + LMS substrate (seamless)")
     p.add_argument("--model", default=None, help="chat model key")
+    p.add_argument(
+        "--mode",
+        choices=("scout", "preserve"),
+        default=None,
+        help="SCOUT=small fiber (default); PRESERVE=frankenstein alone",
+    )
     p.add_argument("--purpose", default="chat")
     p.add_argument("--no-jina", action="store_true")
     p.add_argument("--no-lms", action="store_true")

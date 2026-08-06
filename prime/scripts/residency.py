@@ -105,7 +105,8 @@ def pick_chat_model(
         env_p = os.environ.get("PRIME_PRESERVE_MODEL")
         if preferred and any(p in preferred.lower() for p in PRESERVE_KEYS):
             return {"key": preferred, "reason": "preserve_preferred", "loaded": preferred in keys}
-        if env_p:
+        # Only honor PRIME_PRESERVE_MODEL when it names a preserve-class key
+        if env_p and any(p in env_p.lower() for p in PRESERVE_KEYS):
             return {"key": env_p, "reason": "preserve_env", "loaded": env_p in keys}
         for m in models:
             key = m.get("key") or ""

@@ -46,9 +46,10 @@ def register() -> dict[str, Any]:
         if not _REGISTERED:
             try:
                 ort.register_execution_provider_library(name, lib)
-                _REGISTERED = True
             except Exception as e:
-                if "already" not in str(e).lower():
+                # API does not guarantee message text — check devices after failure
+                devs_try = list(ort.get_ep_devices())
+                if not any(d.ep_name == name for d in devs_try):
                     _LAST = {
                         "ok": False,
                         "error": str(e),
@@ -56,7 +57,7 @@ def register() -> dict[str, Any]:
                         "ort": ort.__version__,
                     }
                     return _LAST
-                _REGISTERED = True
+            _REGISTERED = True
 
         devs = [{"ep_name": d.ep_name, "repr": str(d)} for d in ort.get_ep_devices()]
         n_qnn = sum(1 for d in devs if d["ep_name"] == name)

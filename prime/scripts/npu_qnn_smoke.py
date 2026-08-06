@@ -16,10 +16,11 @@ This script:
 
 Usage:
   python npu_qnn_smoke.py
-  python npu_qnn_smoke.py --bench
+  python npu_qnn_smoke.py --bench   # longer HTP loop (extra latency sample)
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -41,11 +42,21 @@ def register_qnn() -> dict:
     try:
         ort.register_execution_provider_library(name, lib)
     except Exception as e:
-        # already registered
-        if "already" not in str(e).lower():
+        # API does not guarantee "already" text — verify devices after failure
+        try:
+            devs_try = list(ort.get_ep_devices())
+            if not any(d.ep_name == name for d in devs_try):
+                return {
+                    "ok": False,
+                    "error": f"register failed: {e}",
+                    "lib": lib,
+                    "ort": ort.__version__,
+                    "qnn": getattr(qnn, "__version__", None),
+                }
+        except Exception as e2:
             return {
                 "ok": False,
-                "error": f"register failed: {e}",
+                "error": f"register failed: {e}; devices: {e2}",
                 "lib": lib,
                 "ort": ort.__version__,
                 "qnn": getattr(qnn, "__version__", None),
@@ -278,8 +289,15 @@ def run_on_htp(qdq_path: str, *, disable_cpu_fallback: bool = False) -> dict:
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser(description="Hexagon QNN HTP smoke")
+    ap.add_argument(
+        "--bench",
+        action="store_true",
+        help="extra latency sample (250 runs) after smoke",
+    )
+    args = ap.parse_args()
     t0 = time.time()
-    report: dict = {"ok": False, "seconds": 0}
+    report: dict = {"ok": False, "seconds": 0, "bench": bool(args.bench)}
     print("1) register QNN plugin…", flush=True)
     reg = register_qnn()
     report["register"] = reg
@@ -303,6 +321,40 @@ def main() -> int:
     run = run_on_htp(q["qdq_model"], disable_cpu_fallback=False)
     report["run"] = run
     print(json.dumps(run, indent=2), flush=True)
+    if args.bench and run.get("ok"):
+        # Longer sample for ms/run stability (same session path)
+        print("3b) --bench: extra 250 runs…", flush=True)
+        try:
+            import numpy as np
+            import onnxruntime as ort
+            from npu_qnn import register
+
+            register()
+            so = ort.SessionOptions()
+            sess = ort.InferenceSession(
+                q["qdq_model"],
+                sess_options=so,
+                providers=["QNNExecutionProvider", "CPUExecutionProvider"],
+            )
+            inp = sess.get_inputs()[0]
+            shape = [d if isinstance(d, int) and d > 0 else 1 for d in (inp.shape or [1, 16])]
+            x = np.random.randn(*shape).astype(np.float32)
+            for _ in range(5):
+                sess.run(None, {inp.name: x})
+            n = 250
+            t1 = time.time()
+            for _ in range(n):
+                sess.run(None, {inp.name: x})
+            elapsed = time.time() - t1
+            report["bench_result"] = {
+                "runs": n,
+                "total_s": round(elapsed, 4),
+                "ms_per_run": round(elapsed * 1000 / n, 3),
+                "providers": sess.get_providers(),
+            }
+            print(json.dumps(report["bench_result"], indent=2), flush=True)
+        except Exception as e:
+            report["bench_result"] = {"ok": False, "error": str(e)}
 
     report["ok"] = bool(run.get("ok") and run.get("on_qnn_ep"))
     report["seconds"] = round(time.time() - t0, 1)

@@ -169,13 +169,34 @@ def score_docs(query: str, documents: list[str]) -> dict[str, Any]:
             "job": "retrieval_rerank",
             "not_agreement": True,
         }
-    top = int(os.environ.get("PRIME_RERANK_TOP", "32"))
+    try:
+        top = int(os.environ.get("PRIME_RERANK_TOP", "32"))
+        if top < 1:
+            raise ValueError("PRIME_RERANK_TOP must be >= 1")
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": f"invalid PRIME_RERANK_TOP: {e}",
+            "scores": [0.0] * len(docs),
+            "job": "retrieval_rerank",
+            "not_agreement": True,
+        }
     # score in chunks if huge
     all_scores: list[float] = []
     t0 = time.time()
-    for i in range(0, len(docs), top):
-        chunk = docs[i : i + top]
-        all_scores.extend(eng["predict"](query, chunk))
+    try:
+        for i in range(0, len(docs), top):
+            chunk = docs[i : i + top]
+            all_scores.extend(eng["predict"](query, chunk))
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": f"rerank inference failed: {e}",
+            "scores": [0.0] * len(docs),
+            "job": "retrieval_rerank",
+            "not_agreement": True,
+            "model": eng.get("model"),
+        }
     return {
         "ok": True,
         "job": "retrieval_rerank",

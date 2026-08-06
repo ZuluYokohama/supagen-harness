@@ -1,6 +1,9 @@
 # NPU evidence archive (tracked)
 
-Slim copies of measured Hexagon HTP proofs. Full ONNX/QDQ weights stay local (`prime/state/ort_models/`, gitignored).
+**Run ID:** `npu-htp-2026-08-06` · host ASUS Zenbook A14 · Snapdragon X Plus  
+**Packages:** `onnxruntime==1.24.4` + `onnxruntime-qnn==2.4.0`
+
+Slim copies of measured Hexagon HTP proofs. Full ONNX/QDQ weights and full `htp_profile.csv` stay local under `prime/state/npu/` (gitignored). This directory is the **tracked** archive so V&V docs can cite proofs without shipping multi‑MB profiles.
 
 | File | Meaning |
 |------|---------|
@@ -9,6 +12,8 @@ Slim copies of measured Hexagon HTP proofs. Full ONNX/QDQ weights stay local (`p
 | `htp_profile_head.csv` | First lines of QNN HTP profile (HVX / accelerator / mm\* cycles) |
 | `npu_nli_qdq_report.json` | DeBERTa QDQ on HTP: session OK, **label parity residual** |
 
+**Retention:** keep slim JSON/CSV heads in-repo; regenerate from local state when re-measuring. Full profile: `prime/state/npu/htp_profile.csv` (ignored).
+
 Regenerate: `python prime/scripts/npu_qnn_smoke.py` · `npu_stress.py` · `npu_nli_qdq.py`
 
-**Authority:** Task Manager is not the NPU oracle on this Windows image. Use these artifacts + full `prime/state/npu/htp_profile.csv` locally.
+**Authority:** Task Manager is not the NPU oracle on this Windows image. Use these artifacts + full local profile.

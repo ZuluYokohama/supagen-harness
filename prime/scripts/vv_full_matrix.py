@@ -105,7 +105,7 @@ def d1_aboutness() -> dict:
                 {"error": "bakeoff summary ok=false", "fresh": fresh},
             )
     elif sum_path.is_file() and not fresh.get("ok"):
-        # stale — still report but re-measure live floor
+        # stale — re-measure floor only; range rule NOT evaluated
         from nomic_metric import aboutness
 
         a = aboutness(
@@ -113,19 +113,21 @@ def d1_aboutness() -> dict:
             "Carbonara uses guanciale, egg, pecorino, and black pepper.",
         )
         floor = a.get("cosine")
-        rng = None
-        neg = None
-        adv = None
         family = a.get("family")
+        ok_floor = family == "jina" and floor is not None and floor < 0.35
         return _gate(
             "D1_aboutness_jina",
-            family == "jina" and floor is not None and floor < 0.35,
+            ok_floor,
             {
                 "family": family,
                 "floor_mean": floor,
+                "range": None,
                 "stale_bakeoff": fresh,
-                "note": "bakeoff artifact stale; live floor only",
+                "applied_rule": "live_floor_only_stale_bakeoff",
+                "note": "bakeoff artifact stale; range rule not evaluated",
+                "cos_never_open": True,
             },
+            critical=False,  # missing range → not a critical green
         )
     else:
         from nomic_metric import aboutness
@@ -139,13 +141,31 @@ def d1_aboutness() -> dict:
         neg = None
         adv = None
         family = a.get("family")
+        applied_rule = "live_floor_only_no_bakeoff"
+        ok = family == "jina" and floor is not None and floor < 0.35
+        return _gate(
+            "D1_aboutness_jina",
+            ok,
+            {
+                "family": family,
+                "floor_mean": floor,
+                "range": rng,
+                "negation_cos": neg,
+                "adversarial_cos": adv,
+                "applied_rule": applied_rule,
+                "pass_rule": "family=jina, floor<0.35 (range unevaluated)",
+                "cos_never_open": True,
+            },
+            critical=False,  # rng None → do not claim critical range PASS
+        )
     ok = (
         family == "jina"
         and floor is not None
         and floor < 0.35
-        and (rng is None or rng > 0.40)
+        and rng is not None
+        and rng > 0.40
     )
-    # critical: cos still blind (document, not fail ship if NLI holds)
+    # critical only when full bakeoff metrics present
     return _gate(
         "D1_aboutness_jina",
         ok,
@@ -155,6 +175,7 @@ def d1_aboutness() -> dict:
             "range": rng,
             "negation_cos": neg,
             "adversarial_cos": adv,
+            "applied_rule": "fresh_bakeoff_floor_and_range",
             "pass_rule": "family=jina, floor<0.35, range>0.40",
             "cos_never_open": True,
         },

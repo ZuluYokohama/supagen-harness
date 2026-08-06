@@ -32,9 +32,17 @@ Artifacts: `prime/state/holonomy_v3_lfm12b_identity_floor.json`,
 
 ## Dual metric + Tier-B instruments (2026-08-06)
 
+**Provenance (do not mix rows without IDs):**
+
+| Run ID | Pair set | Source artifact | Job1 floor / ceil / range |
+|--------|----------|-----------------|---------------------------|
+| `bakeoff_30` | bakeoff_aboutness_30 pair bank | `prime/state/bakeoff_30_summary.json` | **0.085 / 0.735 / 0.650** |
+| `contract_live` | A paraphrase + C pasta (contract pairs) | `supagen contract` live 21/21 | **0.077 / 0.875 / 0.80** |
+| `push_P1` | push suite A/C re-measure | `vv_push_domains` P1 | **0.038 / 0.88 / 0.84** |
+
 | Instrument | Model | Domain measure | Gate |
 |------------|-------|----------------|------|
-| Job1 aboutness | **jina-v5-small Q4** (:8765, **pooling=last**, dim **1024**) | bakeoff floor **0.085**, ceil **0.735**, range **0.650**; live A/C floor **0.077** / ceil **0.875** / range **0.80** | max local retrieve |
+| Job1 aboutness | **jina-v5-small Q4** (:8765, **pooling=last**, dim **1024**) | see provenance table (`bakeoff_30` + `contract_live`) | max local retrieve |
 | Job1.5 rerank | jina-reranker-v3 | prefer benign **9/9** | retrieval only |
 | Job2 agreement | ORT DeBERTa-v3-base MNLI | adv contra **1.0**, block OPEN **1.0** | owns agreement |
 | Cosine polarity | any encoder | neg **0.69** / adv **0.64** / worst twin **0.78** (was 0.85 nano) | **never OPEN** |
@@ -42,8 +50,8 @@ Artifacts: `prime/state/holonomy_v3_lfm12b_identity_floor.json`,
 
 **Fiber modes:** SCOUT = LFM/Ministral (unload frankenstein). PRESERVE = frankenstein alone.  
 **V&V matrix:** `docs/VV_RUN_RESULTS.md` → **GO_MEASURE** (**18/18**).  
-**Push suite:** **GO_MEASURE** (5 PASS + Hexagon QNN WARN only).  
-**supagen contract live:** **21/21 PASS** (floor 0.077, ceil 0.875, range 0.80, dim 1024, small model).  
+**Push suite:** **GO_MEASURE** (HTP live; Job2 NLI parity residual).  
+**supagen contract live:** **21/21 PASS** (`contract_live` row above).  
 **Field harness offline smoke:** **OK**.
 
 ### Accel path (Job2)
@@ -53,30 +61,31 @@ Artifacts: `prime/state/holonomy_v3_lfm12b_identity_floor.json`,
 | torch CE DeBERTa | PASS | authority fallback |
 | **ORT CPU** DeBERTa ONNX (~704MB) | **PASS** label parity; **~3× faster** batch (3.1s vs 9.6s) | `accel_nli_ort.py`; `PRIME_NLI_ORT=1` |
 | ORT DML (Adreno) | FAIL runtime Reshape | skip auto; `PRIME_ACCEL=dml` forces |
-| Hexagon QNN | not installed | residual silicon |
+| Hexagon QNN (pre-plugin historical) | **historical** | early push P6 WARN — EP not registered yet |
+| Hexagon QNN HTP (live) | **PASS path** | run `npu-htp-2026-08-06` below; Job2 NLI **label parity FAIL** |
 
 ### Push suite (`vv_push_domains.py`)
 
 | Cell | Status | Measure |
 |------|--------|---------|
-| P1 jina v5-small | **PASS** | Q4_K_M GGUF + last pool; floor 0.038 / ceil 0.88 / range 0.84 / dim 1024 |
+| P1 jina v5-small | **PASS** | run `push_P1`; Q4_K_M + last pool; floor 0.038 / ceil 0.88 / range 0.84 / dim 1024 |
 | P2 PRESERVE smoke | **PASS** | frankenstein alone @16384; restore SCOUT LFM |
 | P3 truth_plane enter | **PASS** | face STOP/NEED_INFO; no force-OPEN |
 | P4 negative force-OPEN | **PASS** | cos 0.92 + attacks twin → STOP via ORT NLI |
 | P5 ORT hot | **PASS** | ~187ms contradiction |
-| P6 Hexagon QNN | **WARN** | HW present; QNN EP not in ORT providers on ARM64 |
+| P6 Hexagon QNN | **PASS path / WARN product** | live HTP after plugin; NLI parity residual |
 
-### Hexagon NPU (2026-08-06 — LIVE + profiled)
+### Hexagon NPU (run ID: `npu-htp-2026-08-06` — LIVE + profiled)
 
 | Fact | Detail |
 |------|--------|
-| HW | Snapdragon X Plus Hexagon NPU (`ComputeAccelerator` OK) |
-| Stack | `onnxruntime==1.24.4` + plugin `onnxruntime-qnn==2.4.0` |
+| Run ID | **`npu-htp-2026-08-06`** · host ASUS Zenbook A14 · Snapdragon X Plus X1P42100 |
+| HW | Hexagon NPU (`ComputeAccelerator` OK) |
+| Stack | `onnxruntime==1.24.4` + plugin `onnxruntime-qnn==2.4.0` (package state: registered) |
 | Register | `npu_qnn.register()` → **3 QNN devices** |
 | Sustained load | `python prime/scripts/npu_stress.py --seconds 45` → **~10.7k runs/s**, 45s continuous |
-| **Hard proof** | `prime/state/npu/htp_profile.csv` — **HVX/HMX power-on**, **QNN accelerator execute**, **mm0–mm7 NODE cycles** on HTP |
-| Task Manager | **This Windows build has NO `\NPU*` perf counters** (`typeperf` empty). Performance panel **cannot graph** third-party QNN HTP. GPU counters exist (Adreno); NPU tile missing/unwired for app QNN. |
-| Why it looked “pathetic” | Micro-smoke finished in ms (0% average); Job1/2 still CPU; TM has nothing to plot for NPU |
-| Job2 | DeBERTa still ORT **CPU** until full QDQ NLI lands on HTP |
+| **Hard proof** | tracked `docs/evidence/npu/` + local `prime/state/npu/htp_profile.csv` — **HVX/HMX**, **accelerator execute**, **mm0–mm7 NODE cycles** |
+| Task Manager | **No `\NPU*` counters** on this Windows image — TM is not the oracle |
+| Job2 NLI QDQ | Session on HTP ~32ms; **label parity FAIL** (neutral≈0.51) — CPU remains OPEN authority |
 
-**Do not use Task Manager as NPU proof on this kit. Use `htp_profile.csv`.**
+**Do not use Task Manager as NPU proof on this kit. Use `htp_profile.csv` / evidence archive.**

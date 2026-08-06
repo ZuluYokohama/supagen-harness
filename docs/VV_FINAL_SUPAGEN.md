@@ -139,7 +139,7 @@ All runs store: timestamp, free_gb, loaded models+ctx, git SHA, OS.
 
 | ID | Test | Procedure | Pass |
 |----|------|-----------|------|
-| L2-01 | jina ensure | kill :8765 → `ensure_jina` | auto-restart, dim=768 |
+| L2-01 | jina ensure | kill :8765 → `ensure_jina` | auto-restart, dim=1024 |
 | L2-02 | jina base isolation | `embed(..., base=LMS:1234)` | family still **jina**, not nomic |
 | L2-03 | A paraphrase ceiling | stripped+prefix | cos &gt; 0.70 |
 | L2-04 | C pasta floor | stripped+prefix | cos &lt; 0.30 |
@@ -252,16 +252,17 @@ score stripped + family prefixes only
 PASS: C < 0.30, A > 0.70, A−C > 0.40, family=jina
 ```
 
-### 4.3 Residency mode matrix
+### 4.3 Residency mode matrix (authoritative)
 
 | Action | Expected resident |
 |--------|-------------------|
 | `supagen ensure` (default) | SCOUT fiber (LFM/Ministral); jina side; heavies unloaded |
-| `PRIME_FIBER_MODE=preserve` + ensure / truth_plane | frankenstein alone @ policy ctx; scouts unloaded |
-| `PRIME_FIBER_MODE=scout` | LFM/Ministral; frankenstein unloaded (HEAVY) |
-| API | `residency.seamless_substrate(fiber_mode=…)` · `truth_plane.ensure_substrate(mode=…)` |
+| `supagen ensure --mode scout` | same as default; explicit |
+| `supagen ensure --mode preserve` | frankenstein alone @ policy ctx; scouts unloaded |
+| `PRIME_FIBER_MODE=preserve` / `=scout` | env equivalent when CLI flag omitted |
+| API | `residency.seamless_substrate(fiber_mode=…)` · `truth_plane.ensure_substrate(mode=…)` · `ensure_all(fiber_mode=…)` |
 
-**L1-04 (modes):** **green** via residency/truth_plane (measured P2/D4). CLI `--mode` flag may still lag env/API — not a law blocker.
+**L1-04 (modes):** **green** — CLI `--mode`, env, and API all wired (P2/D4 measured).
 
 ### 4.4 Buddy lab script (external)
 

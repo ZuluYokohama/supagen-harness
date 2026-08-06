@@ -54,6 +54,15 @@ PRESERVE_KEYS = (
 TRUTH_DOMAINS = ("math", "code", "physics", "technology", "claim", "audit", "general")
 
 
+def _atomic_json(path: Path, obj: Any) -> None:
+    """Write JSON atomically (tmp + replace) for concurrent readers."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(obj, indent=2, default=str), encoding="utf-8")
+    tmp.replace(path)
+
+
 def resolve_fiber_mode(
     mode: str | None = None,
     *,
@@ -73,7 +82,12 @@ def frankenstein_required(mode: FiberMode | None = None) -> bool:
     return m == "preserve"
 
 
-def frankenstein_loaded(base: str = "http://127.0.0.1:1234") -> dict[str, Any]:
+def frankenstein_loaded(
+    base: str = "http://127.0.0.1:1234",
+    *,
+    mode: FiberMode | None = None,
+) -> dict[str, Any]:
+    req = frankenstein_required(mode)
     try:
         from lms_layers import l1_catalog
 
@@ -89,11 +103,11 @@ def frankenstein_loaded(base: str = "http://127.0.0.1:1234") -> dict[str, Any]:
                     "loaded": True,
                     "key": m.get("key"),
                     "ctx": ctx,
-                    "required": frankenstein_required(),
+                    "required": req,
                 }
-        return {"loaded": False, "required": frankenstein_required()}
+        return {"loaded": False, "required": req}
     except Exception as e:
-        return {"loaded": False, "error": str(e), "required": frankenstein_required()}
+        return {"loaded": False, "error": str(e), "required": req}
 
 
 def architecture_map() -> dict[str, Any]:
@@ -117,9 +131,10 @@ def architecture_map() -> dict[str, Any]:
         },
         "npu_hexagon": {
             "present": "Snapdragon X Plus Hexagon",
-            "used_today": False,
-            "path": "ORT Dml EP available; QNN EP for true Hexagon next",
-            "target_jobs": ["Job2 NLI", "Job1.5 rerank"],
+            "used_today": "measure fabric (HTP QDQ stress/smoke); not product NLI",
+            "path": "onnxruntime-qnn plugin + QDQ graphs; CPU remains OPEN authority until E3 parity",
+            "run_id": "npu-htp-2026-08-06",
+            "target_jobs": ["Job2 NLI (post-parity)", "always-on measure fabric"],
         },
         "frankenstein": {
             "when": "PRESERVE / identity / holonomy only",
@@ -133,8 +148,24 @@ def architecture_map() -> dict[str, Any]:
     }
 
 
-def accel_status() -> dict[str, Any]:
-    """Probe acceleration: QNN Hexagon NPU (plugin), DML, CPU torch."""
+_ACCEL_CACHE: dict[str, Any] | None = None
+_ACCEL_CACHE_TS: float = 0.0
+
+
+def accel_status(*, force: bool = False) -> dict[str, Any]:
+    """Probe acceleration: QNN Hexagon NPU (plugin), DML, CPU torch.
+
+    Cached ~60s unless force=True (avoid re-import/probe every request).
+    """
+    global _ACCEL_CACHE, _ACCEL_CACHE_TS
+    now = time.time()
+    if (
+        not force
+        and _ACCEL_CACHE is not None
+        and (now - _ACCEL_CACHE_TS) < 60.0
+    ):
+        return dict(_ACCEL_CACHE)
+
     out: dict[str, Any] = {
         "preference": (os.environ.get("PRIME_ACCEL") or "auto").lower(),
         "ort": None,
@@ -191,6 +222,8 @@ def accel_status() -> dict[str, Any]:
             out["torch"]["threads_set"] = n
     except Exception as e:
         out["torch"] = {"ok": False, "error": str(e)}
+    _ACCEL_CACHE = dict(out)
+    _ACCEL_CACHE_TS = now
     return out
 
 
@@ -259,8 +292,7 @@ def ensure_substrate(
         fiber_mode=fiber_mode,
     )
     warm = warm_instruments()
-    frank = frankenstein_loaded(base=base)
-    frank["required"] = frankenstein_required(fiber_mode)
+    frank = frankenstein_loaded(base=base, mode=fiber_mode)
     # Substrate ok is residency+jina; instrument warm is best-effort (reported separately)
     out = {
         "ok": bool(sub.get("ok")),
@@ -278,9 +310,7 @@ def ensure_substrate(
     if out["frankenstein_required"] and not frank.get("loaded"):
         out["ok"] = False
         out["error"] = "PRESERVE mode requires frankenstein loaded alone"
-    STATE.joinpath("truth_plane_last_substrate.json").write_text(
-        json.dumps(out, indent=2, default=str), encoding="utf-8"
-    )
+    _atomic_json(STATE / "truth_plane_last_substrate.json", out)
     return out
 
 
@@ -387,9 +417,16 @@ def truth_loop(
         "n_stop": n_stop,
         "n_agree_measure": n_agree,
         "n_residue": n_res,
-        "stable": len(history) < max_rounds or not changed if len(history) > 1 else True,
+        # <2 rounds → stability unmeasured (not True)
+        "stable": (
+            (len(history) < max_rounds or not changed)
+            if len(history) > 1
+            else None
+        ),
         "rows": final,
-        "history": history if os.environ.get("PRIME_TRUTH_HISTORY") else None,
+        "history": history
+        if os.environ.get("PRIME_TRUTH_HISTORY", "0").strip() in ("1", "true", "yes")
+        else None,
         "not_open_authority": True,
         "law": "loop is MEASURE only; residue never forced to OPEN",
     }
@@ -541,19 +578,15 @@ def request_plane(
     op["not_open_authority"] = True
     card["operator_summary"] = op
 
-    STATE.joinpath("truth_plane_last_request.json").write_text(
-        json.dumps(
-            {
-                "operator_summary": op,
-                "cert_face": card.get("cert_face"),
-                "fiber_mode": fiber_mode,
-                "truth_loop": card.get("truth_loop"),
-                "mutual": card.get("mutual_agreement"),
-            },
-            indent=2,
-            default=str,
-        ),
-        encoding="utf-8",
+    _atomic_json(
+        STATE / "truth_plane_last_request.json",
+        {
+            "operator_summary": op,
+            "cert_face": card.get("cert_face"),
+            "fiber_mode": fiber_mode,
+            "truth_loop": card.get("truth_loop"),
+            "mutual": card.get("mutual_agreement"),
+        },
     )
     return card
 
