@@ -5,7 +5,7 @@
   },
   "export": {
     "ok": true,
-    "fp32": "C:\\PRIMEdEV-1\\prime\\state\\ort_models\\nli-deberta-v3-base-qdq\\model_fp32_fixed.onnx",
+    "fp32": "model_fp32_fixed.onnx",
     "reused": true,
     "model_id": "cross-encoder/nli-deberta-v3-base",
     "max_length": 128,
@@ -24,7 +24,7 @@
   },
   "quantize": {
     "ok": true,
-    "qdq": "C:\\PRIMEdEV-1\\prime\\state\\ort_models\\nli-deberta-v3-base-qdq\\model.qdq.aui16_wui8.onnx",
+    "qdq": "model.qdq.aui16_wui8.onnx",
     "qdq_mb": 296.2,
     "method": "qnn_qdq_config act=uint16 w=uint8",
     "act": "uint16",

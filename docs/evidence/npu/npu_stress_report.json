@@ -235,7 +235,7 @@
         "runs_per_s": 10700.6
       }
     ],
-    "qdq": "C:\\PRIMEdEV-1\\prime\\state\\npu\\heavy_chain.qdq.onnx",
+    "qdq": "heavy_chain.qdq.onnx",
     "qdq_mb": 2.1,
     "cpu_fallback_disabled": true
   },

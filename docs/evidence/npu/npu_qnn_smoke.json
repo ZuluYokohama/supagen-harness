@@ -34,8 +34,8 @@
   },
   "quantize": {
     "ok": true,
-    "fp_model": "C:\\PRIMEdEV-1\\prime\\state\\npu\\tiny_gemm.onnx",
-    "qdq_model": "C:\\PRIMEdEV-1\\prime\\state\\npu\\tiny_gemm.qdq.onnx",
+    "fp_model": "tiny_gemm.onnx",
+    "qdq_model": "tiny_gemm.qdq.onnx",
     "qdq_mb": 0.001,
     "method": "qnn_qdq_config"
   },

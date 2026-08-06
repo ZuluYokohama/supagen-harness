@@ -18,7 +18,7 @@
 | golden soft PASS without schema flag | **Fixed** | fail-closed incomplete |
 | D1 range None critical PASS | **Fixed** | applied_rule + critical=False |
 | dim=768 | **Fixed** | dim=1024 |
-| D17 WARN as n_fail | **Fixed** | n_warn separate; `n_pass+n_warn+n_fail==n_cells` asserted |
+| D17 WARN as n_fail | **Fixed** (artifact regen) | report has n_warn; count_ok; n_pass+n_warn+n_fail==n_cells |
 | Job2 auto QNN EP | **Fixed** | `predict(force_cpu=True)` default; QNN refused on product path |
 | Parity cert incomplete green | **Fixed** | fail-closed fields: held_out, cpu_fallback=false, no probe_only |
 | Buddy independent_buddy free-form | **Fixed** | requires BUDDY_L8_ATTESTATION=signed:… |
@@ -43,7 +43,7 @@
 | buddy_l8 `_run` no timeout | **Fixed** | `PRIME_BUDDY_L8_TIMEOUT` (default 300s); TimeoutExpired → failed step |
 | unknown `prefer` → LFM | **Fixed** | reject unknown with NEED_INFO; LFM only auto fallback or prefer=lfm |
 | E3 held_out OR rate bypass | **Fixed** | `held_out` mandatory + `label_parity_rate` present + `n>=2` |
-| D17 count assert not gate | **Fixed** | runtime `count_ok`; false → `ok=false` / `NO_GO` |
+| D17 count assert not gate | **Fixed** | artifact `count_ok` required by D17 gate + writer |
 | rerank trust_remote unpinned | **Fixed** | refuse jina AutoModel path unless `PRIME_JINA_RERANK_REV` set; CE fallback |
 | synthesize ort_force_cpu=True | **Fixed** | require `run.ort_force_cpu is True`; persist False if missing |
 | LFM fiber env-only | **Fixed** | `glue_agreement(fiber_mode=…)`; dual_enter passes request mode |
@@ -52,7 +52,7 @@
 | contract_live commit_hint only | **Fixed** | full `commit` + `tree` SHA on certificate |
 | soft_critical wrong names | **Fixed** (`de28339`) | set uses `fn.__name__` (d1_aboutness, d8_accel_npu, …) |
 | D15 no freshness | **Fixed** | `_artifact_fresh` required; stale → WARN |
-| D17 mixed count basis | **Fixed** | recompute pass/warn/fail from cells only |
+| D17 mixed count basis | **Fixed** | recompute from cells; require integrity fields on artifact |
 | ORT force_cpu drops cache | **Fixed** | reuse CPU session when EP class matches |
 | intent_self asymmetric | **Fixed** | same stalk both sides + expect_hit |
 | hexagon present hardcoded | **Fixed** | `present: null` until probe |
@@ -64,8 +64,8 @@
 | truth_loop doubles static NLI | **Fixed** | default `PRIME_TRUTH_ROUNDS=1` |
 | prefer=htp doc incomplete | **Fixed** | red refuse + green still auto (HTP product unwired) |
 | disposition string-only | **Fixed** | runtime incomplete-labels + D17 recompute checks |
-| D17 empty cells PASS | **Fixed** | `cells_ok` requires non-empty list |
-| evidence absolute paths | **Fixed** | `_rel_path` on export/qdq; scrub archives |
+| D17 empty cells PASS | **Fixed** | `cells_ok` + type check; empty/malformed fail |
+| evidence absolute paths | **Fixed** (re-scrubbed) | all `docs/evidence/npu/*.json` host-path free |
 | substrate_ok soft OR | **Fixed** | fiber.ok only |
 | nli_engine warm probe | **Fixed** | agreement engine first |
 | preserve_alone any frankenstein | **Fixed** | selected model alone |

@@ -50,7 +50,6 @@ def p1_jina_small() -> dict:
             gguf = g or None
         except Exception:
             gguf = None
-    is_small = bool(gguf and "small" in str(gguf).lower())
     # Bounded wait for port release after stop (not fixed sleep only)
     stop_jina()
     deadline = time.time() + 8.0
@@ -63,6 +62,13 @@ def p1_jina_small() -> dict:
         except Exception:
             break
     ej = ensure_jina(force_restart=True)
+    # Confirmed running GGUF from ensure (not private candidates)
+    confirmed = ej.get("gguf") or gguf
+    is_small = bool(confirmed and "small" in str(confirmed).lower())
+    # Sanitize host paths in evidence
+    conf_s = str(confirmed) if confirmed else None
+    if conf_s and (":" in conf_s or conf_s.startswith("/")):
+        conf_s = Path(conf_s).name
     floor = aboutness(
         "E_ref meets production readiness criteria under measured audit.",
         "Carbonara uses guanciale, egg, pecorino, and black pepper.",
@@ -95,12 +101,13 @@ def p1_jina_small() -> dict:
         "P1_jina_v5_small",
         ok,
         {
-            "gguf": str(gguf) if gguf else None,
+            "gguf": conf_s,
             "is_small": is_small,
             "ensure": {
                 "ok": ej.get("ok"),
                 "status": ej.get("status"),
                 "dim": ej.get("dim"),
+                "gguf": conf_s,
             },
             "floor": cos_f,
             "ceil": cos_c,

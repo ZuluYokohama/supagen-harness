@@ -827,22 +827,45 @@ def d17_push_suite_artifact() -> dict:
             critical=False,
         )
     d = json.loads(p.read_text(encoding="utf-8"))
-    cells = d.get("cells") or []
+    raw_cells = d.get("cells")
+    # Type-validate before counting
+    if not isinstance(raw_cells, list):
+        return _gate(
+            "D17_push_suite",
+            False,
+            {"error": "cells must be a list", "cells_type": type(raw_cells).__name__},
+            critical=False,
+        )
+    cells = raw_cells
     # Single basis: always recompute from cells (ignore mixed header fields)
-    n_pass = sum(1 for c in cells if c.get("status") == "PASS")
-    n_warn = sum(1 for c in cells if c.get("status") == "WARN")
-    n_fail = sum(1 for c in cells if c.get("status") == "FAIL")
+    n_pass = sum(1 for c in cells if isinstance(c, dict) and c.get("status") == "PASS")
+    n_warn = sum(1 for c in cells if isinstance(c, dict) and c.get("status") == "WARN")
+    n_fail = sum(1 for c in cells if isinstance(c, dict) and c.get("status") == "FAIL")
     n_other = sum(
-        1 for c in cells if c.get("status") not in ("PASS", "WARN", "FAIL")
+        1
+        for c in cells
+        if not isinstance(c, dict)
+        or c.get("status") not in ("PASS", "WARN", "FAIL")
     )
     count_ok = (n_pass + n_warn + n_fail == len(cells)) and n_other == 0
     crit_fail = [
-        c for c in cells if c.get("critical") and c.get("status") == "FAIL"
+        c
+        for c in cells
+        if isinstance(c, dict) and c.get("critical") and c.get("status") == "FAIL"
     ]
+    # Prefer recomputed integrity: header ok may be stale — require count_ok + no crit fail
     header_ok = d.get("ok") is True
+    integrity_ok = bool(d.get("count_ok") is True) and d.get("n_cells") == len(cells)
     # Empty/missing cells cannot PASS even if header ok=true
-    cells_ok = isinstance(cells, list) and len(cells) > 0
-    ok = header_ok and not crit_fail and count_ok and cells_ok
+    cells_ok = len(cells) > 0
+    # PASS when cells recompute clean; require integrity fields present on artifact
+    ok = (
+        cells_ok
+        and count_ok
+        and not crit_fail
+        and integrity_ok
+        and (header_ok or d.get("go_no_go") == "GO_MEASURE")
+    )
     return _gate(
         "D17_push_suite",
         ok,
@@ -854,11 +877,17 @@ def d17_push_suite_artifact() -> dict:
             "n_cells": len(cells),
             "cells_ok": cells_ok,
             "count_ok": count_ok,
+            "integrity_ok": integrity_ok,
             "header_n_pass": d.get("n_pass"),
+            "header_n_warn": d.get("n_warn"),
             "header_n_fail": d.get("n_fail"),
-            "count_rule": "recomputed from cells; WARN ≠ n_fail; pass+warn+fail==n_cells",
+            "header_n_cells": d.get("n_cells"),
+            "header_count_ok": d.get("count_ok"),
+            "count_rule": "recomputed from cells; WARN ≠ n_fail; require artifact count_ok+n_cells",
             "cells": [
-                {"id": c.get("id"), "status": c.get("status")} for c in cells
+                {"id": c.get("id"), "status": c.get("status")}
+                for c in cells
+                if isinstance(c, dict)
             ],
         },
         critical=False,

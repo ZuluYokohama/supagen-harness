@@ -312,14 +312,24 @@ def ensure_jina(
                 hyp = live_meta.get("hyperparams") or {}
                 want_pool = os.environ.get("PRIME_JINA_POOLING", "last")
                 live_pool = hyp.get("pooling") or want_pool
-                # Desired GGUF from env / candidates when set
+                # Desired GGUF: explicit env, else first candidate on disk
                 want_gguf = (os.environ.get("PRIME_JINA_GGUF") or "").strip()
+                if not want_gguf:
+                    try:
+                        cand = _first_file(_gguf_candidates())
+                        want_gguf = str(cand) if cand else ""
+                    except Exception:
+                        want_gguf = ""
                 live_gguf = str(live_meta.get("gguf") or "")
                 config_mismatch = False
                 if live_pool != want_pool:
                     config_mismatch = True
-                if want_gguf and live_gguf and want_gguf not in live_gguf and live_gguf not in want_gguf:
-                    config_mismatch = True
+                if want_gguf and live_gguf:
+                    # basename match when full paths differ
+                    wb = Path(want_gguf).name.lower()
+                    lb = Path(live_gguf).name.lower()
+                    if wb != lb and want_gguf not in live_gguf and live_gguf not in want_gguf:
+                        config_mismatch = True
                 if config_mismatch:
                     force_restart = True
                 else:
@@ -330,7 +340,8 @@ def ensure_jina(
                         "base": BASE,
                         "dim": p.get("dim"),
                         "latency_ms": p.get("latency_ms"),
-                        "gguf": live_meta.get("gguf"),
+                        # confirmed running GGUF from live meta
+                        "gguf": live_gguf or live_meta.get("gguf"),
                         "model_field": p.get("model_field"),
                         "hyperparams": {
                             "context_length": live_meta.get("ctx")

@@ -338,22 +338,18 @@ def seamless_substrate(
             from lms_layers import l1_catalog
 
             cat2 = l1_catalog(base=base)
-            selected = (model or (out.get("fiber") or {}).get("model") or "").lower()
+            selected = (model or (out.get("fiber") or {}).get("model") or "").lower().strip()
             loaded_keys = [
-                (m.get("key") or "").lower()
+                (m.get("key") or "").lower().strip()
                 for m in (cat2.get("models") or [])
                 if m.get("loaded") and m.get("type") != "embedding"
             ]
-            selected_loaded = bool(selected) and any(
-                selected in k or k in selected for k in loaded_keys
-            )
-            # Any other loaded chat model is foreign (including other frankenstein variants)
+            # Exact key equality only — other frankenstein variants are foreign
+            selected_loaded = bool(selected) and selected in loaded_keys
             foreign = [
                 k
                 for k in loaded_keys
-                if "jina" not in k
-                and "embed" not in k
-                and not (selected and (selected in k or k in selected))
+                if "jina" not in k and "embed" not in k and k != selected
             ]
             alone = selected_loaded and not foreign
             out["preserve_alone"] = alone
