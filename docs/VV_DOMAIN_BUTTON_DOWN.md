@@ -2,10 +2,10 @@
 
 **PR:** https://github.com/ZuluYokohama/supagen-harness/pull/1  
 **Branch:** `vv/dual-metric-npu-measure-fabric`  
-**CodeRabbit:** requested ASSERTIVE full review vs `CODERABBIT_VV_REVIEW_BRIEF.md` (D0–D15)  
-**CI:** `verify-offline` **SUCCESS** (after golden schema-only fix)
+**CodeRabbit:** ASSERTIVE full review **completed** (`CHANGES_REQUESTED`, ~60+ actionable). Critical/major quick-wins landed in follow-up commits.  
+**CI:** `verify-offline` **SUCCESS** (golden schema-only + follow-up)
 
-This sheet buttons down every domain of relevance. Status is **evidence-based** from author-kit measures + static review of landed code. CodeRabbit inline findings should be merged into this table when the bot completes.
+This sheet buttons down every domain of relevance. Status = author measures + static review + CodeRabbit parse.
 
 ---
 
@@ -35,12 +35,32 @@ This sheet buttons down every domain of relevance. Status is **evidence-based** 
 
 ---
 
+## CodeRabbit response (parse)
+
+| Severity | Theme | Action |
+|----------|--------|--------|
+| Critical | `bakeoff_adv_lexical` crash on None cos | **Fixed** — skip None cos rows |
+| Major | bakeoff `ok` always True | **Fixed** — derive from n_ok + metrics |
+| Major | `attacks:` stopword never matched | **Fixed** — tokenize on punctuation |
+| Major | duplicate PRIME_RERANK gate | **Fixed** — single gate in rerank_service |
+| Major | fiber_mode env unreachable | **Fixed** — default `None` → env |
+| Major | preserve unload results discarded | **Fixed** — record extra_acts |
+| Major | truth_loop ignores explicit False | **Fixed** — explicit opt-out wins |
+| Major | operator_summary face stale | **Fixed** — refresh from cert_face |
+| Major | tier_b exit ≠ tier_b_ready | **Fixed** — exit on tier_b_ready |
+| Major | trust_remote_code loose | **Fixed** — TRUSTED_REMOTE allowlist |
+| Major | NPU evidence gitignored | **Fixed** — `docs/evidence/npu/` slim archive |
+| Major | stale state artifacts as PASS | **Fixed** — D1 freshness helper (72h) |
+| Major | HTP NLI without parity | **Documented** — not product default |
+| Major | V&V plan L1-04 red vs D4 green | **Fixed** — plan text updated |
+
+Remaining nits (markdownlint blank lines, atomic write, accel cache) tracked as non-blockers.
+
 ## Hard residuals (do not paper over)
 
-1. **NPU Job2 label parity** — QDQ DeBERTa on HTP collapses logits (neutral≈0.51). CPU ORT/CE remains authority.  
-2. **CodeRabbit full write-up** — bot accepted review (Pro Plus ASSERTIVE, 25 files); still “processing” at last poll — re-check PR comments.  
-3. **Buddy lab L8-08** — external clean install not signed in this PR.  
-4. **supagen ensure --mode** CLI alias still thinner than residency API (modes exist in `residency`/`truth_plane`; CLI flag may lag).
+1. **NPU Job2 label parity** — QDQ DeBERTa on HTP collapses logits (neutral≈0.51). CPU ORT/CE remains authority. Evidence: `docs/evidence/npu/npu_nli_qdq_report.json`.  
+2. **Buddy lab L8-08** — external clean install not signed in this PR.  
+3. **supagen ensure --mode** CLI flag still thinner than env/API (modes green via residency).
 
 ---
 

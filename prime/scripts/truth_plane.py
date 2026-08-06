@@ -260,8 +260,11 @@ def ensure_substrate(
     )
     warm = warm_instruments()
     frank = frankenstein_loaded(base=base)
+    frank["required"] = frankenstein_required(fiber_mode)
+    # Substrate ok is residency+jina; instrument warm is best-effort (reported separately)
     out = {
-        "ok": bool(sub.get("ok")) and bool((warm.get("nli") or {}).get("ok") or True),
+        "ok": bool(sub.get("ok")),
+        "instruments_ok": bool((warm.get("nli") or {}).get("ok")),
         "fiber_mode": fiber_mode,
         "frankenstein_required": frankenstein_required(fiber_mode),
         "frankenstein": frank,
@@ -485,14 +488,20 @@ def request_plane(
     except Exception as e:
         card["mutual_agreement"] = {"ok": False, "error": str(e)[:200]}
 
-    do_loop = truth_loop_enabled
-    if do_loop is None:
-        do_loop = os.environ.get("PRIME_TRUTH_LOOP", "0").strip() in ("1", "true", "yes")
-    # always loop for precision domains when enabled via domain hint
-    if domain in ("math", "code", "physics", "technology") and os.environ.get(
-        "PRIME_TRUTH_LOOP_PRECISION", "1"
-    ).strip() not in ("0", "false", "no"):
+    # Explicit False from caller wins; else env; precision domains only if not opted out
+    if truth_loop_enabled is False:
+        do_loop = False
+    elif truth_loop_enabled is True:
         do_loop = True
+    else:
+        do_loop = os.environ.get("PRIME_TRUTH_LOOP", "0").strip() in ("1", "true", "yes")
+        if (
+            not do_loop
+            and domain in ("math", "code", "physics", "technology")
+            and os.environ.get("PRIME_TRUTH_LOOP_PRECISION", "1").strip()
+            not in ("0", "false", "no")
+        ):
+            do_loop = True
 
     if do_loop:
         claims = _claims_from_card(card, prompt)
@@ -514,6 +523,8 @@ def request_plane(
 
     card["elapsed_s"] = round(time.time() - t0, 2)
     op = dict(card.get("operator_summary") or {})
+    # Refresh face from cert_face after any demotion (mutual / truth_loop)
+    op["face"] = (card.get("cert_face") or {}).get("face") or op.get("face")
     op["fiber_mode"] = fiber_mode
     op["fiber_model"] = fiber_blk.get("model") or op.get("fiber_model") or chat_model
     op["fiber_ctx"] = fiber_blk.get("loaded_ctx") or op.get("fiber_ctx")

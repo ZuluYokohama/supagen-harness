@@ -25,6 +25,13 @@ from typing import Any
 _LOCK = threading.Lock()
 _ENGINE: dict[str, Any] | None = None
 
+# Only allow trust_remote_code for these exact Hub IDs (pinned revision optional via env)
+TRUSTED_REMOTE = {
+    "jinaai/jina-reranker-v3": os.environ.get(
+        "PRIME_JINA_RERANK_REV", ""
+    ),  # empty = default branch tip; set to commit SHA in production
+}
+
 DEFAULT_MODELS = [
     "jinaai/jina-reranker-v3",
     "BAAI/bge-reranker-v2-m3",
@@ -53,22 +60,32 @@ def _load_engine() -> dict[str, Any]:
         last_err = ""
         for mid in candidates:
             # path A: jina AutoModel.rerank API
-            if "jina-reranker" in mid.lower():
+            if mid in TRUSTED_REMOTE or mid.startswith("jinaai/jina-reranker"):
+                if mid not in TRUSTED_REMOTE and mid != "jinaai/jina-reranker-v3":
+                    last_err = f"{mid}: not in TRUSTED_REMOTE allowlist"
+                    continue
                 try:
                     from transformers import AutoModel
                     import torch
 
                     t0 = time.time()
-                    model = AutoModel.from_pretrained(
-                        mid, trust_remote_code=True, dtype=torch.float32
-                    )
+                    rev = TRUSTED_REMOTE.get(mid) or None
+                    kw: dict[str, Any] = {
+                        "trust_remote_code": True,
+                        "dtype": torch.float32,
+                    }
+                    if rev:
+                        kw["revision"] = rev
+                    model = AutoModel.from_pretrained(mid, **kw)
                     model.eval()
 
                     def _jina_predict(query: str, docs: list[str], _m=model):
                         # returns list of floats aligned to docs order
                         results = _m.rerank(query, docs, top_n=None)
                         # results sorted by score — re-align
-                        by_idx = {int(r["index"]): float(r["relevance_score"]) for r in results}
+                        by_idx = {
+                            int(r["index"]): float(r["relevance_score"]) for r in results
+                        }
                         return [by_idx.get(i, 0.0) for i in range(len(docs))]
 
                     _ENGINE = {
@@ -77,6 +94,7 @@ def _load_engine() -> dict[str, Any]:
                         "model": mid,
                         "predict": _jina_predict,
                         "load_s": round(time.time() - t0, 1),
+                        "revision": rev or "default",
                     }
                     return _ENGINE
                 except Exception as e:
@@ -107,14 +125,16 @@ def _load_engine() -> dict[str, Any]:
                 last_err = f"{mid}: {e}"
                 continue
 
-        _ENGINE = {
+        # Do not permanently cache failure — allow later retry after install/network recover
+        fail = {
             "ok": False,
             "kind": None,
             "model": None,
             "predict": None,
             "error": last_err or "no_reranker_loaded",
         }
-        return _ENGINE
+        _ENGINE = None
+        return fail
 
 
 def rerank_status() -> dict[str, Any]:

@@ -371,8 +371,14 @@ def main() -> int:
         }
         return b
 
+    measured_ok = (
+        jina.get("n_ok", 0) == 30
+        and nomic.get("n_ok", 0) == 30
+        and j_floor is not None
+        and n_floor is not None
+    )
     summary = {
-        "ok": True,
+        "ok": measured_ok,
         "seconds": round(time.time() - t0, 1),
         "live_family_default": resolve_family(),
         "table": table,
@@ -400,7 +406,7 @@ def main() -> int:
     print("\nverdict:", json.dumps(verdict, indent=2), flush=True)
     print("wrote", sum_path, flush=True)
     print("wrote", vec_path, f"({vec_path.stat().st_size // 1024} KB)", flush=True)
-    return 0
+    return 0 if measured_ok else 1
 
 
 if __name__ == "__main__":

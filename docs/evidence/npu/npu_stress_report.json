@@ -1,0 +1,285 @@
+{
+  "ok": true,
+  "htp": {
+    "ok": true,
+    "engine": "QNN_HTP",
+    "providers": [
+      "QNNExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "htp_dll": "C:\\Users\\Deving-1\\AppData\\Roaming\\Python\\Python314\\site-packages\\onnxruntime_qnn\\libs\\arm64ec\\QnnHtp.dll",
+    "dim": 512,
+    "depth": 8,
+    "seconds": 45.0,
+    "runs": 481240,
+    "runs_per_s": 10694.1,
+    "samples": [
+      {
+        "t": 1.0,
+        "runs": 10640,
+        "runs_per_s": 10631.6
+      },
+      {
+        "t": 2.0,
+        "runs": 21280,
+        "runs_per_s": 10627.5
+      },
+      {
+        "t": 3.0,
+        "runs": 31900,
+        "runs_per_s": 10623.4
+      },
+      {
+        "t": 4.0,
+        "runs": 42580,
+        "runs_per_s": 10636.8
+      },
+      {
+        "t": 5.0,
+        "runs": 53220,
+        "runs_per_s": 10634.7
+      },
+      {
+        "t": 6.0,
+        "runs": 63900,
+        "runs_per_s": 10641.4
+      },
+      {
+        "t": 7.0,
+        "runs": 74600,
+        "runs_per_s": 10647.9
+      },
+      {
+        "t": 8.0,
+        "runs": 85300,
+        "runs_per_s": 10653.5
+      },
+      {
+        "t": 9.0,
+        "runs": 96080,
+        "runs_per_s": 10665.7
+      },
+      {
+        "t": 10.0,
+        "runs": 106720,
+        "runs_per_s": 10661.7
+      },
+      {
+        "t": 11.0,
+        "runs": 117400,
+        "runs_per_s": 10662.4
+      },
+      {
+        "t": 12.0,
+        "runs": 128080,
+        "runs_per_s": 10663.8
+      },
+      {
+        "t": 13.0,
+        "runs": 138820,
+        "runs_per_s": 10668.4
+      },
+      {
+        "t": 14.0,
+        "runs": 149500,
+        "runs_per_s": 10667.8
+      },
+      {
+        "t": 15.0,
+        "runs": 160180,
+        "runs_per_s": 10668.0
+      },
+      {
+        "t": 16.0,
+        "runs": 170900,
+        "runs_per_s": 10670.4
+      },
+      {
+        "t": 17.0,
+        "runs": 181600,
+        "runs_per_s": 10671.3
+      },
+      {
+        "t": 18.0,
+        "runs": 192400,
+        "runs_per_s": 10677.9
+      },
+      {
+        "t": 19.0,
+        "runs": 203100,
+        "runs_per_s": 10678.2
+      },
+      {
+        "t": 20.0,
+        "runs": 213860,
+        "runs_per_s": 10681.5
+      },
+      {
+        "t": 21.0,
+        "runs": 224620,
+        "runs_per_s": 10685.1
+      },
+      {
+        "t": 22.0,
+        "runs": 235400,
+        "runs_per_s": 10689.3
+      },
+      {
+        "t": 23.0,
+        "runs": 246180,
+        "runs_per_s": 10692.9
+      },
+      {
+        "t": 24.0,
+        "runs": 256940,
+        "runs_per_s": 10695.3
+      },
+      {
+        "t": 25.0,
+        "runs": 267700,
+        "runs_per_s": 10697.3
+      },
+      {
+        "t": 26.0,
+        "runs": 278420,
+        "runs_per_s": 10697.8
+      },
+      {
+        "t": 27.0,
+        "runs": 289180,
+        "runs_per_s": 10700.0
+      },
+      {
+        "t": 28.0,
+        "runs": 299980,
+        "runs_per_s": 10703.4
+      },
+      {
+        "t": 29.0,
+        "runs": 310760,
+        "runs_per_s": 10706.0
+      },
+      {
+        "t": 30.0,
+        "runs": 321520,
+        "runs_per_s": 10707.4
+      },
+      {
+        "t": 31.0,
+        "runs": 332240,
+        "runs_per_s": 10707.3
+      },
+      {
+        "t": 32.0,
+        "runs": 342980,
+        "runs_per_s": 10708.1
+      },
+      {
+        "t": 33.0,
+        "runs": 353700,
+        "runs_per_s": 10707.8
+      },
+      {
+        "t": 34.0,
+        "runs": 364400,
+        "runs_per_s": 10707.1
+      },
+      {
+        "t": 35.0,
+        "runs": 375100,
+        "runs_per_s": 10706.6
+      },
+      {
+        "t": 36.0,
+        "runs": 385860,
+        "runs_per_s": 10707.6
+      },
+      {
+        "t": 37.0,
+        "runs": 396640,
+        "runs_per_s": 10709.4
+      },
+      {
+        "t": 38.0,
+        "runs": 407420,
+        "runs_per_s": 10710.9
+      },
+      {
+        "t": 39.0,
+        "runs": 418200,
+        "runs_per_s": 10712.2
+      },
+      {
+        "t": 40.0,
+        "runs": 428920,
+        "runs_per_s": 10712.0
+      },
+      {
+        "t": 41.0,
+        "runs": 439440,
+        "runs_per_s": 10707.0
+      },
+      {
+        "t": 42.0,
+        "runs": 450140,
+        "runs_per_s": 10706.8
+      },
+      {
+        "t": 43.0,
+        "runs": 460620,
+        "runs_per_s": 10701.2
+      },
+      {
+        "t": 44.0,
+        "runs": 471300,
+        "runs_per_s": 10700.6
+      }
+    ],
+    "qdq": "C:\\PRIMEdEV-1\\prime\\state\\npu\\heavy_chain.qdq.onnx",
+    "qdq_mb": 2.1,
+    "cpu_fallback_disabled": true
+  },
+  "gpu": {
+    "skipped": true
+  },
+  "gpu_counter_sample": {
+    "N": "val",
+    "E": {
+      "Attributes": [],
+      "File": null,
+      "IsFilter": false,
+      "IsConfiguration": false,
+      "Module": null,
+      "StartPosition": {
+        "Content": "{[math]::Round($_.CookedValue,1)}",
+        "Type": 19,
+        "Start": 232,
+        "Length": 33,
+        "StartLine": 1,
+        "StartColumn": 233,
+        "EndLine": 1,
+        "EndColumn": 266
+      },
+      "DebuggerHidden": false,
+      "Id": "76b95cd3-d715-4def-9304-6fa42b8039d6",
+      "Ast": {
+        "Attributes": "",
+        "UsingStatements": "",
+        "ParamBlock": null,
+        "BeginBlock": null,
+        "ProcessBlock": null,
+        "EndBlock": "[math]::Round($_.CookedValue,1)",
+        "DynamicParamBlock": null,
+        "ScriptRequirements": null,
+        "Extent": "{[math]::Round($_.CookedValue,1)}",
+        "Parent": "{[math]::Round($_.CookedValue,1)}"
+      }
+    }
+  },
+  "task_manager": {
+    "look_at": "Performance \u2192 NPU 0 (Hexagon) and GPU 0 (Adreno)",
+    "why_invisible_before": "Micro-benchmarks finish in ms; HTP utilization averages to ~0%. This run holds burst HTP for tens of seconds.",
+    "no_process_named_npu": true
+  },
+  "verdict": "NPU_STRESS_OK"
+}

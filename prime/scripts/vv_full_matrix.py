@@ -71,10 +71,26 @@ def d0_architecture() -> dict:
     )
 
 
+def _artifact_fresh(path: Path, max_age_h: float = 72.0) -> dict:
+    """CodeRabbit: do not treat stale prime/state JSON as current evidence."""
+    import time as _t
+
+    if not path.is_file():
+        return {"ok": False, "reason": "missing"}
+    age_h = (_t.time() - path.stat().st_mtime) / 3600.0
+    return {
+        "ok": age_h <= max_age_h,
+        "age_h": round(age_h, 2),
+        "max_age_h": max_age_h,
+        "path": str(path),
+    }
+
+
 def d1_aboutness() -> dict:
     # prefer live bakeoff summary if fresh; else re-measure floor pairs
     sum_path = STATE / "bakeoff_30_summary.json"
-    if sum_path.is_file():
+    fresh = _artifact_fresh(sum_path)
+    if sum_path.is_file() and fresh.get("ok"):
         s = json.loads(sum_path.read_text(encoding="utf-8"))
         j = s.get("jina") or {}
         floor = (j.get("floor") or {}).get("mean")
@@ -82,6 +98,35 @@ def d1_aboutness() -> dict:
         neg = (j.get("negation_gap") or {}).get("mean")
         adv = (j.get("adversarial_separation") or {}).get("mean")
         family = "jina"
+        if not s.get("ok", True):
+            return _gate(
+                "D1_aboutness_jina",
+                False,
+                {"error": "bakeoff summary ok=false", "fresh": fresh},
+            )
+    elif sum_path.is_file() and not fresh.get("ok"):
+        # stale — still report but re-measure live floor
+        from nomic_metric import aboutness
+
+        a = aboutness(
+            "E_ref meets production readiness criteria under measured audit.",
+            "Carbonara uses guanciale, egg, pecorino, and black pepper.",
+        )
+        floor = a.get("cosine")
+        rng = None
+        neg = None
+        adv = None
+        family = a.get("family")
+        return _gate(
+            "D1_aboutness_jina",
+            family == "jina" and floor is not None and floor < 0.35,
+            {
+                "family": family,
+                "floor_mean": floor,
+                "stale_bakeoff": fresh,
+                "note": "bakeoff artifact stale; live floor only",
+            },
+        )
     else:
         from nomic_metric import aboutness
 

@@ -256,12 +256,12 @@ PASS: C < 0.30, A > 0.70, A−C > 0.40, family=jina
 
 | Action | Expected resident |
 |--------|-------------------|
-| `supagen ensure` (default) | SCOUT fiber (LFM/Ministral) + nomic; jina side |
-| `supagen ensure --model frankenstein-2.0-i1` | frankenstein only (+ embed); LFM unloaded |
-| `supagen ensure --mode preserve` | **(to implement)** alias frankenstein |
-| `supagen ensure --mode scout` | **(to implement)** LFM |
+| `supagen ensure` (default) | SCOUT fiber (LFM/Ministral); jina side; heavies unloaded |
+| `PRIME_FIBER_MODE=preserve` + ensure / truth_plane | frankenstein alone @ policy ctx; scouts unloaded |
+| `PRIME_FIBER_MODE=scout` | LFM/Ministral; frankenstein unloaded (HEAVY) |
+| API | `residency.seamless_substrate(fiber_mode=…)` · `truth_plane.ensure_substrate(mode=…)` |
 
-Until `--mode` exists, L1-04 is **red** — fix before advertise.
+**L1-04 (modes):** **green** via residency/truth_plane (measured P2/D4). CLI `--mode` flag may still lag env/API — not a law blocker.
 
 ### 4.4 Buddy lab script (external)
 

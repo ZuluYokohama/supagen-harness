@@ -1,0 +1,67 @@
+{
+  "ok": true,
+  "seconds": 3.3,
+  "register": {
+    "ok": true,
+    "ort": "1.24.4",
+    "qnn": "2.4.0",
+    "lib": "C:\\Users\\Deving-1\\AppData\\Roaming\\Python\\Python314\\site-packages\\onnxruntime_qnn\\libs\\arm64ec\\onnxruntime_providers_qnn.dll",
+    "htp_dll": "C:\\Users\\Deving-1\\AppData\\Roaming\\Python\\Python314\\site-packages\\onnxruntime_qnn\\libs\\arm64ec\\QnnHtp.dll",
+    "htp_exists": true,
+    "devices": [
+      {
+        "ep_name": "CPUExecutionProvider",
+        "repr": "<onnxruntime.capi.onnxruntime_pybind11_state.OrtEpDevice object at 0x000001AF111C0530>"
+      },
+      {
+        "ep_name": "QNNExecutionProvider",
+        "repr": "<onnxruntime.capi.onnxruntime_pybind11_state.OrtEpDevice object at 0x000001AF2205DAF0>"
+      },
+      {
+        "ep_name": "QNNExecutionProvider",
+        "repr": "<onnxruntime.capi.onnxruntime_pybind11_state.OrtEpDevice object at 0x000001AF22067230>"
+      },
+      {
+        "ep_name": "QNNExecutionProvider",
+        "repr": "<onnxruntime.capi.onnxruntime_pybind11_state.OrtEpDevice object at 0x000001AF22065070>"
+      }
+    ],
+    "n_qnn_devices": 3,
+    "providers_list": [
+      "AzureExecutionProvider",
+      "CPUExecutionProvider"
+    ]
+  },
+  "quantize": {
+    "ok": true,
+    "fp_model": "C:\\PRIMEdEV-1\\prime\\state\\npu\\tiny_gemm.onnx",
+    "qdq_model": "C:\\PRIMEdEV-1\\prime\\state\\npu\\tiny_gemm.qdq.onnx",
+    "qdq_mb": 0.001,
+    "method": "qnn_qdq_config"
+  },
+  "run": {
+    "ok": true,
+    "api": "plugin_add_provider_for_devices",
+    "providers_used": [
+      "QNNExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "on_qnn_ep": true,
+    "htp_dll": "C:\\Users\\Deving-1\\AppData\\Roaming\\Python\\Python314\\site-packages\\onnxruntime_qnn\\libs\\arm64ec\\QnnHtp.dll",
+    "input_shape": [
+      1,
+      16
+    ],
+    "output_shape": [
+      1,
+      8
+    ],
+    "runs": 50,
+    "total_s": 0.0026,
+    "ms_per_run": 0.052,
+    "session_create_s": 0.763,
+    "reg_devices": 3,
+    "note": "QNN EP in providers list = graph scheduled on QNN stack (HTP=NPU). Task Manager may still show system NPU as 'Shared' not a named process."
+  },
+  "verdict": "NPU_PATH_LIVE"
+}

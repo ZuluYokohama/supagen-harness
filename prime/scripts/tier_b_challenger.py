@@ -314,11 +314,12 @@ def main() -> int:
             and floor["mean"] < 0.35,
             "cos_still_blind_negation": (negation.get("mean") or 0) > 0.55,
             "cos_still_blind_adversarial": (adversarial.get("mean") or 0) > 0.55,
+            # Align with vv_full_matrix D2/D3 gates
             "nli_blocks_adversarial_open": (nli.get("adversarial_block_open_rate") or 0)
-            >= 0.8,
+            >= 0.9,
             "nli_catches_contradiction": (nli.get("adversarial_contra_rate") or 0)
-            >= 0.5,
-            "rerank_prefers_benign": (rr.get("prefer_benign_rate") or 0) >= 0.6,
+            >= 0.9,
+            "rerank_prefers_benign": (rr.get("prefer_benign_rate") or 0) >= 0.8,
             "tier_b_ready": False,  # filled below
             "reading": "",
         },
@@ -354,7 +355,7 @@ def main() -> int:
     print("\n=== VERDICT ===", flush=True)
     print(json.dumps(v, indent=2), flush=True)
     print("wrote", OUT, flush=True)
-    return 0 if v.get("nli_blocks_adversarial_open") else 1
+    return 0 if v.get("tier_b_ready") else 1
 
 
 if __name__ == "__main__":

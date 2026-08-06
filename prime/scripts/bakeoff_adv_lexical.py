@@ -10,7 +10,8 @@ SUM = Path(__file__).resolve().parent.parent / "state" / "bakeoff_30_summary.jso
 
 
 def tokens(t: str) -> list[str]:
-    t = re.sub(r"[^a-z0-9\s:]", " ", t.lower())
+    # Split on punctuation so "attacks:" → "attacks" (stopword drops framing, not glue)
+    t = re.sub(r"[^a-z0-9\s]", " ", t.lower())
     stop = {"attacks", "and", "to", "the", "a", "an", "of", "is", "for", "with", "or", "then"}
     return [w for w in t.split() if w and w not in stop]
 
@@ -66,12 +67,19 @@ def main() -> int:
         dic = dice(ta, tb)
         tjac = trigram_jaccard(ta, tb)
         nc = nomic_map[(pr["a"], pr["b"])]
+        jcos = pr.get("cos")
+        if jcos is None or nc is None:
+            print(
+                f"{pr['a']+'/'+pr['b']:<32} {str(jcos):>6} {str(nc):>6} "
+                f"{jac:6.3f} {dic:6.3f} {tjac:6.3f}  (skip None cos)"
+            )
+            continue
         shared = sorted(set(tokens(ta)) & set(tokens(tb)))
         rows.append(
             {
                 "a": pr["a"],
                 "b": pr["b"],
-                "jina_cos": pr["cos"],
+                "jina_cos": jcos,
                 "nomic_cos": nc,
                 "jaccard": round(jac, 4),
                 "dice": round(dic, 4),
@@ -80,7 +88,7 @@ def main() -> int:
             }
         )
         print(
-            f"{pr['a']+'/'+pr['b']:<32} {pr['cos']:6.3f} {nc:6.3f} "
+            f"{pr['a']+'/'+pr['b']:<32} {jcos:6.3f} {nc:6.3f} "
             f"{jac:6.3f} {dic:6.3f} {tjac:6.3f}"
         )
 

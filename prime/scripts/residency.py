@@ -28,6 +28,7 @@ HEAVY_KEYS = (
 PRESERVE_KEYS = (
     "frankenstein",
     "frankenstein-2.0",
+    "thedrummer/frankenstein",
 )
 
 
@@ -214,7 +215,7 @@ def seamless_substrate(
     *,
     chat_model: str | None = None,
     base: str = "http://127.0.0.1:1234",
-    fiber_mode: str = "scout",
+    fiber_mode: str | None = None,
 ) -> dict[str, Any]:
     """
     One shot: jina ensure + pick/promote chat fiber by mode.
@@ -222,10 +223,15 @@ def seamless_substrate(
     scout:    unload heavies (incl. frankenstein), load small fiber
     preserve: unload everything else, load frankenstein alone
     nomic ensure is optional fallback only — Job1 is jina.
+
+    fiber_mode=None → PRIME_FIBER_MODE env → scout
     """
     import os
 
-    mode = (fiber_mode or os.environ.get("PRIME_FIBER_MODE") or "scout").lower()
+    mode = (fiber_mode if fiber_mode is not None else None) or os.environ.get(
+        "PRIME_FIBER_MODE"
+    ) or "scout"
+    mode = str(mode).lower().strip()
     if mode not in ("scout", "preserve"):
         mode = "scout"
 
@@ -266,6 +272,7 @@ def seamless_substrate(
             # also unload non-heavy chat that is not the preserve model
             from lms_layers import l0_post, l1_catalog
 
+            extra_acts: list[dict[str, Any]] = []
             for m in (l1_catalog(base=base).get("models") or []):
                 key = m.get("key") or ""
                 if key == model or m.get("type") == "embedding":
@@ -275,13 +282,31 @@ def seamless_substrate(
                 for inst in m.get("loaded_instances") or []:
                     iid = inst.get("id")
                     if iid:
-                        l0_post(
+                        r = l0_post(
                             "/api/v1/models/unload",
                             {"instance_id": iid},
                             base=base,
                             timeout=180,
                         )
+                        extra_acts.append(
+                            {
+                                "unload": iid,
+                                "key": key,
+                                "ok": bool(getattr(r, "ok", r) if not isinstance(r, dict) else r.get("ok")),
+                                "err": (
+                                    getattr(r, "error", "")
+                                    if not isinstance(r, dict)
+                                    else (r.get("error") or "")
+                                ),
+                            }
+                        )
+            freed = dict(freed or {})
+            acts = list(freed.get("actions") or []) + extra_acts
+            freed["actions"] = acts
+            freed["n_unloaded"] = sum(1 for a in acts if a.get("ok"))
             out["preserve_freed"] = freed
+            if any(not a.get("ok") for a in extra_acts):
+                out["errors"].append("preserve_unload_partial")
         else:
             # scout: frankenstein is HEAVY — unload_heavies inside promote
             pass
