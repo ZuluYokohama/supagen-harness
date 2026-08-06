@@ -435,8 +435,11 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   "go_no_go": "GO_MEASURE",
   "n_pass": 5,
   "n_warn": 1,
-  "n_fail": 1,
-  "count_rule": "WARN does not increment n_fail",
+  "n_fail": 0,
+  "n_cells": 6,
+  "count_ok": true,
+  "count_rule": "WARN does not increment n_fail; n_pass+n_warn+n_fail==n_cells",
+  "source": "docs/evidence/vv_push_domains_integrity.json",
   "cells": [
     {
       "id": "P1_jina_v5_small",

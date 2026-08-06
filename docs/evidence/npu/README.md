@@ -19,12 +19,12 @@ Slim copies of measured Hexagon HTP proofs. Full ONNX/QDQ weights and full `htp_
 | `../vv_push_domains_integrity.json` | Portable D17 integrity (count_ok, n_warn, cells) |
 | `nli_eval_qdq_vs_cpu.json` | **65-pair nli_eval_v1:** ORT fp32 con_high **0.952** vs QDQ CPU/HTP con_high **0.048** |
 
-**Design law (earned):** NPU is measure fabric; **the gate is CPU**. Verifier cannot be approximated by low-bit QDQ (con_high cliff).
+**Design law (earned):** NPU is **measure fabric only**; **Job2 product gate is CPU ORT/CE permanently**.  
+HTP work is limited to measurement experiments (latency, profile, research). It does **not** replace or approximate the CPU gate. Verifier cannot be low-bit QDQ (con_high 0.95 → 0.05 on `nli_eval_v1`).
 
-**E3 residual (accepted for GO_MEASURE):** label-parity **still FAIL** (must be ≥0.9 for green).  
-Progress: 0/3 invert → **1/4** after calib work; **CPU-EP on same QDQ matches HTP** when `qdq_sha256` matches → residual is **quant geometry**, not Hexagon routing.  
-FP32 ORT CPU on same pairs: **PASS**. Product: `measure_fabric` red cert → HTP refused.  
-Next: QAI Hub / distill student / keep CPU ORT — static calib expansion alone insufficient.
+**E3 residual (accepted for GO_MEASURE):** label-parity **FAIL** (held-out **measured** 1/4 = 0.25).  
+CPU-EP on the same QDQ graph matches HTP miss pattern → residual is **quant geometry**, not Hexagon routing.  
+FP32 ORT CPU: **con_high 0.952**. Product: `measure_fabric` red cert → HTP refused as gate.
 
 **Retention:** keep slim JSON/CSV heads in-repo; regenerate from local state when re-measuring. Full profile: `prime/state/npu/htp_profile.csv` (ignored).
 

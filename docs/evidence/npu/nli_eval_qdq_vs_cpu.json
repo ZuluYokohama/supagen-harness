@@ -1,5 +1,5 @@
 {
-  "eval": "nli_eval_v1.jsonl",
+  "eval": "prime/eval_nli/nli_eval_v1.jsonl",
   "n_eval_file": 65,
   "limit": null,
   "law": "NPU is measure fabric; Job2 gate authority is CPU ORT/CE until E3 green. Design commitment \u2014 not temporary fallback.",
@@ -162,5 +162,14 @@
       ],
       "active_provider": "QNNExecutionProvider"
     }
-  }
+  },
+  "eval_sha256": "19d5c724882cb76666a8db87e8107b6b7ce57d3d6fd6ed5a895e8c627b9e52c4",
+  "fp32_model_id": "cross-encoder/nli-deberta-v3-base",
+  "qdq_sha256": "82e50289cbb6d16a2f361235a89279d71dc790f327aadc26f5f86bf091d28c0d",
+  "qdq_labels": [
+    "contradiction",
+    "entailment",
+    "neutral"
+  ],
+  "qdq_bytes": 296157762
 }

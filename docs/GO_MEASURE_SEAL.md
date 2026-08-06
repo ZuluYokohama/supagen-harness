@@ -4,9 +4,9 @@
 **Branch:** `vv/dual-metric-npu-measure-fabric`  
 **Seal class:** **GO_MEASURE** (instrument advertise)  
 **Not sealed:** production OPEN marketing  
-**HEAD (seal refresh):** `6cb4877`+ on branch; CI must pass `verify_cr_disposition` + offline verify  
-**D17 portable:** `docs/evidence/vv_push_domains_integrity.json`  
-**E3 residual locus:** static QDQ geometry (CPU-EP same graph); product HTP refused  
+**HEAD (content seal):** `e884b7c` (nli_eval QDQ cliff + CPU gate design law); tip must remain ancestor-bound via DOMAIN cert  
+**D17 portable:** `docs/evidence/vv_push_domains_integrity.json` (header counts must match cell recount)  
+**E3 residual locus:** static QDQ geometry (CPU-EP same graph); product HTP refused permanently 
 
 ---
 

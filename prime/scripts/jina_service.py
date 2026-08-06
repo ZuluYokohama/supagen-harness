@@ -332,13 +332,29 @@ def ensure_jina(
                     elif live_pool != want_pool:
                         config_mismatch = True
                     if want_gguf and live_gguf:
-                        wb = Path(want_gguf).name.lower()
-                        lb = Path(live_gguf).name.lower()
-                        if (
-                            wb != lb
-                            and want_gguf not in live_gguf
-                            and live_gguf not in want_gguf
-                        ):
+                        # Identity: same resolved file (or same size+mtime fallback),
+                        # never basename-only or substring path match.
+                        try:
+                            wp = Path(want_gguf).expanduser().resolve()
+                            lp = Path(live_gguf).expanduser().resolve()
+                            same = False
+                            if wp.is_file() and lp.is_file():
+                                try:
+                                    same = wp.samefile(lp)
+                                except OSError:
+                                    same = False
+                                if not same:
+                                    same = (
+                                        wp.stat().st_size == lp.stat().st_size
+                                        and abs(wp.stat().st_mtime - lp.stat().st_mtime)
+                                        < 1.0
+                                        and wp.name.lower() == lp.name.lower()
+                                    )
+                            else:
+                                same = str(wp).lower() == str(lp).lower()
+                            if not same:
+                                config_mismatch = True
+                        except Exception:
                             config_mismatch = True
                     if config_mismatch:
                         force_restart = True

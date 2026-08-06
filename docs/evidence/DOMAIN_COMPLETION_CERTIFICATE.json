@@ -1,8 +1,8 @@
 {
   "artifact": "DOMAIN_COMPLETION_CERTIFICATE",
-  "pr": "https://github.com/ZuluYokohama/supagen-harness/pull/1",
+  "pr": "1",
   "branch": "vv/dual-metric-npu-measure-fabric",
-  "timestamp": "2026-08-06T21:24:22.308492Z",
+  "timestamp": "2026-08-06T21:58:36.414559Z",
   "seal": "GO_MEASURE",
   "production_open": "NO-GO",
   "matrix": {
@@ -19,9 +19,9 @@
     "live": true,
     "measured_count": "21/21",
     "run_id": "contract_live_author_kit",
-    "commit": "b41b1d513905e5bd161e78961ae307c691495707",
-    "tree": "a66ff8e69202e4cc881f1ef42ab74a0f8aeea419",
-    "commit_hint": "b41b1d5",
+    "commit": "e884b7cc19f14f3982823e5dd331c9abd4e1074e",
+    "tree": "15aaba892842fe7b804a98b9841ad98e9b85e4c3",
+    "commit_hint": "e884b7c",
     "evidence_path": "docs/evidence/buddy_l8_live_protocol_run.json",
     "recheck": "law_path_auto_cpu_htp_refuse",
     "job2_force_cpu": true
@@ -29,7 +29,7 @@
   "disposition_verifier": {
     "status": "PASS",
     "command": "python prime/scripts/verify_cr_disposition.py",
-    "checks": "72+"
+    "checks": "78+"
   },
   "job2_auto_ep": "CPUExecutionProvider",
   "htp_refuse": true,
@@ -40,9 +40,10 @@
     "cosine never OPEN",
     "Job2 owns agreement not OPEN",
     "auto never QNN",
-    "HTP only after nli_htp_parity_pass",
+    "NPU = measure fabric only",
+    "Job2 gate = CPU ORT/CE permanently",
     "product nli_ort force_cpu=True"
   ],
-  "head": "b41b1d513905e5bd161e78961ae307c691495707",
+  "head": "e884b7cc19f14f3982823e5dd331c9abd4e1074e",
   "d17_integrity": "docs/evidence/vv_push_domains_integrity.json"
 }

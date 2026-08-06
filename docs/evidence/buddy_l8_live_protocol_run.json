@@ -22,7 +22,7 @@
       "engine": "ort_nli",
       "htp_refused": {
         "ok": false,
-        "path": "C:\\PRIMEdEV-1\\prime\\state\\npu\\nli_htp_parity_cert.json",
+        "path": "prime/state/npu/nli_htp_parity_cert.json",
         "reason": "cert_not_green",
         "age_h": 0.06,
         "hits": 0,

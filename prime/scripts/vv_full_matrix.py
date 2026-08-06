@@ -872,8 +872,19 @@ def d17_push_suite_artifact() -> dict:
         if isinstance(c, dict) and c.get("critical") and c.get("status") == "FAIL"
     ]
     # Prefer recomputed integrity: header ok may be stale — require count_ok + no crit fail
+    # and header n_pass/n_warn/n_fail must match cell recount (anti-stale header).
     header_ok = d.get("ok") is True
-    integrity_ok = bool(d.get("count_ok") is True) and d.get("n_cells") == len(cells)
+    header_counts_match = (
+        d.get("n_pass") == n_pass
+        and d.get("n_warn") == n_warn
+        and d.get("n_fail") == n_fail
+        and d.get("n_cells") == len(cells)
+    )
+    integrity_ok = (
+        bool(d.get("count_ok") is True)
+        and d.get("n_cells") == len(cells)
+        and header_counts_match
+    )
     # Empty/missing cells cannot PASS even if header ok=true
     cells_ok = len(cells) > 0
     # PASS when cells recompute clean; require integrity fields present on artifact
@@ -908,7 +919,8 @@ def d17_push_suite_artifact() -> dict:
             "header_n_fail": d.get("n_fail"),
             "header_n_cells": d.get("n_cells"),
             "header_count_ok": d.get("count_ok"),
-            "count_rule": "recomputed from cells; WARN ≠ n_fail; require artifact count_ok+n_cells",
+            "header_counts_match": header_counts_match,
+            "count_rule": "recomputed from cells; WARN ≠ n_fail; require artifact count_ok+n_cells+header match",
             "cells": [
                 {"id": c.get("id"), "status": c.get("status")}
                 for c in cells

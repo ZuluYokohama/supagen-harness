@@ -23,7 +23,13 @@
 | Parity cert incomplete green | **Fixed** | fail-closed fields: held_out, cpu_fallback=false, no probe_only |
 | Buddy independent_buddy free-form | **Fixed** | requires BUDDY_L8_ATTESTATION=signed:… |
 | LFM in PRESERVE | **Fixed** | LFM fallback scout-only |
-| Evidence user paths | **Fixed** | sanitized + logical IDs |
+| Evidence user paths | **Fixed** | scrub_evidence_paths + disposition host-path scan fail-closed |
+| nli_eval digests / shared QDQ labels | **Fixed** | score_nli_qdq_eval eval_sha256+qdq_sha256+load_qdq_labels |
+| DOMAIN cert HEAD bind | **Fixed** | lineage seal: commit ancestor of HEAD + tree match |
+| README QAI Hub Next | **Fixed** | measure-only law; no product remediation path |
+| Jina GGUF basename match | **Fixed** | samefile / size+mtime identity |
+| Smoke QDQ direct write | **Fixed** | temp + os.replace atomic |
+| D17 header vs cells | **Fixed** | header_counts_match required; published MD match |
 | nomic fallback in jina bakeoff | **Fixed** | family_mismatch reject |
 | ORT probs key case | **Fixed** | normalized |
 | smoke --bench orphan | **Fixed** | argparse + bench |

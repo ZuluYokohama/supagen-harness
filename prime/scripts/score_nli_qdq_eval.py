@@ -2,7 +2,7 @@
 """
 Score nli_eval_v1.jsonl with ORT CPU (fp32 product) vs QDQ (CPU-EP and optional HTP).
 
-Answers two questions before any QAI Hub / distill spend:
+Answers two instrument questions (NPU=measure fabric; Job2 gate=CPU permanently):
   1) Is label_parity_rate measured or a default? (also re-derive from rows)
   2) Is QDQ collapse (one label) or quantization damage (confusion spreads)?
 
@@ -24,6 +24,44 @@ OUT_DIR = ROOT / "docs" / "evidence" / "npu"
 QDQ_DIR = ROOT / "prime" / "state" / "ort_models" / "nli-deberta-v3-base-qdq"
 MAX_LEN = 128
 LABELS = ("contradiction", "entailment", "neutral")
+FP32_MODEL_ID = "cross-encoder/nli-deberta-v3-base"
+
+
+def load_qdq_labels() -> list[str]:
+    """Shared label map from QDQ export meta (CPU-EP and HTP must match)."""
+    meta_p = QDQ_DIR / "meta.json"
+    labels = list(LABELS)
+    if meta_p.is_file():
+        try:
+            meta = json.loads(meta_p.read_text(encoding="utf-8"))
+            if meta.get("labels"):
+                labels = [str(x).lower() for x in meta["labels"]]
+        except Exception:
+            pass
+    return labels
+
+
+def normalize_nli_label(lab: str) -> str:
+    lab = (lab or "").lower()
+    if "contrad" in lab:
+        return "contradiction"
+    if "entail" in lab:
+        return "entailment"
+    if "neutral" in lab:
+        return "neutral"
+    return lab if lab in LABELS else lab
+
+
+def file_sha256(path: Path) -> str | None:
+    import hashlib
+
+    if not path.is_file():
+        return None
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def load_eval(path: Path) -> list[dict[str, Any]]:
@@ -104,16 +142,11 @@ def make_qdq_predict(path: Path, providers: list[str]) -> Callable[[str, str], d
     import onnxruntime as ort
     from transformers import AutoTokenizer
 
-    tok = AutoTokenizer.from_pretrained("cross-encoder/nli-deberta-v3-base")
+    tok = AutoTokenizer.from_pretrained(FP32_MODEL_ID)
     so = ort.SessionOptions()
     sess = ort.InferenceSession(str(path), so, providers=providers)
     names = {i.name for i in sess.get_inputs()}
-    meta_p = QDQ_DIR / "meta.json"
-    labels = list(LABELS)
-    if meta_p.is_file():
-        meta = json.loads(meta_p.read_text(encoding="utf-8"))
-        if meta.get("labels"):
-            labels = [str(x).lower() for x in meta["labels"]]
+    labels = load_qdq_labels()
 
     def pred(prem: str, hyp: str) -> dict[str, Any]:
         enc = tok(
@@ -138,13 +171,7 @@ def make_qdq_predict(path: Path, providers: list[str]) -> Callable[[str, str], d
         ex = np.exp(logits - logits.max())
         probs = ex / ex.sum()
         i = int(probs.argmax())
-        lab = labels[i] if i < len(labels) else str(i)
-        if "contrad" in lab:
-            lab = "contradiction"
-        elif "entail" in lab:
-            lab = "entailment"
-        elif "neutral" in lab:
-            lab = "neutral"
+        lab = normalize_nli_label(labels[i] if i < len(labels) else str(i))
         return {
             "pred": lab,
             "conf": round(float(probs[i]), 4),
@@ -215,13 +242,16 @@ def main() -> int:
 
     pairs = load_eval(Path(args.eval))
     limit = args.limit or None
+    eval_path = Path(args.eval)
     report: dict[str, Any] = {
-        "eval": str(args.eval),
+        "eval": "prime/eval_nli/nli_eval_v1.jsonl",
+        "eval_sha256": file_sha256(eval_path),
+        "fp32_model_id": FP32_MODEL_ID,
         "n_eval_file": len(pairs),
         "limit": limit,
         "law": (
-            "NPU is measure fabric; Job2 gate authority is CPU ORT/CE until E3 "
-            "green. Design commitment — not temporary fallback."
+            "NPU is measure fabric; Job2 gate authority is CPU ORT/CE permanently. "
+            "Design commitment — not temporary fallback."
         ),
         "arms": {},
     }
@@ -244,8 +274,11 @@ def main() -> int:
     qdq = QDQ_DIR / "model.qdq.aui16_wui8.onnx"
     if not qdq.is_file():
         qdq = QDQ_DIR / "model.qdq.onnx"
-    report["qdq_path"] = str(qdq).replace("\\", "/")
+    report["qdq_path"] = "prime/state/ort_models/nli-deberta-v3-base-qdq/" + qdq.name
     report["qdq_exists"] = qdq.is_file()
+    report["qdq_sha256"] = file_sha256(qdq) if qdq.is_file() else None
+    report["qdq_bytes"] = qdq.stat().st_size if qdq.is_file() else None
+    report["qdq_labels"] = load_qdq_labels()
 
     if qdq.is_file():
         print("2) QDQ on CPU EP (quant isolation)…", flush=True)
@@ -288,11 +321,9 @@ def main() -> int:
                     import numpy as np
                     from transformers import AutoTokenizer
 
-                    tok = AutoTokenizer.from_pretrained(
-                        "cross-encoder/nli-deberta-v3-base"
-                    )
+                    tok = AutoTokenizer.from_pretrained(FP32_MODEL_ID)
                     names = {i.name for i in sess.get_inputs()}
-                    labels = list(LABELS)
+                    labels = load_qdq_labels()
 
                     def pred_htp(prem: str, hyp: str) -> dict[str, Any]:
                         enc = tok(
@@ -319,7 +350,9 @@ def main() -> int:
                         ex = np.exp(logits - logits.max())
                         probs = ex / ex.sum()
                         i = int(probs.argmax())
-                        lab = labels[i] if i < len(labels) else str(i)
+                        lab = normalize_nli_label(
+                            labels[i] if i < len(labels) else str(i)
+                        )
                         return {
                             "pred": lab,
                             "conf": round(float(probs[i]), 4),

@@ -110,25 +110,52 @@ def build_and_quantize() -> dict:
             weight_type=QuantType.QUInt8,
         )
         # Single pass: get_qnn_qdq_config → quantize() (do not pre-write via quantize_static)
+        # Write to temp then rename so an interrupted run cannot leave a truncated QDQ.
         from onnxruntime.quantization import quantize
+        import os
+        import tempfile
 
         reader.rewind()
-        quantize(src, str(qdq_path), cfg)
+        fd, tmp_name = tempfile.mkstemp(suffix=".qdq.onnx", dir=str(STATE))
+        os.close(fd)
+        tmp_path = Path(tmp_name)
+        try:
+            quantize(src, str(tmp_path), cfg)
+            os.replace(str(tmp_path), str(qdq_path))
+        except Exception:
+            try:
+                tmp_path.unlink(missing_ok=True)
+            except Exception:
+                pass
+            raise
         method = "qnn_qdq_config"
     except Exception as e1:
         # fallback classic static quant
         try:
             from onnxruntime.quantization import QuantFormat
+            import os
+            import tempfile
 
             reader = Reader()
-            quantize_static(
-                str(fp_path),
-                str(qdq_path),
-                reader,
-                quant_format=QuantFormat.QDQ,
-                activation_type=QuantType.QUInt8,
-                weight_type=QuantType.QUInt8,
-            )
+            fd, tmp_name = tempfile.mkstemp(suffix=".qdq.onnx", dir=str(STATE))
+            os.close(fd)
+            tmp_path = Path(tmp_name)
+            try:
+                quantize_static(
+                    str(fp_path),
+                    str(tmp_path),
+                    reader,
+                    quant_format=QuantFormat.QDQ,
+                    activation_type=QuantType.QUInt8,
+                    weight_type=QuantType.QUInt8,
+                )
+                os.replace(str(tmp_path), str(qdq_path))
+            except Exception:
+                try:
+                    tmp_path.unlink(missing_ok=True)
+                except Exception:
+                    pass
+                raise
             method = f"quantize_static_fallback after {e1}"
         except Exception as e2:
             return {

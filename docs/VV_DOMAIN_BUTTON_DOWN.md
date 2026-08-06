@@ -4,7 +4,8 @@
 **Branch:** `vv/dual-metric-npu-measure-fabric`  
 **Seal:** **`docs/GO_MEASURE_SEAL.md`** — dual-metric instrument law **GO_MEASURE**  
 **CI:** `verify-offline` green  
-**Matrix:** 18/18 PASS · live contract 21/21 · disposition 72/72 · HEAD `6cb4877`+  
+**Matrix:** 18/18 PASS · live contract 21/21 · disposition 84/84 · content seal `e884b7c`+  
+ 
 
 ---
 

@@ -157,6 +157,23 @@ def main() -> int:
         in t("prime/scripts/npu_nli_qdq.py")
         or '"uint16"' in t("prime/scripts/npu_nli_qdq.py")
         and "default uint16" in t("prime/scripts/npu_nli_qdq.py"),
+        "score_eval_digests": "eval_sha256" in t("prime/scripts/score_nli_qdq_eval.py")
+        and "qdq_sha256" in t("prime/scripts/score_nli_qdq_eval.py")
+        and "fp32_model_id" in t("prime/scripts/score_nli_qdq_eval.py"),
+        "score_shared_qdq_labels": "load_qdq_labels" in t(
+            "prime/scripts/score_nli_qdq_eval.py"
+        )
+        and "normalize_nli_label" in t("prime/scripts/score_nli_qdq_eval.py"),
+        "jina_gguf_samefile": "samefile" in t("prime/scripts/jina_service.py"),
+        "smoke_qdq_atomic_replace": "os.replace" in t("prime/scripts/npu_qnn_smoke.py")
+        and "mkstemp" in t("prime/scripts/npu_qnn_smoke.py"),
+        "d17_header_counts_match": "header_counts_match" in t(
+            "prime/scripts/vv_full_matrix.py"
+        ),
+        "nli_eval_report_digests": '"eval_sha256"'
+        in t("docs/evidence/npu/nli_eval_qdq_vs_cpu.json")
+        and '"qdq_sha256"' in t("docs/evidence/npu/nli_eval_qdq_vs_cpu.json"),
+        "no_qai_hub_next": "QAI Hub" not in t("docs/evidence/npu/README.md"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---
@@ -320,8 +337,24 @@ def main() -> int:
                 and art.get("count_ok") is True
             )
             runtime["runtime_d17_portable_integrity"] = ok_status and header_match
+            # Published VV_RUN_RESULTS D17 must not contradict portable artifact
+            try:
+                md = (ROOT / "docs/VV_RUN_RESULTS.md").read_text(
+                    encoding="utf-8", errors="replace"
+                )
+                pub_ok = (
+                    "D17_push_suite" in md
+                    and "**PASS**" in md
+                    and f'"n_pass": {n_pass}' in md
+                    and f'"n_warn": {n_warn}' in md
+                    and f'"n_fail": {n_fail}' in md
+                )
+                runtime["runtime_d17_published_match"] = pub_ok and header_match
+            except Exception:
+                runtime["runtime_d17_published_match"] = False
     except Exception as e:
         runtime["runtime_d17_portable_integrity"] = False
+        runtime["runtime_d17_published_match"] = False
         print("runtime d17 portable error:", e)
 
     try:
@@ -334,9 +367,60 @@ def main() -> int:
         runtime["runtime_cert_structured"] = isinstance(cl, dict) and bool(
             cl.get("measured_count")
         ) and bool(cl.get("evidence_path"))
+        # Content seal: 40-char commit on lineage, tree matches that commit's tree.
+        # Allows a follow-up pin commit; cert seals measured content (ancestor of HEAD).
+        import subprocess
+
+        head = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=str(ROOT), text=True
+        ).strip()
+        cert_commit = str(cl.get("commit") or cert.get("head") or "")
+        cert_tree = str(cl.get("tree") or "")
+        bound = False
+        if len(cert_commit) == 40 and len(cert_tree) == 40:
+            try:
+                sealed_tree = subprocess.check_output(
+                    ["git", "rev-parse", f"{cert_commit}^{{tree}}"],
+                    cwd=str(ROOT),
+                    text=True,
+                    stderr=subprocess.DEVNULL,
+                ).strip()
+                anc = subprocess.call(
+                    ["git", "merge-base", "--is-ancestor", cert_commit, head],
+                    cwd=str(ROOT),
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                bound = sealed_tree == cert_tree and anc == 0
+            except Exception:
+                bound = False
+        runtime["runtime_cert_bound_to_head"] = bound
     except Exception as e:
         runtime["runtime_cert_structured"] = False
+        runtime["runtime_cert_bound_to_head"] = False
         print("runtime cert error:", e)
+
+    # Scan tracked evidence for host-specific paths
+    try:
+        import re
+
+        host_re = re.compile(r"[A-Za-z]:[\\/]|/Users/|/home/")
+        bad: list[str] = []
+        ev = ROOT / "docs" / "evidence"
+        for p in ev.rglob("*"):
+            if p.suffix.lower() not in {".json", ".md", ".txt"}:
+                continue
+            try:
+                if host_re.search(p.read_text(encoding="utf-8", errors="replace")):
+                    bad.append(str(p.relative_to(ROOT)))
+            except Exception:
+                continue
+        runtime["runtime_evidence_no_host_paths"] = len(bad) == 0
+        if bad:
+            print("host_paths_remain", bad[:12])
+    except Exception as e:
+        runtime["runtime_evidence_no_host_paths"] = False
+        print("runtime evidence scan error:", e)
 
     checks.update(runtime)
     miss = [k for k, v in checks.items() if not v]
