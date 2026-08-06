@@ -114,8 +114,14 @@ validate_held_out_disjoint()
 
 
 def export_fixed() -> dict[str, Any]:
-    import torch
-    from transformers import AutoModelForSequenceClassification, AutoTokenizer
+    try:
+        import torch
+        from transformers import AutoModelForSequenceClassification, AutoTokenizer
+    except ImportError as e:
+        raise ImportError(
+            "npu_nli_qdq.export_fixed requires torch + transformers "
+            "(measure path only; not a product Job2 dependency)"
+        ) from e
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     fp = OUT_DIR / "model_fp32_fixed.onnx"

@@ -848,6 +848,15 @@ def run_all() -> dict:
         d16_kb_family_1024,
         d17_push_suite_artifact,
     ]
+    # Soft (non-critical) domains — exception must not promote to critical FAIL
+    soft_critical_false = {
+        "d1_job1_aboutness",  # partial range paths
+        "d8_npu_status",
+        "d12_ort_nli",
+        "d7_supagen_contract",
+        "d16_push_domains",
+        "d17_push_count",
+    }
     results = []
     for fn in cells:
         name = fn.__name__
@@ -855,7 +864,10 @@ def run_all() -> dict:
         try:
             results.append(fn())
         except Exception as e:
-            results.append(_gate(name, False, {"error": str(e)[:400]}))
+            crit = getattr(fn, "vv_critical", name not in soft_critical_false)
+            results.append(
+                _gate(name, False, {"error": str(e)[:400]}, critical=bool(crit))
+            )
         print(f"  → {results[-1]['status']}", flush=True)
 
     critical = [r for r in results if r.get("critical")]

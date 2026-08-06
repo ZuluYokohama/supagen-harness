@@ -272,7 +272,9 @@ def main() -> int:
         try:
             c = fn()
         except Exception as e:
-            c = gate(fn.__name__, False, {"error": str(e)[:400]})
+            # Preserve per-probe criticality (p6 residual is non-critical)
+            crit = getattr(fn, "vv_critical", fn.__name__ != "p6_qnn_probe")
+            c = gate(fn.__name__, False, {"error": str(e)[:400]}, critical=bool(crit))
         cells.append(c)
         print(f"  → {c['status']}", flush=True)
 
