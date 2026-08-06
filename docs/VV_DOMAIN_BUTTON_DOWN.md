@@ -68,7 +68,7 @@ This sheet buttons down every domain of relevance. Status = author measures + st
 
 Follow-up also: atomic truth_plane JSON, accel 60s cache, jina live meta, npu register via devices.
 
-### HEAD re-review batch (post-7c5835c)
+### HEAD re-review batches (post-7c5835c → fb39f7f)
 
 | Theme | Action |
 |-------|--------|
@@ -80,7 +80,11 @@ Follow-up also: atomic truth_plane JSON, accel 60s cache, jina live meta, npu re
 | ORT probs key case | **Fixed** — normalized labels |
 | D17 n_fail counts WARN | **Fixed** — n_warn separate; WARN ∉ n_fail |
 | htp→ort prefer before E3 | **Fixed** — docs order ort→ce→lfm until parity |
-| evidence user paths | **Fixed** — sanitized docs/evidence/npu/*.json |
+| evidence user paths | **Fixed** — sanitized evidence + logical status IDs |
+| **Job2 owns OPEN (Critical)** | **Fixed** — `owns_open_gate=false`; D0 rejects true |
+| Job2 prefer NPU diagram | **Fixed** — CPU authority; HTP iff E3 |
+| smoke register duplicate | **Fixed** — delegates `npu_qnn.register` |
+| asymmetric glue strip | **Fixed** — both stalks cleaned |
 
 ## Hard residuals (do not paper over)
 
