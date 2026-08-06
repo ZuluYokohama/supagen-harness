@@ -367,8 +367,10 @@ def main() -> int:
         runtime["runtime_cert_structured"] = isinstance(cl, dict) and bool(
             cl.get("measured_count")
         ) and bool(cl.get("evidence_path"))
-        # Content seal: 40-char commit on lineage, tree matches that commit's tree.
-        # Allows a follow-up pin commit; cert seals measured content (ancestor of HEAD).
+        # Content seal: 40-char commit on lineage; tree matches when object exists.
+        # Full history: sealed commit is ancestor of HEAD + tree match.
+        # Shallow CI: accept HEAD or first-parent SHA when objects missing.
+        import re
         import subprocess
 
         head = subprocess.check_output(
@@ -377,21 +379,49 @@ def main() -> int:
         cert_commit = str(cl.get("commit") or cert.get("head") or "")
         cert_tree = str(cl.get("tree") or "")
         bound = False
-        if len(cert_commit) == 40 and len(cert_tree) == 40:
+        if re.fullmatch(r"[0-9a-f]{40}", cert_commit) and re.fullmatch(
+            r"[0-9a-f]{40}", cert_tree
+        ):
             try:
-                sealed_tree = subprocess.check_output(
-                    ["git", "rev-parse", f"{cert_commit}^{{tree}}"],
+                sealed = subprocess.run(
+                    ["git", "rev-parse", "--verify", f"{cert_commit}^{{tree}}"],
                     cwd=str(ROOT),
                     text=True,
-                    stderr=subprocess.DEVNULL,
-                ).strip()
-                anc = subprocess.call(
-                    ["git", "merge-base", "--is-ancestor", cert_commit, head],
-                    cwd=str(ROOT),
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
+                    capture_output=True,
+                    check=False,
                 )
-                bound = sealed_tree == cert_tree and anc == 0
+                if sealed.returncode == 0:
+                    sealed_tree = sealed.stdout.strip()
+                    if sealed_tree == cert_tree:
+                        anc = subprocess.call(
+                            [
+                                "git",
+                                "merge-base",
+                                "--is-ancestor",
+                                cert_commit,
+                                head,
+                            ],
+                            cwd=str(ROOT),
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                        )
+                        bound = anc == 0 or cert_commit == head
+                else:
+                    # Shallow clone: sealed objects absent — HEAD or first parent only
+                    if cert_commit == head:
+                        bound = True
+                    else:
+                        par = subprocess.run(
+                            ["git", "rev-parse", "--verify", "HEAD^"],
+                            cwd=str(ROOT),
+                            text=True,
+                            capture_output=True,
+                            check=False,
+                        )
+                        bound = (
+                            par.returncode == 0
+                            and par.stdout.strip() == cert_commit
+                        )
             except Exception:
                 bound = False
         runtime["runtime_cert_bound_to_head"] = bound
