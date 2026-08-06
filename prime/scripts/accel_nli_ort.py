@@ -134,16 +134,28 @@ def _providers() -> list[str]:
 
 def load_session(*, force_cpu: bool = False) -> dict[str, Any]:
     global _SESSION, _META, _TOK
-    if force_cpu:
-        _SESSION = None  # drop DML session
+    # Reuse cached session when it already matches the requested EP class
     if _SESSION is not None:
-        return {
-            "ok": True,
-            "cached": True,
-            "providers": _SESSION.get_providers(),
-            "meta": _META,
-            "active_provider": (_SESSION.get_providers() or [None])[0],
-        }
+        active = (_SESSION.get_providers() or [None])[0]
+        is_cpu = active == "CPUExecutionProvider"
+        if force_cpu and is_cpu:
+            return {
+                "ok": True,
+                "cached": True,
+                "providers": _SESSION.get_providers(),
+                "meta": _META,
+                "active_provider": active,
+            }
+        if not force_cpu and not is_cpu:
+            return {
+                "ok": True,
+                "cached": True,
+                "providers": _SESSION.get_providers(),
+                "meta": _META,
+                "active_provider": active,
+            }
+        # EP class mismatch — drop and rebuild
+        _SESSION = None
     if not ONNX_PATH.is_file() or not META_PATH.is_file():
         exp = export()
         if not exp.get("ok"):

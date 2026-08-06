@@ -118,6 +118,16 @@ def main() -> int:
         "dual_enter_passes_fiber": "fiber_mode=mode" in t("prime/scripts/dual_enter.py"),
         "held_out_neutral": '"neutral"' in t("prime/scripts/npu_nli_qdq.py")
         and "labels_covered" in t("prime/scripts/npu_nli_qdq.py"),
+        "soft_critical_fn_names": '"d1_aboutness"' in t("prime/scripts/vv_full_matrix.py")
+        and '"d8_accel_npu"' in t("prime/scripts/vv_full_matrix.py")
+        and '"d1_job1_aboutness"' not in t("prime/scripts/vv_full_matrix.py"),
+        "d15_freshness": "freshness_required" in t("prime/scripts/vv_full_matrix.py"),
+        "ort_session_reuse": "EP class mismatch" in t("prime/scripts/accel_nli_ort.py"),
+        "intent_self_symmetric": '"hypothesis": self_text' in t("prime/scripts/truth_plane.py"),
+        "hexagon_present_not_hardcoded": (
+            '"present": None' in t("prime/scripts/truth_plane.py")
+            or "present_note" in t("prime/scripts/truth_plane.py")
+        ),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---

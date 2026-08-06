@@ -136,7 +136,9 @@ def architecture_map() -> dict[str, Any]:
             "note": "agreement measure only; production OPEN needs domain audit + cert_face",
         },
         "npu_hexagon": {
-            "present": "Snapdragon X Plus Hexagon",
+            # Do not assert silicon without probe — see accel_status().hexagon_npu
+            "present": None,
+            "present_note": "unknown until accel_status / npu_qnn.register; host-specific",
             "used_today": "measure fabric (HTP QDQ stress/smoke); not product NLI",
             "path": "onnxruntime-qnn plugin + QDQ graphs; CPU ORT/CE = agreement authority; E3 parity required for HTP Job2",
             "run_id": "npu-htp-2026-08-06",
@@ -334,13 +336,14 @@ def _claims_from_card(card: dict[str, Any], prompt: str) -> list[dict[str, str]]
         hyp = strip_envelope(o.get("parsed") or o.get("raw") or o.get("content") or "")
         if hyp and len(hyp.strip()) >= 20:
             claims.append({"id": f"role:{role}", "premise": intent, "hypothesis": hyp[:800]})
-    # also intent vs self-paraphrase guard (should entail)
+    # intent vs self-identity guard — same stalk both sides (no asymmetric truncate)
     if intent:
+        self_text = intent[:800]
         claims.append(
             {
                 "id": "intent_self",
-                "premise": intent,
-                "hypothesis": intent[:500],
+                "premise": self_text,
+                "hypothesis": self_text,
                 "expect": "entailment",
             }
         )
@@ -378,9 +381,13 @@ def truth_loop(
             hyp = c.get("hypothesis") or ""
             one = nli_cross_encoder(prem, hyp)
             mut = mutual_entailment(prem, hyp)
+            expect = c.get("expect")
+            expect_hit = (one.get("label") == expect) if expect else None
             row = {
                 "id": c.get("id"),
                 "round": rnd,
+                "expect": expect,
+                "expect_hit": expect_hit,
                 "one_way": {
                     "label": one.get("label"),
                     "confidence": one.get("confidence"),
@@ -392,12 +399,14 @@ def truth_loop(
                     "ab": mut.get("ab"),
                     "ba": mut.get("ba"),
                 },
-                "expect": c.get("expect"),
             }
             # precision domains: contradiction or non-agree → residue
+            # honor explicit expect: miss → RESIDUE (never demote OPEN solely on self-id noise)
             if mut.get("gate") == "STOP" or one.get("label") == "contradiction":
                 row["disposition"] = "STOP"
-            elif mut.get("agrees"):
+            elif expect and expect_hit is False:
+                row["disposition"] = "RESIDUE"
+            elif mut.get("agrees") or expect_hit is True:
                 row["disposition"] = "AGREE_MEASURE"  # not production OPEN
             else:
                 row["disposition"] = "RESIDUE"

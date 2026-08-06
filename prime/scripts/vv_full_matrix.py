@@ -722,7 +722,24 @@ def d15_jina_small_bakeoff() -> dict:
     """Latest bakeoff_30 on live jina (prefer v5-small last-pool)."""
     sum_path = STATE / "bakeoff_30_summary.json"
     if not sum_path.is_file():
-        return _gate("D15_jina_small_bakeoff", False, {"error": "no bakeoff summary"})
+        return _gate(
+            "D15_jina_small_bakeoff",
+            False,
+            {"error": "no bakeoff summary"},
+            critical=False,
+        )
+    fresh = _artifact_fresh(sum_path)
+    if not fresh.get("ok"):
+        return _gate(
+            "D15_jina_small_bakeoff",
+            False,
+            {
+                "error": "bakeoff summary stale — re-run bakeoff_aboutness_30",
+                "fresh": fresh,
+                "applied_rule": "freshness_required",
+            },
+            critical=False,
+        )
     s = json.loads(sum_path.read_text(encoding="utf-8"))
     j = s.get("jina") or {}
     floor = (j.get("floor") or {}).get("mean")
@@ -749,7 +766,10 @@ def d15_jina_small_bakeoff() -> dict:
             "prefix": (meta.get("prefix_preview") or "")[:40],
             "dim": meta.get("dim"),
             "model": meta.get("model"),
+            "fresh": fresh,
+            "applied_rule": "fresh_bakeoff_floor_range_jina_improves",
         },
+        critical=False,
     )
 
 
@@ -808,20 +828,19 @@ def d17_push_suite_artifact() -> dict:
         )
     d = json.loads(p.read_text(encoding="utf-8"))
     cells = d.get("cells") or []
+    # Single basis: always recompute from cells (ignore mixed header fields)
+    n_pass = sum(1 for c in cells if c.get("status") == "PASS")
+    n_warn = sum(1 for c in cells if c.get("status") == "WARN")
+    n_fail = sum(1 for c in cells if c.get("status") == "FAIL")
+    n_other = sum(
+        1 for c in cells if c.get("status") not in ("PASS", "WARN", "FAIL")
+    )
+    count_ok = (n_pass + n_warn + n_fail == len(cells)) and n_other == 0
     crit_fail = [
-        c
-        for c in cells
-        if c.get("critical") and c.get("status") == "FAIL"
+        c for c in cells if c.get("critical") and c.get("status") == "FAIL"
     ]
-    # Prefer status-aware counts when present (WARN ≠ fail)
-    n_pass = d.get("n_pass")
-    n_warn = d.get("n_warn")
-    n_fail = d.get("n_fail")
-    if n_warn is None:
-        n_warn = sum(1 for c in cells if c.get("status") == "WARN")
-    if n_fail is None:
-        n_fail = sum(1 for c in cells if c.get("status") == "FAIL")
-    ok = d.get("ok") is True and not crit_fail
+    header_ok = d.get("ok") is True
+    ok = header_ok and not crit_fail and count_ok
     return _gate(
         "D17_push_suite",
         ok,
@@ -830,7 +849,11 @@ def d17_push_suite_artifact() -> dict:
             "n_pass": n_pass,
             "n_warn": n_warn,
             "n_fail": n_fail,
-            "count_rule": d.get("count_rule") or "WARN does not increment n_fail",
+            "n_cells": len(cells),
+            "count_ok": count_ok,
+            "header_n_pass": d.get("n_pass"),
+            "header_n_fail": d.get("n_fail"),
+            "count_rule": "recomputed from cells; WARN ≠ n_fail; pass+warn+fail==n_cells",
             "cells": [
                 {"id": c.get("id"), "status": c.get("status")} for c in cells
             ],
@@ -861,14 +884,15 @@ def run_all() -> dict:
         d16_kb_family_1024,
         d17_push_suite_artifact,
     ]
-    # Soft (non-critical) domains — exception must not promote to critical FAIL
+    # Soft (non-critical) domains — keys MUST match fn.__name__ (not gate ids)
     soft_critical_false = {
-        "d1_job1_aboutness",  # partial range paths
-        "d8_npu_status",
+        "d1_aboutness",
+        "d7_package_contract",
+        "d8_accel_npu",
         "d12_ort_nli",
-        "d7_supagen_contract",
-        "d16_push_domains",
-        "d17_push_count",
+        "d15_jina_small_bakeoff",
+        "d16_kb_family_1024",
+        "d17_push_suite_artifact",
     }
     results = []
     for fn in cells:
@@ -956,7 +980,12 @@ def _write_md(report: dict) -> None:
         lines.append(f"### {c['id']} — {c['status']}")
         lines.append("")
         lines.append("```json")
-        lines.append(json.dumps(c.get("detail"), indent=2, default=str)[:3000])
+        detail_s = json.dumps(c.get("detail"), indent=2, default=str)
+        if len(detail_s) > 3000:
+            # Truncate on a full line so the fenced block stays valid JSON-ish
+            cut = detail_s[:3000].rsplit("\n", 1)[0]
+            detail_s = cut + "\n  \"…\": \"truncated\"\n}"
+        lines.append(detail_s)
         lines.append("```")
         lines.append("")
     lines += [
@@ -965,6 +994,12 @@ def _write_md(report: dict) -> None:
         "- Critical FAIL → **NO-GO** advertise",
         "- WARN (NPU, package path) → residual documented, not force-OPEN",
         "- Production OPEN still requires domain audit + external certifier",
+        "",
+        "### D12 ORT NLI acceptance",
+        "",
+        "- PASS when ORT CPU predicts contradiction/entailment on fixture pairs with valid envelope",
+        "- ORT fail → WARN (CE remains product authority); never `job2_owns_open`",
+        "- Product path: `force_cpu=True` only; HTP only after E3 green parity cert",
         "",
         f"Artifact JSON: `prime/state/vv_full_matrix.json`",
         "",

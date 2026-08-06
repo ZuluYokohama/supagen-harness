@@ -320,13 +320,22 @@ def nli_cross_encoder(
                 for j in range(3)
             }
         elif s.size == 1:
-            conf = float(1 / (1 + np.exp(-s[0])))
-            label = (
-                "entailment"
-                if conf > 0.55
-                else ("contradiction" if conf < ONEWAY_P else "neutral")
-            )
-            probs = {label: round(conf, 4)}
+            # Single-logit: sigmoid p(entail); thresholds coupled to ONEWAY_P only
+            p_ent = float(1 / (1 + np.exp(-s[0])))
+            if p_ent >= ONEWAY_P:
+                label = "entailment"
+                conf = p_ent
+            elif p_ent <= (1.0 - ONEWAY_P):
+                label = "contradiction"
+                conf = 1.0 - p_ent
+            else:
+                label = "neutral"
+                conf = 1.0 - abs(2.0 * p_ent - 1.0)  # distance from 0.5
+            probs = {
+                "entailment": round(p_ent, 4),
+                "contradiction": round(1.0 - p_ent, 4),
+                "neutral": round(max(0.0, 1.0 - abs(2.0 * p_ent - 1.0)), 4),
+            }
             label_source = label_source + "+single_logit"
         else:
             return {

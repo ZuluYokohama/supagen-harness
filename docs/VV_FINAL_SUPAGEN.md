@@ -132,8 +132,8 @@ All runs store: timestamp, free_gb, loaded models+ctx, git SHA, OS.
 | L1-06 | ctx policy tiers | free=8 sim: LFM≥32k, Ministral≥16k | unit contract |
 | L1-07 | Free RAM gate | Attempt 12B alone when free&lt;2GB | fail soft or half-ctx, no crash |
 
-**Critical defect to close in implementation before advertise:**  
-`seamless_substrate` currently treats frankenstein as **heavy** and unloads it. V&V L1-04 **fails** until modes are explicit (`--mode scout|preserve`).
+**Historical note (closed on branch `vv/dual-metric-npu-measure-fabric`):**  
+Earlier draft text claimed L1-04 fails until `--mode scout|preserve` ships. **Implemented:** `supagen ensure --mode scout|preserve`, `seamless_substrate(fiber_mode=…)`, SCOUT unloads frankenstein HEAVY, PRESERVE measures alone-residency. Treat this paragraph as archive, not open defect.
 
 ### L2 — Job1 aboutness instrument
 
@@ -292,7 +292,7 @@ These are **not optional polish** — they block L8.
 
 | Gap | Why V&V fails | Fix before advertise |
 |-----|---------------|----------------------|
-| No `--mode scout\|preserve` | frankenstein unloaded by default ensure | CLI + residency keep list |
+| ~~No `--mode scout\|preserve`~~ **CLOSED** | was: frankenstein unloaded by default | `supagen ensure --mode` + residency PRESERVE_KEYS |
 | Docs still imply LFM is “the” fiber | Reputation: LFM p=0.29 | Capacity sheet + README roles |
 | Harness golden may need sandbox data | Offline buddy without 123abc dumps | Ship minimal golden fixtures in-repo (done partially) or document optional |
 | Live V&V needs jina GGUF | Job1 offline without GGUF is partial | Document PRIME_JINA_GGUF; ship download pointer |
@@ -378,11 +378,11 @@ Aggregate into `docs/HOLONOMY_CAPACITY.md` + `supagen/state/MEASURED.json` + run
 
 ## 10. Immediate next engineering (ordered)
 
-1. **Ship `--mode scout|preserve`** (or ensure flags) so frankenstein stays loaded when intended.  
+1. ~~**Ship `--mode scout|preserve`**~~ **DONE** (`supagen ensure --mode`).  
 2. **Freeze capacity sheet** with LFM p=0.29, FRK p=0.88, gemma 0.38.  
 3. **Run P1–P3** under this plan; archive logs.  
 4. **Independent buddy clone** of `https://github.com/ZuluYokohama/supagen-harness`.  
-5. **Go/No-Go meeting** with this checklist — no soft launch.
+5. **Go/No-Go meeting** with this checklist — no soft launch. (Instrument law = GO_MEASURE; production OPEN = NO-GO.)
 
 ---
 
