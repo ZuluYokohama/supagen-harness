@@ -128,6 +128,13 @@ def main() -> int:
             '"present": None' in t("prime/scripts/truth_plane.py")
             or "present_note" in t("prime/scripts/truth_plane.py")
         ),
+        "cpu_qdq_isolation": "run_cpu_qdq" in t("prime/scripts/npu_nli_qdq.py")
+        and "static_qdq_geometry" in t("prime/scripts/npu_nli_qdq.py"),
+        "e3_quant_not_htp": "static QDQ of DeBERTa" in t(
+            "docs/RESIDUAL_ACCEPTANCE_E3.md"
+        )
+        or "quant, not HTP" in t("docs/RESIDUAL_ACCEPTANCE_E3.md").lower()
+        or "CPU EP" in t("docs/RESIDUAL_ACCEPTANCE_E3.md"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---

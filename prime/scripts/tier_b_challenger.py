@@ -92,8 +92,11 @@ def run_nli(texts: dict[str, str]) -> dict:
     rows = []
     # Negation: expect contradiction (or at least not mutual agree)
     for a, b in NEGATION_PAIRS:
-        ab = nli_cross_encoder(texts[a], texts[b])
         mut = mutual_entailment(texts[a], texts[b])
+        # Reuse mutual's ab (same engine) — avoid double one-way CE
+        ab = mut.get("ab") if isinstance(mut.get("ab"), dict) else nli_cross_encoder(
+            texts[a], texts[b]
+        )
         rows.append(
             {
                 "kind": "negation",
@@ -120,8 +123,10 @@ def run_nli(texts: dict[str, str]) -> dict:
         )
     # Adversarial twins: expect contradiction / STOP, never mutual agree
     for a, b in ADVERSARIAL_PAIRS:
-        ab = nli_cross_encoder(texts[a], texts[b])
         mut = mutual_entailment(texts[a], texts[b])
+        ab = mut.get("ab") if isinstance(mut.get("ab"), dict) else nli_cross_encoder(
+            texts[a], texts[b]
+        )
         rows.append(
             {
                 "kind": "adversarial",

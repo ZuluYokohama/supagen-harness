@@ -20,7 +20,7 @@
 | **D5 cert_face / dual_enter** | **SEALED** | force-OPEN → NEED_INFO/STOP |
 | **D6 Identity holonomy** | **SEALED** | measured floors |
 | **D7 Package / contract** | **SEALED** | offline+live; CI schema-only |
-| **D8 NPU / Hexagon** | **SEALED + residual** | path live; E3 accepted; HTP refuse measured |
+| **D8 NPU / Hexagon** | **SEALED + residual** | path live; E3 accepted; HTP refuse; **CPU-EP same QDQ = 1/4** (quant residual, not HTP) |
 | **D9 Adversarial** | **SEALED** | lexical + NLI block |
 | **D10 Truth loop** | **SEALED** | MEASURE only |
 | **D11 Field harness** | **SEALED** | offline multiplane |

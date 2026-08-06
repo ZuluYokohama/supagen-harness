@@ -15,6 +15,13 @@
 | QDQ UINT8 @ HTP (early) | 3 | 0/3 — logits collapse ~neutral 0.51 |
 | QDQ act=UINT16 w=UINT8 @ HTP (early) | 3 | 0/3 — **label-inverted** |
 | QDQ UINT16/UINT8 + **expanded balanced CALIB (18)** | 4 (incl. neutral) | **1/4 (rate 0.25)** — HTP live ~35ms; still red vs ≥0.9 |
+| QDQ UINT16/UINT8 + **contra-heavy CALIB (32)** | 4 | **1/4 (0.25)** — same pattern; calib mix insufficient |
+| **Same QDQ graph on CPU EP** (not HTP) | 4 | **1/4 (0.25)** — **isolates residual to quant, not HTP** |
+
+**Isolation (2026-08-06, contra-heavy calib):**  
+Loading `model.qdq.aui16_wui8.onnx` with `CPUExecutionProvider` alone yields the **same** held-out miss pattern as QNN HTP.  
+Therefore: Hexagon is not “corrupting” a good quant graph — static QDQ of DeBERTa-v3-base currently **destroys label geometry** before HTP.  
+Product law remains correct: CPU **FP32/ORT** (or CE) owns agreement until a green parity cert.
 
 **Logit diagnostic (UINT16, 2026-08-06):**
 
@@ -48,6 +55,6 @@ See: `prime/scripts/measure_fabric.py`, `entailment_glue.glue_agreement`.
 | Block GO_MEASURE for dual-metric instrument law? | **No** — CPU Job2 owns agreement measure |
 | Block production OPEN marketing? | **Yes** (already NO-GO for other reasons too) |
 | Claim product HTP NLI? | **No** until E3 parity cert green |
-| Next engineering | **expanded balanced CALIB_PAIRS** (entail/contra/neutral) → re-QDQ UINT16 → held-out parity; if still red: distill stance head / QAI Hub context binary. **Not** blocked on Adreno llama-server (GPU owns SCOUT, not law). |
+| Next engineering | Residual is **quant geometry**, not HTP routing (CPU-EP QDQ same 1/4). Paths: QAI Hub / vendor NLI INT8, distill 3-way head to HTP-friendly student, or keep CPU ORT authority. **Not** blocked on Adreno llama-server (GPU owns SCOUT). Static calib expansion alone is insufficient. |
 
 **Signed residual (author measure):** accepted for GO_MEASURE instrument advertise on 2026-08-06.

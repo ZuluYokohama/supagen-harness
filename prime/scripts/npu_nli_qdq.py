@@ -26,36 +26,44 @@ MAX_LEN = 128  # fixed for HTP; domain pairs are short
 REPORT = STATE / "npu_nli_qdq_report.json"
 STATE.mkdir(parents=True, exist_ok=True)
 
-# Calibration bank for static QDQ (NOT held-out). Balanced contradiction /
-# entailment / neutral so HTP scales do not collapse to neutral or invert.
+# Calibration bank for static QDQ (NOT held-out).
+# HTP UINT16 previously biased to entailment → overweight short, sharp
+# contradiction pairs; keep entail/neutral for range coverage.
 # Labels are documentation only — CalibrationDataReader uses text pairs.
 CALIB_PAIRS = [
-    # --- entailment (paraphrase / consequence) ---
+    # --- contradiction (heavy; counters HTP entailment bias) ---
     (
-        "E_ref meets production readiness criteria under measured audit.",
-        "Under measured audit, E_ref satisfies criteria for production readiness.",
+        "The cat is on the mat.",
+        "The cat is not on the mat.",
     ),
     (
-        "Restrict then measure then audit before any OPEN decision.",
-        "OPEN requires restrict, measure, and audit in sequence.",
+        "All doors are locked.",
+        "Every door is unlocked.",
     ),
     (
-        "Jina embeddings score topical aboutness for retrieval only.",
-        "Aboutness cosine is a retrieval diagnostic, not an agreement gate.",
+        "The server is running.",
+        "The server is stopped.",
     ),
     (
-        "Mutual agreement requires both directions of entailment above the p-floor.",
-        "If either direction fails the p-floor, mutual agreement does not hold.",
+        "It is raining outside.",
+        "It is not raining outside.",
     ),
     (
-        "SCOUT fiber prefers a small chat model and unloads frankenstein.",
-        "Under SCOUT, frankenstein is not the resident chat fiber.",
+        "The package was delivered today.",
+        "The package was never delivered.",
     ),
     (
-        "Hexagon HTP executes quantized MatMul tiles on fixed-shape graphs.",
-        "Fixed-shape QDQ graphs can run MatMul on the Hexagon HTP.",
+        "She accepted the offer.",
+        "She rejected the offer.",
     ),
-    # --- contradiction ---
+    (
+        "The light is on.",
+        "The light is off.",
+    ),
+    (
+        "The claim is true.",
+        "The claim is false.",
+    ),
     (
         "E_ref is production-ready and certified OPEN.",
         "E_ref is not production-ready; residue remains.",
@@ -80,7 +88,48 @@ CALIB_PAIRS = [
         "PRESERVE mode requires frankenstein alone as the chat fiber.",
         "PRESERVE mode keeps LFM scout resident and never loads frankenstein.",
     ),
-    # --- neutral (related vocabulary, no entail/contradict) ---
+    (
+        "The audit passed without residue.",
+        "The audit failed with open residue.",
+    ),
+    (
+        "Cosine never authorizes production OPEN.",
+        "High cosine alone is sufficient for production OPEN.",
+    ),
+    # --- entailment ---
+    (
+        "E_ref meets production readiness criteria under measured audit.",
+        "Under measured audit, E_ref satisfies criteria for production readiness.",
+    ),
+    (
+        "Restrict then measure then audit before any OPEN decision.",
+        "OPEN requires restrict, measure, and audit in sequence.",
+    ),
+    (
+        "Jina embeddings score topical aboutness for retrieval only.",
+        "Aboutness cosine is a retrieval diagnostic, not an agreement gate.",
+    ),
+    (
+        "Mutual agreement requires both directions of entailment above the p-floor.",
+        "If either direction fails the p-floor, mutual agreement does not hold.",
+    ),
+    (
+        "SCOUT fiber prefers a small chat model and unloads frankenstein.",
+        "Under SCOUT, frankenstein is not the resident chat fiber.",
+    ),
+    (
+        "Hexagon HTP executes quantized MatMul tiles on fixed-shape graphs.",
+        "Fixed-shape QDQ graphs can run MatMul on the Hexagon HTP.",
+    ),
+    (
+        "The door is closed.",
+        "The door is not open.",
+    ),
+    (
+        "Two plus two equals four.",
+        "The sum of two and two is four.",
+    ),
+    # --- neutral ---
     (
         "Carbonara uses guanciale, egg, pecorino, and black pepper.",
         "Fresh pasta cooks in about three minutes.",
@@ -104,6 +153,14 @@ CALIB_PAIRS = [
     (
         "Sheaf certificates record residue when global sections are obstructed.",
         "Quantization recipes include UINT8 and UINT16 activation widths.",
+    ),
+    (
+        "The museum opens at nine in the morning.",
+        "Soccer teams practice midweek in winter.",
+    ),
+    (
+        "A binary tree has at most two children per node.",
+        "Tea is often served with lemon in some cultures.",
     ),
 ]
 
@@ -490,6 +547,73 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
     }
 
 
+def run_cpu_qdq(qdq_path: Path) -> dict[str, Any]:
+    """
+    Load the *same* QDQ ONNX on CPUExecutionProvider only.
+    If held-out rate matches HTP misses, residual is quant geometry — not Hexagon.
+    """
+    import numpy as np
+    import onnxruntime as ort
+    from transformers import AutoTokenizer
+
+    validate_held_out_disjoint()
+    tok = AutoTokenizer.from_pretrained(HF_ID)
+    so = ort.SessionOptions()
+    sess = ort.InferenceSession(
+        str(qdq_path), so, providers=["CPUExecutionProvider"]
+    )
+    names = {i.name for i in sess.get_inputs()}
+    labels = ["contradiction", "entailment", "neutral"]
+    rows: list[dict[str, Any]] = []
+    for a, b, exp in HELD_OUT_PAIRS:
+        enc = tok(
+            a,
+            b,
+            return_tensors="np",
+            padding="max_length",
+            truncation=True,
+            max_length=MAX_LEN,
+        )
+        feed: dict[str, Any] = {}
+        if "input_ids" in names:
+            feed["input_ids"] = enc["input_ids"].astype(np.int64)
+        if "attention_mask" in names:
+            feed["attention_mask"] = enc["attention_mask"].astype(np.int64)
+        if "token_type_ids" in names:
+            tt = enc.get("token_type_ids")
+            if tt is None:
+                tt = np.zeros_like(enc["input_ids"])
+            feed["token_type_ids"] = tt.astype(np.int64)
+        logits = sess.run(None, feed)[0][0]
+        ex = np.exp(logits - logits.max())
+        probs = ex / ex.sum()
+        i = int(probs.argmax())
+        lab = labels[i] if i < len(labels) else str(i)
+        rows.append(
+            {
+                "expect": exp,
+                "label": lab,
+                "confidence": round(float(probs[i]), 4),
+                "hit": lab == exp,
+            }
+        )
+    hits = sum(1 for r in rows if r["hit"])
+    n = len(rows)
+    return {
+        "ok": True,
+        "provider": "CPUExecutionProvider",
+        "qdq": "<repo>/prime/state/ort_models/nli-deberta-v3-base-qdq/",
+        "hits": hits,
+        "n": n,
+        "rate": round(hits / n, 3) if n else 0.0,
+        "rows": rows,
+        "isolation": (
+            "If rate ≈ HTP rate and both red, residual is static QDQ of DeBERTa, "
+            "not Hexagon HTP execution."
+        ),
+    }
+
+
 def main() -> int:
     import argparse
     import os
@@ -498,6 +622,11 @@ def main() -> int:
     ap.add_argument("--act", default=os.environ.get("PRIME_NLI_QDQ_ACT", "uint8"))
     ap.add_argument("--weight", default=os.environ.get("PRIME_NLI_QDQ_WEIGHT", "uint8"))
     ap.add_argument("--skip-export", action="store_true", help="reuse existing FP32")
+    ap.add_argument(
+        "--cpu-qdq-check",
+        action="store_true",
+        help="also run held-out on same QDQ via CPU EP (quant vs HTP isolation)",
+    )
     args = ap.parse_args()
 
     t0 = time.time()
@@ -545,6 +674,30 @@ def main() -> int:
         return 1
     report["run"] = run
     print(json.dumps(run, indent=2), flush=True)
+
+    # Optional: same QDQ on CPU EP — isolates quant residual from HTP
+    if args.cpu_qdq_check or os.environ.get("PRIME_NLI_CPU_QDQ_CHECK", "").strip() in (
+        "1",
+        "true",
+        "yes",
+    ):
+        print("3b) CPU EP on same QDQ (isolation)…", flush=True)
+        try:
+            cpu_chk = run_cpu_qdq(Path(q["qdq"]))
+            report["cpu_qdq_check"] = cpu_chk
+            print(json.dumps(cpu_chk, indent=2), flush=True)
+            htp_rate = float(run.get("label_parity_rate") or 0.0)
+            if (
+                cpu_chk.get("rate") is not None
+                and abs(float(cpu_chk["rate"]) - htp_rate) <= 0.01
+                and htp_rate < 0.9
+            ):
+                report["residual_locus"] = "static_qdq_geometry"
+                report["residual_note"] = (
+                    "CPU-EP QDQ rate matches HTP rate → do not blame Hexagon routing"
+                )
+        except Exception as e:
+            report["cpu_qdq_check"] = {"ok": False, "error": str(e)[:300]}
 
     on_path = bool(run.get("qnn_ep_registered") or run.get("on_qnn"))
     parity_rate = float(run.get("label_parity_rate") or 0.0)
