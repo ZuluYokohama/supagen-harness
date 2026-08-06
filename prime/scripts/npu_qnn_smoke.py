@@ -109,9 +109,7 @@ def build_and_quantize() -> dict:
             activation_type=QuantType.QUInt8,
             weight_type=QuantType.QUInt8,
         )
-        reader.rewind()
-        quantize_static(src, str(qdq_path), reader, quant_format=None, extra_options=None)
-        # get_qnn_qdq_config returns config object for quantize()
+        # Single pass: get_qnn_qdq_config → quantize() (do not pre-write via quantize_static)
         from onnxruntime.quantization import quantize
 
         reader.rewind()

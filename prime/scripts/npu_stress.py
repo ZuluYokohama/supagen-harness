@@ -168,30 +168,41 @@ def open_htp_session(qdq: Path, *, profile: bool = True):
 
 
 def summarize_htp_profile(prof_csv: Path) -> dict:
-    """Parse QNN HTP profile CSV — this is the real NPU proof (Task Manager has no NPU counters here)."""
+    """Parse QNN HTP profile CSV — this is the real NPU proof (Task Manager has no NPU counters here).
+
+    Stream the file line-by-line (profiles can be large); do not load whole CSV into RAM.
+    """
     if not prof_csv.is_file():
         return {"ok": False, "error": "no profile csv"}
-    text = prof_csv.read_text(encoding="utf-8", errors="replace")
-    lines = text.strip().splitlines()
-    hvx = [ln for ln in lines if "HVX" in ln or "HMX" in ln]
-    accel = [ln for ln in lines if "QNN accelerator (execute)" in ln]
-    nodes = [ln for ln in lines if ",NODE," in ln and "mm" in ln]
-    cycles = []
-    for ln in nodes:
-        parts = ln.split(",")
-        # NODE,cycles,CYCLES,...
-        try:
-            if len(parts) > 2 and parts[2] == "CYCLES":
-                cycles.append(int(parts[1]))
-        except Exception:
-            pass
+    hvx: list[str] = []
+    accel: list[str] = []
+    nodes: list[str] = []
+    cycles: list[int] = []
+    n_lines = 0
+    with prof_csv.open(encoding="utf-8", errors="replace") as f:
+        for ln in f:
+            n_lines += 1
+            if ("HVX" in ln or "HMX" in ln) and len(hvx) < 8:
+                hvx.append(ln.rstrip())
+            if "QNN accelerator (execute)" in ln and len(accel) < 6:
+                accel.append(ln.rstrip())
+            if ",NODE," in ln and "mm" in ln:
+                if len(nodes) < 12:
+                    nodes.append(ln.rstrip())
+                parts = ln.split(",")
+                try:
+                    if len(parts) > 2 and parts[2] == "CYCLES":
+                        cycles.append(int(parts[1]))
+                except Exception:
+                    pass
     return {
         "ok": True,
         "path": str(prof_csv),
         "bytes": prof_csv.stat().st_size,
-        "hvx_lines": hvx[:8],
-        "accel_execute_lines": accel[:6],
-        "matmul_node_lines": nodes[:12],
+        "n_lines_scanned": n_lines,
+        "hvx_lines": hvx,
+        "accel_execute_lines": accel,
+        "matmul_node_lines": nodes,
         "matmul_cycles_sum": sum(cycles) if cycles else None,
         "proof": (
             "HVX/HMX + accelerator execute cycles in profile = Hexagon NPU ran the graph. "
@@ -364,10 +375,11 @@ def sample_gpu_counters() -> list:
                 "powershell",
                 "-NoProfile",
                 "-Command",
+                # Use commas between calculated properties (semicolon terminates statement)
                 r"Get-Counter '\GPU Engine(*)\Utilization Percentage' -ErrorAction SilentlyContinue | "
                 r"Select-Object -ExpandProperty CounterSamples | "
                 r"Where-Object { $_.CookedValue -gt 1 } | "
-                r"Select-Object -First 12 @{N='path';E={$_.Path}}; @{N='val';E={[math]::Round($_.CookedValue,1)}} | "
+                r"Select-Object -First 12 @{N='path';E={$_.Path}}, @{N='val';E={[math]::Round($_.CookedValue,1)}} | "
                 r"ConvertTo-Json -Compress",
             ],
             capture_output=True,
