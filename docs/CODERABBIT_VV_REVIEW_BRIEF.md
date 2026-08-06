@@ -20,11 +20,13 @@ Paste/attach this when requesting `@coderabbitai full review`. Reviewers (human 
 ## Domain checklist for CodeRabbit
 
 ### D0 — Architecture honesty
+
 - [ ] Hybrid LMS (chat only) vs off-LMS instruments (jina :8765, DeBERTa, rerank, NPU) is documented in code comments / README / `truth_plane.architecture_map`
 - [ ] No path claims jina via LMS `:1234` embeddings (silent nomic remap risk)
 - [ ] `nomic_metric.default_embed_base` isolates jina from LMS base
 
 ### D1 — Job1 aboutness (jina)
+
 - [ ] Prefixes: jina `Query:` / `Document:`; nomic `search_*` only on nomic family
 - [ ] Default pooling for v5 is **`last`** not mean (`jina_service`)
 - [ ] Prefer v5-small GGUF when present; nano fallback
@@ -32,21 +34,25 @@ Paste/attach this when requesting `@coderabbitai full review`. Reviewers (human 
 - [ ] Bakeoff / null: floor usable, range usable; polarity still blind (expected)
 
 ### D2 — Job1.5 neural rerank
+
 - [ ] `rerank_service` ladder (jina-reranker-v3 → bge → MiniLM)
 - [ ] `dimensional_parse.retrieve` optional neural blend; score_kind remains aboutness*
 - [ ] Not used as agreement
 
 ### D3 — Job2 NLI / agreement
+
 - [ ] `glue_agreement` prefer auto: ORT → CE DeBERTa → LFM fallback
 - [ ] `mutual_entailment` p-floor (default 0.80)
 - [ ] `lms_layers` must not prefer LFM NLI over DeBERTa for production path (flag if `prefer="lfm"` remains on dual metric enter)
 - [ ] Contradiction demotes OPEN_CANDIDATE
 
 ### D4 — Fiber modes / residency
+
 - [ ] `PRIME_FIBER_MODE` / `seamless_substrate(fiber_mode=scout|preserve)`
 - [ ] SCOUT unloads frankenstein (HEAVY)
 - [ ] PRESERVE loads frankenstein alone; unloads scouts
 - [ ] No default holonomy claims for LFM
+- [ ] D4 `preserve_ok` requires frankenstein in key (not any non-empty key)
 
 ### D5 — cert_face / dual_enter
 - [ ] High cos + no NLI agree ≠ OPEN

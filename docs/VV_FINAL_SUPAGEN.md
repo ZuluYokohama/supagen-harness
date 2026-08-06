@@ -229,7 +229,7 @@ All runs store: timestamp, free_gb, loaded models+ctx, git SHA, OS.
 
 ### 4.1 Identity floor (canonical)
 
-```
+```text
 unload all LLMs
 load MUT only @ ctx_policy(purpose=floor|chat)
 DeBERTa Judge independent
@@ -245,7 +245,7 @@ Record: modes, median_cos, cos≥0.75 rate, free_gb, ctx, quant, git SHA
 
 ### 4.2 Aboutness null (canonical)
 
-```
+```text
 ensure jina :8765
 pairs A paraphrase / B negation / C pasta
 score stripped + family prefixes only

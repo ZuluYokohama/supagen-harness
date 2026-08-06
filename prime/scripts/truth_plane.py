@@ -44,11 +44,15 @@ FiberMode = Literal["scout", "preserve", "auto"]
 STATE = Path(__file__).resolve().parent.parent / "state"
 STATE.mkdir(parents=True, exist_ok=True)
 
-PRESERVE_KEYS = (
-    "frankenstein",
-    "frankenstein-2.0",
-    "thedrummer/frankenstein",
-)
+# Single source of truth: residency.PRESERVE_KEYS (avoid dual definitions)
+try:
+    from residency import PRESERVE_KEYS as PRESERVE_KEYS
+except Exception:  # offline / partial import
+    PRESERVE_KEYS = (
+        "frankenstein",
+        "frankenstein-2.0",
+        "thedrummer/frankenstein",
+    )
 
 # Precision domains — loop applies extra mutual-NLI + residue refusal
 TRUTH_DOMAINS = ("math", "code", "physics", "technology", "claim", "audit", "general")
