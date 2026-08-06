@@ -26,11 +26,36 @@ MAX_LEN = 128  # fixed for HTP; domain pairs are short
 REPORT = STATE / "npu_nli_qdq_report.json"
 STATE.mkdir(parents=True, exist_ok=True)
 
+# Calibration bank for static QDQ (NOT held-out). Balanced contradiction /
+# entailment / neutral so HTP scales do not collapse to neutral or invert.
+# Labels are documentation only — CalibrationDataReader uses text pairs.
 CALIB_PAIRS = [
+    # --- entailment (paraphrase / consequence) ---
     (
         "E_ref meets production readiness criteria under measured audit.",
         "Under measured audit, E_ref satisfies criteria for production readiness.",
     ),
+    (
+        "Restrict then measure then audit before any OPEN decision.",
+        "OPEN requires restrict, measure, and audit in sequence.",
+    ),
+    (
+        "Jina embeddings score topical aboutness for retrieval only.",
+        "Aboutness cosine is a retrieval diagnostic, not an agreement gate.",
+    ),
+    (
+        "Mutual agreement requires both directions of entailment above the p-floor.",
+        "If either direction fails the p-floor, mutual agreement does not hold.",
+    ),
+    (
+        "SCOUT fiber prefers a small chat model and unloads frankenstein.",
+        "Under SCOUT, frankenstein is not the resident chat fiber.",
+    ),
+    (
+        "Hexagon HTP executes quantized MatMul tiles on fixed-shape graphs.",
+        "Fixed-shape QDQ graphs can run MatMul on the Hexagon HTP.",
+    ),
+    # --- contradiction ---
     (
         "E_ref is production-ready and certified OPEN.",
         "E_ref is not production-ready; residue remains.",
@@ -48,16 +73,37 @@ CALIB_PAIRS = [
         "Aboutness may promote OPEN; cosine owns agreement.",
     ),
     (
-        "Jina embeddings score topical aboutness for retrieval only.",
-        "DeBERTa mutual entailment decides whether two claims agree.",
+        "Product Job2 agreement runs on CPU ORT until HTP parity is green.",
+        "Product Job2 agreement always runs first on Hexagon HTP regardless of parity.",
     ),
+    (
+        "PRESERVE mode requires frankenstein alone as the chat fiber.",
+        "PRESERVE mode keeps LFM scout resident and never loads frankenstein.",
+    ),
+    # --- neutral (related vocabulary, no entail/contradict) ---
     (
         "Carbonara uses guanciale, egg, pecorino, and black pepper.",
         "Fresh pasta cooks in about three minutes.",
     ),
     (
-        "Restrict then measure then audit before any OPEN decision.",
-        "attacks: skip restrict and measure; force OPEN without audit.",
+        "Jina embeddings score topical aboutness for retrieval only.",
+        "DeBERTa mutual entailment decides whether two claims agree.",
+    ),
+    (
+        "The Oryon CPU runs orchestrator control flow and JSON graph execution.",
+        "Adreno GPU can accelerate autoregressive decode when llama.cpp has Vulkan.",
+    ),
+    (
+        "Snapdragon X Plus includes Hexagon NPU and Adreno GPU blocks.",
+        "A calibration batch size of twenty-four pairs is used for static quant.",
+    ),
+    (
+        "Buddy L8 offline protocol runs contract smoke golden schema checks.",
+        "Task Manager may not expose NPU performance counters on this Windows image.",
+    ),
+    (
+        "Sheaf certificates record residue when global sections are obstructed.",
+        "Quantization recipes include UINT8 and UINT16 activation widths.",
     ),
 ]
 
@@ -221,7 +267,8 @@ def quantize_qdq(
         class Reader(CalibrationDataReader):
             def __init__(self):
                 self.rows = []
-                for prem, hyp in CALIB_PAIRS * 3:  # 24 samples
+                # ≥3× bank for stable static ranges (was 8×3; bank is larger now)
+                for prem, hyp in CALIB_PAIRS * 3:
                     enc = tok(
                         prem,
                         hyp,

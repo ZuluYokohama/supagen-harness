@@ -9,11 +9,12 @@
 
 ## What was measured
 
-| Backend | Domain pairs (3) | Result |
-|---------|------------------|--------|
-| ORT CPU DeBERTa (product authority) | 3/3 | **PASS** (p≥0.998) |
-| QDQ UINT8 @ HTP | 0/3 | logits collapse ~neutral 0.51 |
-| QDQ act=UINT16 w=UINT8 @ HTP | 0/3 | logits uncollapsed but **label-inverted** vs expect |
+| Backend | Domain pairs | Result |
+|---------|--------------|--------|
+| ORT CPU DeBERTa (product authority) | held-out | **PASS** (authoritative) |
+| QDQ UINT8 @ HTP (early) | 3 | 0/3 — logits collapse ~neutral 0.51 |
+| QDQ act=UINT16 w=UINT8 @ HTP (early) | 3 | 0/3 — **label-inverted** |
+| QDQ UINT16/UINT8 + **expanded balanced CALIB (18)** | 4 (incl. neutral) | **1/4 (rate 0.25)** — HTP live ~35ms; still red vs ≥0.9 |
 
 **Logit diagnostic (UINT16, 2026-08-06):**
 
@@ -47,6 +48,6 @@ See: `prime/scripts/measure_fabric.py`, `entailment_glue.glue_agreement`.
 | Block GO_MEASURE for dual-metric instrument law? | **No** — CPU Job2 owns agreement measure |
 | Block production OPEN marketing? | **Yes** (already NO-GO for other reasons too) |
 | Claim product HTP NLI? | **No** until E3 parity cert green |
-| Next engineering | better calib / distill stance head / QAI Hub context binary |
+| Next engineering | **expanded balanced CALIB_PAIRS** (entail/contra/neutral) → re-QDQ UINT16 → held-out parity; if still red: distill stance head / QAI Hub context binary. **Not** blocked on Adreno llama-server (GPU owns SCOUT, not law). |
 
 **Signed residual (author measure):** accepted for GO_MEASURE instrument advertise on 2026-08-06.

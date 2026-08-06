@@ -11,11 +11,13 @@ Slim copies of measured Hexagon HTP proofs. Full ONNX/QDQ weights and full `htp_
 | `npu_stress_report.json` | Sustained ~45s HTP load, providers, rates |
 | `htp_profile_head.csv` | First lines of QNN HTP profile (HVX / accelerator / mm\* cycles) |
 | `npu_nli_qdq_report.json` | DeBERTa QDQ **UINT8** on HTP: session OK, logits collapse ~neutral 0.51 |
-| `npu_nli_qdq_uint16_report.json` | DeBERTa QDQ **act=UINT16 w=UINT8**: session OK ~32ms; logits uncollapsed but **labels inverted** (0/3 hits) |
+| `npu_nli_qdq_uint16_report.json` | DeBERTa QDQ **act=UINT16 w=UINT8** (early): session OK ~32ms; **labels inverted** (0/3) |
+| `npu_nli_qdq_uint16_expanded_calib_report.json` | **Expanded balanced CALIB (18 pairs)** UINT16/UINT8: HTP ~35ms; parity **1/4 (0.25)** — still red |
 
-**E3 residual (accepted for GO_MEASURE):** both recipes **label-parity FAIL**.  
-ORT CPU on same pairs: **3/3 PASS**. Product path: `measure_fabric` + red `nli_htp_parity_cert.json` → HTP refused.  
-See `docs/RESIDUAL_ACCEPTANCE_E3.md`. Next engineering: better calib / distill / QAI Hub.
+**E3 residual (accepted for GO_MEASURE):** label-parity **still FAIL** (must be ≥0.9 for green).  
+Progress: 0/3 invert → **1/4** after balanced calib (entail hit; contra/neutral still wrong).  
+ORT CPU on same pairs: **PASS**. Product path: `measure_fabric` + red cert → HTP refused.  
+See `docs/RESIDUAL_ACCEPTANCE_E3.md`. Next: more calib / stance distill / QAI Hub — **not** GPU llama hunt for law.
 
 **Retention:** keep slim JSON/CSV heads in-repo; regenerate from local state when re-measuring. Full profile: `prime/state/npu/htp_profile.csv` (ignored).
 

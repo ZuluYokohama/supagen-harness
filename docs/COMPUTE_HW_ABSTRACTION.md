@@ -48,10 +48,17 @@ This is not a product pitch. It is a substrate map for *novel use* of the NPU in
 | **Adreno GPU** | FP16/FP32 bulk, vision, some DML nets | Power vs NPU for INT8, app packaging (DML vs QNN ORT conflict) | Display; DML optional / separate |
 | **Hexagon HTP** | **Fixed-shape QDQ**, MatMul/Conv tiles, **always-on** instruments, batch embed/NLI | Dynamic seq, heavy control flow, unquantized transformers, “one big LLM decode” | Stress path only (until Job2 QDQ) |
 
-**Rule of three (smart routing, industry pattern):**  
-- **NPU** = always-on *measure* plane  
-- **CPU** = *decide / certify / agent* plane  
-- **GPU** = *bulk float / media* plane when needed  
+**Rule of three (smart routing — saturate the silicon, not the Oryon alone):**  
+
+| Processor | Owns | Workloads | Product authority today |
+|-----------|------|-----------|-------------------------|
+| **Hexagon NPU** | **The Law (measure)** | QDQ DeBERTa NLI, QDQ rerank, HTP stress MatMul | **Job2 only after E3 parity green**; else refuse HTP |
+| **Adreno GPU** | **The Scout (generate)** | LFM/Ministral decode via Vulkan/OpenCL llama.cpp when available | SCOUT drafting only — never OPEN authority |
+| **Oryon CPU** | **The Orchestrator** | Prime MCP, Python, sheaf/compute graph, jina `:8765`, dual_enter, cert_face | Always: control plane + **CPU ORT/CE agreement authority until E3** |
+
+Task Manager **NPU 0%** while Oryon is hot usually means: instruments still on CPU *or* host IO/quant prep only (HTP may still execute — TM is not the NPU oracle on this Windows image). Evidence: `docs/evidence/npu/`, `npu_stress` profile cycles.
+
+**Intent alignment:** absolute precision → finish **E3 label parity** so NPU can *own* agreement measure; efficiency of SCOUT tokens is secondary (GPU llama-server hunt).  
 
 That maps cleanly onto our law: **aboutness + agreement are measures; OPEN is a decision.**
 
