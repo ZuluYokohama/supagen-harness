@@ -2,9 +2,14 @@
 """Assert HEAD still carries dispositions for prior CodeRabbit majors."""
 from __future__ import annotations
 
+import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SCRIPTS = ROOT / "prime" / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
 
 
 def main() -> int:
@@ -66,7 +71,75 @@ def main() -> int:
         "golden_struct_gate": "claims_artifact_structure" in t(
             "golden_paths/filmore_multiplane_v1/verify_golden.py"
         ),
+        "held_out_disjoint_fn": "validate_held_out_disjoint" in t(
+            "prime/scripts/npu_nli_qdq.py"
+        ),
+        "ort_parity_force_cpu_call": "force_cpu=True" in t("prime/scripts/npu_nli_qdq.py"),
+        "predict_force_cpu_param": "force_cpu: bool = True" in t(
+            "prime/scripts/accel_nli_ort.py"
+        ),
+        "cert_contract_live_structured": '"contract_live"'
+        in t("docs/evidence/DOMAIN_COMPLETION_CERTIFICATE.json")
+        and '"measured_count"'
+        in t("docs/evidence/DOMAIN_COMPLETION_CERTIFICATE.json"),
+        "nli_ort_force_cpu_kw": "force_cpu: bool = True" in t(
+            "prime/scripts/entailment_glue.py"
+        )
+        or "force_cpu=True" in t("prime/scripts/entailment_glue.py"),
     }
+
+    # --- Executable routing / bank integrity (not string-only) ---
+    runtime: dict[str, bool] = {}
+    try:
+        from npu_nli_qdq import (  # type: ignore
+            CALIB_PAIRS,
+            HELD_OUT_PAIRS,
+            _norm_pair_text,
+            validate_held_out_disjoint,
+        )
+
+        validate_held_out_disjoint()
+        calib = {_norm_pair_text(a) for a, b in CALIB_PAIRS} | {
+            _norm_pair_text(b) for a, b in CALIB_PAIRS
+        }
+        overlap = False
+        for a, b, _lab in HELD_OUT_PAIRS:
+            if _norm_pair_text(a) in calib or _norm_pair_text(b) in calib:
+                overlap = True
+                break
+        runtime["runtime_held_out_disjoint"] = not overlap and len(HELD_OUT_PAIRS) >= 3
+    except Exception as e:
+        runtime["runtime_held_out_disjoint"] = False
+        print("runtime held_out error:", e)
+
+    try:
+        from measure_fabric import nli_htp_parity_pass, route_job2  # type: ignore
+
+        par = nli_htp_parity_pass()
+        order = route_job2().get("order") or []
+        # Red cert → no htp first
+        runtime["runtime_red_cert_no_htp_first"] = (not par.get("ok")) and (
+            not order or order[0] != "htp_qdq"
+        )
+    except Exception as e:
+        runtime["runtime_red_cert_no_htp_first"] = False
+        print("runtime fabric error:", e)
+
+    try:
+        cert = json.loads(
+            (ROOT / "docs/evidence/DOMAIN_COMPLETION_CERTIFICATE.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        cl = cert.get("contract_live") or {}
+        runtime["runtime_cert_structured"] = isinstance(cl, dict) and bool(
+            cl.get("measured_count")
+        ) and bool(cl.get("evidence_path"))
+    except Exception as e:
+        runtime["runtime_cert_structured"] = False
+        print("runtime cert error:", e)
+
+    checks.update(runtime)
     miss = [k for k, v in checks.items() if not v]
     print(f"disposition_ok={len(checks) - len(miss)}/{len(checks)}")
     for k, v in sorted(checks.items()):
