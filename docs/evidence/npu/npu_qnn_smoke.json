@@ -9,22 +9,10 @@
     "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll",
     "htp_exists": true,
     "devices": [
-      {
-        "ep_name": "CPUExecutionProvider",
-        "repr": "<onnxruntime.capi.onnxruntime_pybind11_state.OrtEpDevice object at 0x000001AF111C0530>"
-      },
-      {
-        "ep_name": "QNNExecutionProvider",
-        "repr": "<onnxruntime.capi.onnxruntime_pybind11_state.OrtEpDevice object at 0x000001AF2205DAF0>"
-      },
-      {
-        "ep_name": "QNNExecutionProvider",
-        "repr": "<onnxruntime.capi.onnxruntime_pybind11_state.OrtEpDevice object at 0x000001AF22067230>"
-      },
-      {
-        "ep_name": "QNNExecutionProvider",
-        "repr": "<onnxruntime.capi.onnxruntime_pybind11_state.OrtEpDevice object at 0x000001AF22065070>"
-      }
+      {"ep_name": "CPUExecutionProvider"},
+      {"ep_name": "QNNExecutionProvider"},
+      {"ep_name": "QNNExecutionProvider"},
+      {"ep_name": "QNNExecutionProvider"}
     ],
     "n_qnn_devices": 3,
     "providers_list": [
@@ -46,22 +34,20 @@
       "QNNExecutionProvider",
       "CPUExecutionProvider"
     ],
+    "qnn_ep_registered": true,
     "on_qnn_ep": true,
     "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll",
-    "input_shape": [
-      1,
-      16
-    ],
-    "output_shape": [
-      1,
-      8
-    ],
+    "htp_exists": true,
+    "input_shape": [1, 16],
+    "output_shape": [1, 8],
     "runs": 50,
     "total_s": 0.0026,
     "ms_per_run": 0.052,
     "session_create_s": 0.763,
     "reg_devices": 3,
-    "note": "QNN EP in providers list = graph scheduled on QNN stack (HTP=NPU). Task Manager may still show system NPU as 'Shared' not a named process."
+    "note": "qnn_ep_registered means QNN is in the session provider list — not per-node HTP cycle proof. Hard HTP proof = htp_profile via npu_stress."
   },
-  "verdict": "NPU_PATH_LIVE"
+  "verdict": "NPU_PATH_LIVE",
+  "proof_note": "qnn_ep_registered + htp_exists = path live; HTP cycle proof = npu_stress htp_profile",
+  "archive_note": "regenerated producer fields; devices without process memory addresses"
 }

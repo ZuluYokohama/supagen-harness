@@ -1,0 +1,46 @@
+{
+  "artifact": "vv_push_domains_integrity",
+  "ok": true,
+  "go_no_go": "GO_MEASURE",
+  "n_pass": 5,
+  "n_warn": 1,
+  "n_fail": 0,
+  "n_cells": 6,
+  "count_ok": true,
+  "count_rule": "WARN does not increment n_fail; n_pass+n_warn+n_fail==n_cells",
+  "n_critical_fail": 0,
+  "cells": [
+    {
+      "id": "P1_jina_v5_small",
+      "status": "PASS",
+      "critical": true
+    },
+    {
+      "id": "P6_hexagon_qnn",
+      "status": "WARN",
+      "critical": false
+    },
+    {
+      "id": "P5_ort_hot",
+      "status": "PASS",
+      "critical": false
+    },
+    {
+      "id": "P4_negative_force_open",
+      "status": "PASS",
+      "critical": true
+    },
+    {
+      "id": "P2_preserve_smoke",
+      "status": "PASS",
+      "critical": true
+    },
+    {
+      "id": "P3_truth_plane_enter",
+      "status": "PASS",
+      "critical": true
+    }
+  ],
+  "regenerated_integrity": true,
+  "law": "aboutness must not promote OPEN; NLI owns agreement; residue never forced"
+}

@@ -646,22 +646,30 @@ def d12_ort_nli() -> dict:
         n = (b.get("ort") or {}).get("n") or 0
         parity = b.get("label_parity")
         ok = bool(b.get("ok")) and hits is not None and hits >= max(n - 1, 1)
+        # Product Job2 hot path is ORT CPU — gate is critical when session loads
         return _gate(
             "D12_ort_nli",
             ok,
             {
-                "session": b.get("session") or st,
+                "session": {
+                    "ok": st.get("ok"),
+                    "cached": st.get("cached"),
+                    "active_provider": st.get("active_provider"),
+                    "providers": st.get("providers"),
+                },
+                "bench_session": b.get("session"),
                 "ort_hits": hits,
                 "torch_hits": (b.get("torch") or {}).get("hits"),
                 "label_parity": parity,
                 "ort_s": (b.get("ort") or {}).get("seconds"),
                 "torch_s": (b.get("torch") or {}).get("seconds"),
                 "rows": (b.get("ort") or {}).get("rows"),
+                "acceptance": "ORT CPU hits on fixture pairs; force_cpu=True; job2_owns_open=false",
             },
-            critical=False,  # CE path remains authority if ORT fails
+            critical=True,
         )
     except Exception as e:
-        return _gate("D12_ort_nli", False, {"error": str(e)[:400]}, critical=False)
+        return _gate("D12_ort_nli", False, {"error": str(e)[:400]}, critical=True)
 
 
 def d13_preserve_pick() -> dict:

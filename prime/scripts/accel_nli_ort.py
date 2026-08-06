@@ -359,11 +359,12 @@ def bench() -> dict[str, Any]:
 
     ort_rows = []
     t0 = time.time()
-    st = load_session()
+    # Same session class as product Job2 (CPU ORT)
+    st = load_session(force_cpu=True)
     if not st.get("ok"):
-        return {"ok": False, "export_or_load": st}
+        return {"ok": False, "export_or_load": st, "session": st}
     for a, b, exp in pairs:
-        r = predict(a, b)
+        r = predict(a, b, force_cpu=True)
         ort_rows.append(
             {
                 "expect": exp,

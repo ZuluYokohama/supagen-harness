@@ -16,6 +16,7 @@ Slim copies of measured Hexagon HTP proofs. Full ONNX/QDQ weights and full `htp_
 | `npu_nli_qdq_uint16_contra_heavy_report.json` | Contra-heavy CALIB 32 UINT16/UINT8 HTP: held-out **1/4**, all 3 labels covered |
 | `npu_nli_qdq_cpu_ep_same_graph.json` | Isolation: same QDQ on **CPU EP** **1/4** + `qdq_sha256` / held-out digest |
 | `nli_htp_parity_cert.json` | E3 parity certificate consumed by `measure_fabric` (currently red) |
+| `../vv_push_domains_integrity.json` | Portable D17 integrity (count_ok, n_warn, cells) |
 
 **E3 residual (accepted for GO_MEASURE):** label-parity **still FAIL** (must be ≥0.9 for green).  
 Progress: 0/3 invert → **1/4** after calib work; **CPU-EP on same QDQ matches HTP** when `qdq_sha256` matches → residual is **quant geometry**, not Hexagon routing.  

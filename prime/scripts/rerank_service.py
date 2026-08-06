@@ -222,13 +222,18 @@ def score_docs(query: str, documents: list[str]) -> dict[str, Any]:
             "job": "retrieval_rerank",
             "not_agreement": True,
         }
-    # score in chunks if huge
+    # jina listwise scores the full set in one forward pass — never chunk that path.
+    # CrossEncoder may chunk large candidate sets.
     all_scores: list[float] = []
     t0 = time.time()
     try:
-        for i in range(0, len(docs), top):
-            chunk = docs[i : i + top]
-            all_scores.extend(eng["predict"](query, chunk))
+        kind = eng.get("kind") or ""
+        if kind == "jina_rerank_api" or top <= 0 or top >= len(docs):
+            all_scores = list(eng["predict"](query, docs))
+        else:
+            for i in range(0, len(docs), top):
+                chunk = docs[i : i + top]
+                all_scores.extend(eng["predict"](query, chunk))
     except Exception as e:
         return {
             "ok": False,

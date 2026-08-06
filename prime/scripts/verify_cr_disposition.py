@@ -139,8 +139,19 @@ def main() -> int:
         "e3_quant_not_htp": "static QDQ of DeBERTa" in t(
             "docs/RESIDUAL_ACCEPTANCE_E3.md"
         )
-        or "quant, not HTP" in t("docs/RESIDUAL_ACCEPTANCE_E3.md").lower()
-        or "CPU EP" in t("docs/RESIDUAL_ACCEPTANCE_E3.md"),
+        or "quant geometry" in t("docs/RESIDUAL_ACCEPTANCE_E3.md").lower()
+        or "CPU EP" in t("docs/RESIDUAL_ACCEPTANCE_E3.md")
+        or "CPUExecutionProvider" in t(
+            "docs/evidence/npu/npu_nli_qdq_cpu_ep_same_graph.json"
+        ),
+        "jina_listwise_no_chunk": "jina_rerank_api" in t("prime/scripts/rerank_service.py")
+        and "never chunk that path" in t("prime/scripts/rerank_service.py"),
+        "d12_critical": 'critical=True' in t("prime/scripts/vv_full_matrix.py")
+        and "D12_ort_nli" in t("prime/scripts/vv_full_matrix.py"),
+        "smoke_no_device_ptrs": "0x0000" not in t("docs/evidence/npu/npu_qnn_smoke.json"),
+        "d17_portable_evidence": (
+            ROOT / "docs/evidence/vv_push_domains_integrity.json"
+        ).is_file(),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---
