@@ -4,8 +4,9 @@ Job 2 — AGREEMENT / GLUE (not aboutness).
 Instrument: NLI over (premise, hypothesis) jointly.
   Labels: entailment | contradiction | neutral
 
-Primary: LFM structured NLI — reason FIRST, label LAST (label is conclusion, not prior).
-Optional: transformers CrossEncoder (DeBERTa-MNLI) if installed.
+Primary: DeBERTa cross-encoder NLI (PRIME_NLI_MODEL, default nli-deberta-v3-base).
+Fallback: LFM structured NLI — reason FIRST, label LAST (label is conclusion, not prior).
+Mutual entailment (p≥PRIME_NLI_MUTUAL_P, default 0.80) for strong agreement.
 
 Null failure (pre-fix): 7/7 neutral; reason said "contradicts" while label=neutral
 because label was sampled at token ~5 before reasoning. Fixed by field order.
@@ -214,14 +215,39 @@ def nli_lfm(
     }
 
 
+# Job2 default: DeBERTa-v3-base MNLI (cached on this kit; large multi-NLI is upgrade path)
+import os as _os
+
+DEFAULT_NLI_MODEL = _os.environ.get(
+    "PRIME_NLI_MODEL", "cross-encoder/nli-deberta-v3-base"
+)
+# Mutual entailment confidence floor for "agrees" (dual direction)
+MUTUAL_P = float(_os.environ.get("PRIME_NLI_MUTUAL_P", "0.80"))
+
+_CE_CACHE: dict[str, Any] = {}
+_CE_LOCK = __import__("threading").Lock()
+
+
+def _get_cross_encoder(model_name: str):
+    with _CE_LOCK:
+        if model_name in _CE_CACHE:
+            return _CE_CACHE[model_name]
+        from sentence_transformers import CrossEncoder  # type: ignore
+
+        ce = CrossEncoder(model_name)
+        _CE_CACHE[model_name] = ce
+        return ce
+
+
 def nli_cross_encoder(
     premise: str,
     hypothesis: str,
-    model_name: str = "cross-encoder/nli-deberta-v3-xsmall",
+    model_name: str | None = None,
 ) -> dict[str, Any]:
-    """Optional true cross-encoder if sentence-transformers is installed."""
+    """True cross-encoder NLI (DeBERTa-MNLI). Owns agreement; not aboutness."""
+    model_name = model_name or DEFAULT_NLI_MODEL
     try:
-        from sentence_transformers import CrossEncoder  # type: ignore
+        from sentence_transformers import CrossEncoder  # type: ignore  # noqa: F401
     except Exception as e:
         return {
             "ok": False,
@@ -235,21 +261,35 @@ def nli_cross_encoder(
     try:
         import numpy as np
 
-        ce = CrossEncoder(model_name)
+        ce = _get_cross_encoder(model_name)
         scores = ce.predict([(premise[:1500], hypothesis[:500])])
         s = np.array(scores).reshape(-1)
+        # sentence-transformers NLI models: typically [contradiction, entailment, neutral]
+        # Verify via config when possible
+        labels = ["contradiction", "entailment", "neutral"]
+        try:
+            id2label = getattr(getattr(ce, "model", None), "config", None)
+            id2label = getattr(id2label, "id2label", None) if id2label else None
+            if isinstance(id2label, dict) and len(id2label) == 3:
+                labels = [str(id2label[i]).lower() for i in range(3)]
+        except Exception:
+            pass
         if s.size == 3:
-            labels = ["contradiction", "entailment", "neutral"]
             i = int(s.argmax())
             label = _norm_label(labels[i])
             ex = np.exp(s - s.max())
             conf = float(ex[i] / ex.sum())
+            probs = {
+                _norm_label(labels[j]): round(float(ex[j] / ex.sum()), 4)
+                for j in range(3)
+            }
         elif s.size == 1:
             conf = float(1 / (1 + np.exp(-s[0])))
             label = (
                 "entailment" if conf > 0.55
                 else ("contradiction" if conf < 0.45 else "neutral")
             )
+            probs = None
         else:
             return {
                 "ok": False,
@@ -259,6 +299,7 @@ def nli_cross_encoder(
                 "agrees": False,
                 "gate": "NEED_INFO",
             }
+        # Gate: entailment needs calibrated conf (default 0.45 one-way; mutual uses MUTUAL_P)
         agrees = label == "entailment" and conf >= 0.45
         gate = "PASS" if agrees else ("STOP" if label == "contradiction" else "NEED_INFO")
         return {
@@ -268,6 +309,7 @@ def nli_cross_encoder(
             "model": model_name,
             "label": label,
             "confidence": round(conf, 3),
+            "probs": probs,
             "agrees": agrees,
             "gate": gate,
             "not_open_authority": True,
@@ -284,21 +326,117 @@ def nli_cross_encoder(
         }
 
 
+def mutual_entailment(
+    a: str,
+    b: str,
+    model_name: str | None = None,
+    p_floor: float | None = None,
+) -> dict[str, Any]:
+    """
+    Bidirectional entailment: both a→b and b→a must be entailment with conf ≥ p_floor.
+    This is the asymmetric zero that cosine lacks. Never OPEN authority alone.
+    """
+    p_floor = MUTUAL_P if p_floor is None else p_floor
+    ab = nli_cross_encoder(a, b, model_name=model_name)
+    ba = nli_cross_encoder(b, a, model_name=model_name)
+    if not ab.get("ok") or not ba.get("ok"):
+        return {
+            "ok": False,
+            "job": "mutual_entailment",
+            "error": ab.get("error") or ba.get("error"),
+            "ab": ab,
+            "ba": ba,
+            "agrees": False,
+            "gate": "NEED_INFO",
+            "not_open_authority": True,
+        }
+    ab_e = ab.get("label") == "entailment" and float(ab.get("confidence") or 0) >= p_floor
+    ba_e = ba.get("label") == "entailment" and float(ba.get("confidence") or 0) >= p_floor
+    contra = ab.get("label") == "contradiction" or ba.get("label") == "contradiction"
+    agrees = bool(ab_e and ba_e)
+    if contra and not agrees:
+        gate = "STOP"
+    elif agrees:
+        gate = "PASS"
+    else:
+        gate = "NEED_INFO"
+    return {
+        "ok": True,
+        "job": "mutual_entailment",
+        "model": ab.get("model"),
+        "p_floor": p_floor,
+        "ab": {
+            "label": ab.get("label"),
+            "confidence": ab.get("confidence"),
+            "probs": ab.get("probs"),
+        },
+        "ba": {
+            "label": ba.get("label"),
+            "confidence": ba.get("confidence"),
+            "probs": ba.get("probs"),
+        },
+        "agrees": agrees,
+        "gate": gate,
+        "min_entail_conf": round(
+            min(
+                float(ab.get("confidence") or 0) if ab.get("label") == "entailment" else 0.0,
+                float(ba.get("confidence") or 0) if ba.get("label") == "entailment" else 0.0,
+            ),
+            3,
+        ),
+        "not_open_authority": True,
+        "note": "Mutual entailment owns agreement; aboutness must not promote OPEN.",
+    }
+
+
+def nli_ort(premise: str, hypothesis: str) -> dict[str, Any]:
+    """ONNX Runtime DeBERTa NLI (CPU ORT default; DML/QNN when EP works)."""
+    try:
+        from accel_nli_ort import predict
+
+        return predict(premise, hypothesis)
+    except Exception as e:
+        return {
+            "ok": False,
+            "job": "agreement_nli",
+            "engine": "ort_nli",
+            "error": str(e)[:300],
+            "label": "unknown",
+            "agrees": False,
+            "gate": "NEED_INFO",
+        }
+
+
 def glue_agreement(
     human: str,
     domain: str,
-    prefer: str = "lfm",
+    prefer: str = "auto",
     base: str = DEFAULT_BASE,
 ) -> dict[str, Any]:
     """
     Job 2 entry: does domain stalk *agree* with human intent (entailment).
-    prefer: lfm | cross_encoder | auto
+    prefer: auto (ORT→DeBERTa CE→LFM) | ort | cross_encoder | lfm | mutual
     """
     from metric_text import strip_envelope, strip_prompt_chrome
 
-    human = strip_prompt_chrome(strip_envelope(human) if (human or "").strip().startswith("{") else (human or ""))
+    human = strip_prompt_chrome(
+        strip_envelope(human) if (human or "").strip().startswith("{") else (human or "")
+    )
     domain = strip_envelope(domain) if domain else ""
+    if prefer == "mutual":
+        return mutual_entailment(human, domain)
+    if prefer == "ort":
+        return nli_ort(human, domain)
     if prefer in ("cross_encoder", "auto"):
+        # Prefer ORT when model exported (faster warm path); fall back CE
+        if prefer == "auto" and _os.environ.get("PRIME_NLI_ORT", "1").strip() not in (
+            "0",
+            "false",
+            "no",
+        ):
+            r_ort = nli_ort(human, domain)
+            if r_ort.get("ok"):
+                return r_ort
         r = nli_cross_encoder(human, domain)
         if r.get("ok") or prefer == "cross_encoder":
             return r
@@ -352,7 +490,7 @@ def dual_measure(
         mean=aboutness_mean,
         base=base,
     )
-    agree = glue_agreement(human, domain, prefer="lfm", base=base)
+    agree = glue_agreement(human, domain, prefer="auto", base=base)
     sym = None
     if domain_kind.lower() in ("code", "field", "rplc", "eref"):
         sym = interface_jaccard(human, domain)

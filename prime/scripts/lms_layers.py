@@ -1265,7 +1265,8 @@ def l5_metric(
         # strip human prompt of instruction chrome if short enough leave as is
         premise = strip_envelope(prompt) if prompt.strip().startswith("{") else prompt
         if hyp and len(hyp.strip()) >= 8:
-            agreement = glue_agreement(premise[:1800], hyp[:800], prefer="lfm", base=base)
+            # DeBERTa/ORT first (prefer=auto); LFM only as fallback inside glue_agreement
+            agreement = glue_agreement(premise[:1800], hyp[:800], prefer="auto", base=base)
         else:
             agreement = {
                 "ok": False,

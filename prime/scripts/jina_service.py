@@ -71,14 +71,28 @@ PREFIX = {
 
 
 def _gguf_candidates() -> list[Path]:
+    """Prefer v5-small if present (Tier-B upgrade); else nano."""
     out: list[Path] = []
     if os.environ.get("PRIME_JINA_GGUF"):
         out.append(Path(os.environ["PRIME_JINA_GGUF"]))
+    base = Path(
+        r"C:\LM_STUDIO_MODELS\00.LLM HF MODELS4 CODING-RESEARCH-TESTING-USE-RESEARCH-TESTING-USE-1JUN26"
+        r"\jinaai"
+    )
+    # Tier-B: small before nano (prefer Q4_K_M then higher quality quants)
+    small_dir = base / "jina-embeddings-v5-text-small-retrieval"
+    for name in (
+        "v5-small-retrieval-Q4_K_M.gguf",
+        "v5-small-retrieval-Q5_K_M.gguf",
+        "v5-small-retrieval-Q8_0.gguf",
+        "v5-small-retrieval-F16.gguf",
+    ):
+        out.append(small_dir / name)
+    out.extend(sorted(small_dir.glob("*.gguf")))
     out.append(
-        Path(
-            r"C:\LM_STUDIO_MODELS\00.LLM HF MODELS4 CODING-RESEARCH-TESTING-USE-RESEARCH-TESTING-USE-1JUN26"
-            r"\jinaai\jina-embeddings-v5-text-nano-retrieval\v5-nano-retrieval-F16.gguf"
-        )
+        base
+        / "jina-embeddings-v5-text-nano-retrieval"
+        / "v5-nano-retrieval-F16.gguf"
     )
     # LMS downloadsFolder variants
     try:
@@ -86,12 +100,12 @@ def _gguf_candidates() -> list[Path]:
 
         dl = (read_settings() or {}).get("downloads_folder")
         if dl:
-            out.append(
-                Path(dl)
-                / "jinaai"
-                / "jina-embeddings-v5-text-nano-retrieval"
-                / "v5-nano-retrieval-F16.gguf"
-            )
+            dlp = Path(dl) / "jinaai"
+            for name in (
+                "jina-embeddings-v5-text-small-retrieval",
+                "jina-embeddings-v5-text-nano-retrieval",
+            ):
+                out.extend(sorted((dlp / name).glob("*.gguf")))
     except Exception:
         pass
     return out
@@ -214,8 +228,9 @@ def _build_cmd(gguf: Path, srv: Path) -> list[str]:
         str(UBATCH),
         "-b",
         str(max(UBATCH, 512)),
+        # jina-embeddings-v5: last-token pooling (mean collapses paraphrase ceiling)
         "--pooling",
-        os.environ.get("PRIME_JINA_POOLING", "mean"),
+        os.environ.get("PRIME_JINA_POOLING", "last"),
     ]
     # optional flash-attn if backend supports
     if os.environ.get("PRIME_JINA_FLASH", "0") in ("1", "true", "yes"):
@@ -258,9 +273,9 @@ def _start_detached(gguf: Path, srv: Path) -> dict[str, Any]:
         "hyperparams": {
             "embedding": True,
             "context_length": CTX,
-            "pooling": os.environ.get("PRIME_JINA_POOLING", "mean"),
+            "pooling": os.environ.get("PRIME_JINA_POOLING", "last"),
             "task_prefixes": PREFIX,
-            "note": "Prefixes are the retrieval system channel; no chat system_prompt.",
+            "note": "Prefixes are the retrieval system channel; no chat system_prompt. Pooling=last for v5.",
         },
     }
     _write_meta(meta)
@@ -296,7 +311,7 @@ def ensure_jina(
                     "latency_ms": p.get("latency_ms"),
                     "hyperparams": {
                         "context_length": CTX,
-                        "pooling": os.environ.get("PRIME_JINA_POOLING", "mean"),
+                        "pooling": os.environ.get("PRIME_JINA_POOLING", "last"),
                         "prefixes": PREFIX,
                     },
                     "seamless": True,
