@@ -292,7 +292,9 @@ def d4_fiber_modes() -> dict:
     scout_key = (scout_pick.get("key") or "").lower()
     preserve_key = (preserve_pick.get("key") or "").lower()
     scout_ok = not any(h in scout_key for h in ("frankenstein",)) and "jina" not in scout_key
-    preserve_ok = "frankenstein" in preserve_key or bool(preserve_pick.get("key"))
+    # CR major: preserve_ok must require frankenstein-class key only — any non-empty
+    # key would make this gate always-true and unable to fail.
+    preserve_ok = "frankenstein" in preserve_key
     mode = resolve_fiber_mode()
     ok = scout_ok and preserve_ok and frankenstein_required("preserve") and not frankenstein_required("scout")
     return _gate(

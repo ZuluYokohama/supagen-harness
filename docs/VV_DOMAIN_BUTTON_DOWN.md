@@ -16,7 +16,7 @@
 | **D1 Job1 aboutness** | **SEALED** | jina floor≈0.04 ceil≈0.88 range≈0.84 |
 | **D2 Job1.5 rerank** | **SEALED** | aboutness_hybrid; envelopes |
 | **D3 Job2 NLI** | **SEALED** | ORT contra STOP p=0.9999 |
-| **D4 Fiber modes** | **SEALED** | ensure --mode; preserve fail-closed |
+| **D4 Fiber modes** | **SEALED** | ensure --mode; preserve fail-closed; preserve_ok = frankenstein-only (not any key) |
 | **D5 cert_face / dual_enter** | **SEALED** | force-OPEN → NEED_INFO/STOP |
 | **D6 Identity holonomy** | **SEALED** | measured floors |
 | **D7 Package / contract** | **SEALED** | offline+live; CI schema-only |

@@ -34,6 +34,8 @@ prime/state/**/*.json
 supagen/state/e2e_last.json
 
 # ONNX / NPU local artifacts (regenerate via scripts)
+# Proofs / sealed reports live under docs/evidence/npu/ (tracked).
+# prime/state/npu/ is working scratch only — never the archive.
 **/*.onnx
 **/*.onnx.data
 prime/state/ort_models/

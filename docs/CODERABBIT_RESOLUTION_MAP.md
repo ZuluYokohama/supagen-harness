@@ -38,8 +38,10 @@
 | HELD_OUT overlaps CALIB | **Fixed** (`43c8ce3`) | `validate_held_out_disjoint()` + CI runtime check |
 | ORT parity without force_cpu | **Fixed** (`43c8ce3`/`4110aee`) | held-out loop always `force_cpu=True` |
 | Free-form contract_live_author | **Fixed** (`43c8ce3`) | structured `contract_live` object |
+| D4 `preserve_ok` always true | **Fixed** (this HEAD) | `"frankenstein" in preserve_key` only; no `or bool(key)` |
+| gitignore drops NPU proofs | **Documented** | proofs under `docs/evidence/npu/` (tracked); `prime/state/npu/` scratch only |
 
 **Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`  
-Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (42/42).
+Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (+ D4 frankenstein-only + evidence archive note).
 
 Stale inline comments may still map to new line numbers after re-review; this table + verifier are authoritative until CR re-submits on current HEAD.

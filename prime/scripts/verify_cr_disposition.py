@@ -86,6 +86,16 @@ def main() -> int:
             "prime/scripts/entailment_glue.py"
         )
         or "force_cpu=True" in t("prime/scripts/entailment_glue.py"),
+        # D4 CR major: preserve_ok must require frankenstein, not any non-empty key
+        "d4_preserve_ok_frankenstein_only": (
+            'preserve_ok = "frankenstein" in preserve_key' in t(
+                "prime/scripts/vv_full_matrix.py"
+            )
+            and "or bool(preserve_pick.get(\"key\"))"
+            not in t("prime/scripts/vv_full_matrix.py")
+        ),
+        "npu_evidence_archive_note": "docs/evidence/npu" in t(".gitignore")
+        or "docs/evidence/npu/" in t(".gitignore"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---
