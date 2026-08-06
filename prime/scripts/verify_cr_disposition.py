@@ -48,6 +48,15 @@ def main() -> int:
         "nli_partial_not_live_alone": "NPU_NLI_PARTIAL" in t("prime/scripts/npu_nli_qdq.py")
         and "hit_rate" in t("prime/scripts/npu_nli_qdq.py"),
         "go_measure_seal": "GO_MEASURE" in t("docs/GO_MEASURE_SEAL.md"),
+        "qnn_opt_in_only": 'pref in ("qnn", "npu")' in t("prime/scripts/accel_nli_ort.py")
+        and 'pref in ("auto", "qnn", "npu")' not in t("prime/scripts/accel_nli_ort.py"),
+        "oneway_p_shared": "ONEWAY_P" in t("prime/scripts/accel_nli_ort.py")
+        and "ONEWAY_P" in t("prime/scripts/entailment_glue.py"),
+        "mutual_uses_ort": "_nli_one_way" in t("prime/scripts/entailment_glue.py"),
+        "tier_b_rerank_required": "rerank_residual" in t("prime/scripts/tier_b_challenger.py"),
+        "golden_struct_gate": "claims_artifact_structure" in t(
+            "golden_paths/filmore_multiplane_v1/verify_golden.py"
+        ),
     }
     miss = [k for k, v in checks.items() if not v]
     print(f"disposition_ok={len(checks) - len(miss)}/{len(checks)}")

@@ -32,7 +32,31 @@ def sha256_file(path: Path) -> str:
 
 
 def main() -> int:
-    cert = json.loads(CERT_PATH.read_text(encoding="utf-8"))
+    if not CERT_PATH.is_file():
+        print(json.dumps({"ok": False, "error": "certificate missing", "path": str(CERT_PATH)}, indent=2))
+        print("GOLDEN VERIFY FAIL")
+        return 1
+    try:
+        cert = json.loads(CERT_PATH.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(json.dumps({"ok": False, "error": f"certificate unreadable: {e}"}, indent=2))
+        print("GOLDEN VERIFY FAIL")
+        return 1
+    # Structure gate before any claims_artifact key access
+    claims_art = cert.get("claims_artifact")
+    if not isinstance(claims_art, dict):
+        print(
+            json.dumps(
+                {
+                    "ok": False,
+                    "error": "certificate missing claims_artifact object",
+                    "keys": list(cert.keys())[:20],
+                },
+                indent=2,
+            )
+        )
+        print("GOLDEN VERIFY FAIL")
+        return 1
     # Prefer portable roots: GOLDEN_SANDBOX_ROOT, monorepo extract, legacy absolute.
     # CI/buddy without field dumps: schema-only PASS when sandbox missing.
     # Force schema-only: GOLDEN_SANDBOX_ROOT=0 or GOLDEN_SCHEMA_ONLY=1
@@ -54,10 +78,10 @@ def main() -> int:
             DEFAULT_SANDBOX,
         ]
         sandbox = next((p for p in candidates if p.is_dir()), Path("__no_sandbox__"))
-    rel = cert["claims_artifact"]["relative_path"]
-    claims_path = sandbox / rel.replace("\\", "/")
+    rel = str(claims_art.get("relative_path") or "")
+    claims_path = sandbox / rel.replace("\\", "/") if rel else sandbox / "__missing__"
     # Windows path as stored
-    if not claims_path.is_file():
+    if rel and not claims_path.is_file():
         claims_path = sandbox / Path(rel)
 
     checks = []
@@ -69,7 +93,8 @@ def main() -> int:
         if not passed:
             ok = False
 
-    check("certificate_present", CERT_PATH.is_file())
+    check("certificate_present", True)
+    check("claims_artifact_structure", isinstance(claims_art, dict))
 
     # Fail-closed: schema-only PASS only when explicitly requested.
     # Implicit missing sandbox without GOLDEN_SCHEMA_ONLY → incomplete (non-zero).

@@ -100,23 +100,27 @@ _META: dict[str, Any] | None = None
 _TOK = None
 
 
+# Shared one-way entailment floor (must match entailment_glue / CE path)
+ONEWAY_P = float(os.environ.get("PRIME_NLI_ONEWAY_P", "0.45"))
+
+
 def _providers() -> list[str]:
     """
-    EP order. DeBERTa ONNX on this Snapdragon kit: DML Reshape fails at runtime
-    → default CPU ORT (still faster than full torch CE load path once session warm).
-    Force DML: PRIME_ACCEL=dml (may error). QNN when package present.
+    EP order for Job2 DeBERTa ORT.
+
+    Product default (auto): **CPU only**. QNN/HTP is opt-in via PRIME_ACCEL=qnn|npu
+    and still is not agreement authority until E3 parity cert is green
+    (see measure_fabric). DML is opt-in only (known Reshape issues on Adreno).
     """
     import onnxruntime as ort
 
     avail = ort.get_available_providers()
     pref = (os.environ.get("PRIME_ACCEL") or "auto").lower()
     order: list[str] = []
-    if "QNNExecutionProvider" in avail and pref in ("auto", "qnn", "npu"):
+    # QNN is opt-in only — never first under auto (E3 residual)
+    if "QNNExecutionProvider" in avail and pref in ("qnn", "npu"):
         order.append("QNNExecutionProvider")
-    if pref == "dml" and "DmlExecutionProvider" in avail:
-        order.append("DmlExecutionProvider")
-    # auto: skip DML for this model graph (known bad Reshape on Adreno DML)
-    if pref == "dml_force" and "DmlExecutionProvider" in avail:
+    if pref in ("dml", "dml_force") and "DmlExecutionProvider" in avail:
         order.append("DmlExecutionProvider")
     order.append("CPUExecutionProvider")
     seen: set[str] = set()
@@ -243,21 +247,33 @@ def predict(premise: str, hypothesis: str) -> dict[str, Any]:
     for j in range(min(len(labels), len(probs))):
         probs_norm[_norm_key(labels[j])] = round(float(probs[j]), 4)
 
-    agrees = lab == "entailment" and conf >= 0.45
+    agrees = lab == "entailment" and conf >= ONEWAY_P
     gate = "PASS" if agrees else ("STOP" if lab == "contradiction" else "NEED_INFO")
+    providers = list(_SESSION.get_providers() or [])
+    # Soft-warn if QNN slipped into product path without E3 (should not under auto)
+    on_qnn = any("QNN" in (p or "") for p in providers)
     return {
         "ok": True,
         "job": "agreement_nli",
         "engine": "ort_nli",
-        "provider": (_SESSION.get_providers() or [None])[0],
+        "provider": providers[0] if providers else None,
+        "providers": providers,
         "model": _META.get("model_id"),
         "label": lab,
         "confidence": round(conf, 4),
         "probs": probs_norm,
         "agrees": agrees,
         "gate": gate,
+        "oneway_p": ONEWAY_P,
         "latency_ms": round((time.time() - t0) * 1000, 1),
         "not_open_authority": True,
+        "job2_owns_open": False,
+        "qnn_in_providers": on_qnn,
+        "note": (
+            "QNN present but E3 parity residual — prefer CPU authority"
+            if on_qnn
+            else None
+        ),
     }
 
 
@@ -348,7 +364,7 @@ def bench() -> dict[str, Any]:
         },
         "label_parity": all(
             (t.get("label") == o.get("label"))
-            for t, o in zip(torch_rows, ort_rows)
+            for t, o in zip(torch_rows, ort_rows, strict=True)
         )
         if torch_rows and ort_rows
         else None,

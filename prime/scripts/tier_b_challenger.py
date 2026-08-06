@@ -325,12 +325,22 @@ def main() -> int:
         },
     }
     v = report["verdict"]
-    # All D3 NLI gates required — neutral-only path must not tier_b_ready
+    rerank_ok = bool(rr.get("model")) and bool(v["rerank_prefers_benign"])
+    v["rerank_available"] = bool(rr.get("model"))
+    v["rerank_residual"] = None if rr.get("model") else "reranker_unavailable"
+    # Full tier_b_ready: Job1 floor + both D3 NLI gates + rerank with model present
+    # (unavailable reranker is residual — not a silent pass)
     v["tier_b_ready"] = bool(
         v["jina_floor_usable"]
         and v["nli_blocks_adversarial_open"]
         and v["nli_catches_contradiction"]
-        and (v["rerank_prefers_benign"] or rr.get("model") is None)
+        and rerank_ok
+    )
+    # Core dual-metric law can still be green without Job1.5
+    v["dual_metric_core_ready"] = bool(
+        v["jina_floor_usable"]
+        and v["nli_blocks_adversarial_open"]
+        and v["nli_catches_contradiction"]
     )
     report["ok"] = bool(v["tier_b_ready"])
     parts = []
@@ -350,7 +360,7 @@ def main() -> int:
         else:
             parts.append(f"rerank weak stance ({rr.get('model')})")
     else:
-        parts.append("rerank unavailable")
+        parts.append("rerank unavailable (residual — not tier_b_ready)")
     v["reading"] = "; ".join(parts)
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

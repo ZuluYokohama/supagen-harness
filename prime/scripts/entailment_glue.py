@@ -223,6 +223,8 @@ DEFAULT_NLI_MODEL = _os.environ.get(
 )
 # Mutual entailment confidence floor for "agrees" (dual direction)
 MUTUAL_P = float(_os.environ.get("PRIME_NLI_MUTUAL_P", "0.80"))
+# One-way entailment floor — must match accel_nli_ort.ONEWAY_P
+ONEWAY_P = float(_os.environ.get("PRIME_NLI_ONEWAY_P", "0.45"))
 
 _CE_CACHE: dict[str, Any] = {}
 _CE_GLOBAL = __import__("threading").Lock()
@@ -276,28 +278,39 @@ def nli_cross_encoder(
         s = np.array(scores).reshape(-1)
         # sentence-transformers NLI models: typically [contradiction, entailment, neutral]
         # Verify via config when possible
-        labels = ["contradiction", "entailment", "neutral"]
+        default_labels = ["contradiction", "entailment", "neutral"]
+        labels = list(default_labels)
         try:
             id2label = getattr(getattr(ce, "model", None), "config", None)
             id2label = getattr(id2label, "id2label", None) if id2label else None
-            if isinstance(id2label, dict) and len(id2label) == 3:
-                labels = [str(id2label[i]).lower() for i in range(3)]
+            if isinstance(id2label, dict) and len(id2label) >= 3:
+                # HF often stores id2label keys as strings "0","1","2"
+                resolved = []
+                for i in range(3):
+                    raw = id2label.get(i)
+                    if raw is None:
+                        raw = id2label.get(str(i), default_labels[i])
+                    resolved.append(str(raw).lower())
+                labels = resolved
         except Exception:
             pass
         if s.size == 3:
             i = int(s.argmax())
-            label = _norm_label(labels[i])
+            label = _norm_label(labels[i] if i < len(labels) else "neutral")
             ex = np.exp(s - s.max())
             conf = float(ex[i] / ex.sum())
             probs = {
-                _norm_label(labels[j]): round(float(ex[j] / ex.sum()), 4)
+                _norm_label(labels[j] if j < len(labels) else str(j)): round(
+                    float(ex[j] / ex.sum()), 4
+                )
                 for j in range(3)
             }
         elif s.size == 1:
             conf = float(1 / (1 + np.exp(-s[0])))
             label = (
-                "entailment" if conf > 0.55
-                else ("contradiction" if conf < 0.45 else "neutral")
+                "entailment"
+                if conf > 0.55
+                else ("contradiction" if conf < ONEWAY_P else "neutral")
             )
             probs = None
         else:
@@ -309,8 +322,8 @@ def nli_cross_encoder(
                 "agrees": False,
                 "gate": "NEED_INFO",
             }
-        # Gate: entailment needs calibrated conf (default 0.45 one-way; mutual uses MUTUAL_P)
-        agrees = label == "entailment" and conf >= 0.45
+        # Gate: entailment needs calibrated conf (ONEWAY_P; mutual uses MUTUAL_P)
+        agrees = label == "entailment" and conf >= ONEWAY_P
         gate = "PASS" if agrees else ("STOP" if label == "contradiction" else "NEED_INFO")
         return {
             "ok": True,
@@ -336,19 +349,42 @@ def nli_cross_encoder(
         }
 
 
+def _nli_one_way(
+    premise: str,
+    hypothesis: str,
+    *,
+    prefer: str = "auto",
+    model_name: str | None = None,
+) -> dict[str, Any]:
+    """Single-direction NLI using same engine order as glue_agreement."""
+    if prefer in ("ort", "auto") and _os.environ.get("PRIME_NLI_ORT", "1").strip() not in (
+        "0",
+        "false",
+        "no",
+    ):
+        r = nli_ort(premise, hypothesis)
+        if r.get("ok"):
+            return r
+        if prefer == "ort":
+            return r
+    return nli_cross_encoder(premise, hypothesis, model_name=model_name)
+
+
 def mutual_entailment(
     a: str,
     b: str,
     model_name: str | None = None,
     p_floor: float | None = None,
+    prefer: str = "auto",
 ) -> dict[str, Any]:
     """
     Bidirectional entailment: both a→b and b→a must be entailment with conf ≥ p_floor.
-    This is the asymmetric zero that cosine lacks. Never OPEN authority alone.
+    Uses the same engine selection as glue_agreement (ORT→CE under auto).
+    Never OPEN authority alone.
     """
     p_floor = MUTUAL_P if p_floor is None else p_floor
-    ab = nli_cross_encoder(a, b, model_name=model_name)
-    ba = nli_cross_encoder(b, a, model_name=model_name)
+    ab = _nli_one_way(a, b, prefer=prefer, model_name=model_name)
+    ba = _nli_one_way(b, a, prefer=prefer, model_name=model_name)
     if not ab.get("ok") or not ba.get("ok"):
         return {
             "ok": False,
@@ -443,7 +479,7 @@ def glue_agreement(
     human = _clean(human)
     domain = _clean(domain)
     if prefer == "mutual":
-        return mutual_entailment(human, domain)
+        return mutual_entailment(human, domain, prefer="auto")
 
     # Explicit HTP only after E3 parity cert (session-ready QDQ is not enough)
     if prefer in ("htp", "hexagon", "npu"):
