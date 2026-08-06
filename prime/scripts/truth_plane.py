@@ -562,17 +562,19 @@ def request_plane(
 
     card["elapsed_s"] = round(time.time() - t0, 2)
     op = dict(card.get("operator_summary") or {})
-    # Refresh face from cert_face after any demotion (mutual / truth_loop)
+    # Refresh face/verdict from cert_face after any demotion (mutual / truth_loop)
     op["face"] = (card.get("cert_face") or {}).get("face") or op.get("face")
+    op["verdict"] = card.get("verdict") or op.get("verdict")
     op["fiber_mode"] = fiber_mode
     op["fiber_model"] = fiber_blk.get("model") or op.get("fiber_model") or chat_model
     op["fiber_ctx"] = fiber_blk.get("loaded_ctx") or op.get("fiber_ctx")
     op["frankenstein_loaded"] = (sub.get("frankenstein") or {}).get("loaded")
     op["frankenstein_required"] = frankenstein_required(fiber_mode)
-    op["nli_engine"] = ((sub.get("instruments") or {}).get("nli") or {}).get(
-        "engine"
-    ) or (card.get("agreement") or {}).get("engine")
-    op["nli_model"] = ((sub.get("instruments") or {}).get("nli") or {}).get("model")
+    # Prefer live agreement engine over warm-probe instrument metadata
+    agree = card.get("agreement") or {}
+    warm_nli = ((sub.get("instruments") or {}).get("nli") or {})
+    op["nli_engine"] = agree.get("engine") or warm_nli.get("engine")
+    op["nli_model"] = agree.get("model") or warm_nli.get("model")
     op["rerank_model"] = ((sub.get("instruments") or {}).get("rerank") or {}).get("model")
     op["jina"] = ((sub.get("substrate") or {}).get("jina") or {}).get("status")
     op["truth_loop"] = bool(card.get("truth_loop"))

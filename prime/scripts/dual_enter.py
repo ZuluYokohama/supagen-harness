@@ -175,6 +175,7 @@ def dual_enter(
     substrate: dict[str, Any] = {"ok": True, "skipped": not ensure, "fiber_mode": mode}
     chat_model = model or DEFAULT_LFM
     instruments: dict[str, Any] = {}
+    substrate_ok = not ensure  # if not ensuring, residency will load fiber itself
     if ensure:
         try:
             # Full truth-plane substrate when available (jina + mode + warm NLI/rerank)
@@ -195,6 +196,7 @@ def dual_enter(
                 fiber_m = (substrate.get("fiber") or {}).get("model")
                 if fiber_m:
                     chat_model = fiber_m
+                substrate_ok = bool(plane.get("ok") or substrate.get("ok"))
             else:
                 from residency import seamless_substrate
 
@@ -204,8 +206,10 @@ def dual_enter(
                 if substrate.get("fiber", {}).get("model"):
                     chat_model = substrate["fiber"]["model"]
                 substrate["fiber_mode"] = mode
+                substrate_ok = bool(substrate.get("ok"))
         except Exception as e:
             substrate = {"ok": False, "error": str(e), "fiber_mode": mode}
+            substrate_ok = False
 
     retrieval: dict[str, Any] = {"ok": False, "skipped": True}
     work_prompt = clean
@@ -231,13 +235,13 @@ def dual_enter(
     ):
         use_roles = ["SCOUT", "FALSIFY", "VERDICT"]
 
-    # Substrate already promoted fiber — skip second L1 thrash (big latency win)
+    # Skip residency thrash only when substrate actually loaded the fiber
     card = layered_enter(
         work_prompt,
         base=base,
         model=chat_model,
         embed=embed,
-        ensure_residency=not ensure,  # False when seamless_substrate just ran
+        ensure_residency=not (ensure and substrate_ok),
         roles=use_roles,
     )
 

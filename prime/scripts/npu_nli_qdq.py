@@ -24,6 +24,7 @@ OUT_DIR = STATE / "ort_models" / "nli-deberta-v3-base-qdq"
 HF_ID = "cross-encoder/nli-deberta-v3-base"
 MAX_LEN = 128  # fixed for HTP; domain pairs are short
 REPORT = STATE / "npu_nli_qdq_report.json"
+STATE.mkdir(parents=True, exist_ok=True)
 
 CALIB_PAIRS = [
     (
@@ -419,6 +420,7 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
         "label_parity_n": n_parity,
         "label_parity_den": n_parity_den,
         "held_out": True,
+        "ort_force_cpu": True,  # parity authority is always CPU ORT
         "bench_ms_per": round(bench_s * 1000 / n, 2),
         "htp_dll": "<QnnHtp.dll>",  # sanitized — no user path in reports
     }

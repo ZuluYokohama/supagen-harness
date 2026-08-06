@@ -63,6 +63,7 @@ def nli_htp_parity_pass(*, max_age_h: float = 168.0) -> dict[str, Any]:
             and bool(cert.get("recipe") or cert.get("model_id"))
             and not bool(cert.get("probe_only") or cert.get("strict_qnn_failed"))
             and not bool(cert.get("uncalibrated_probe"))
+            and cert.get("ort_force_cpu") is True  # parity authority must be CPU ORT
         )
         green = required_ok
         out.update(
@@ -188,6 +189,7 @@ def write_parity_cert_from_report(report_path: Path | str) -> dict[str, Any]:
         "probe_only": probe_only,
         "strict_qnn_failed": bool(run.get("strict_qnn_failed")),
         "uncalibrated_probe": not green,
+        "ort_force_cpu": bool(run.get("ort_force_cpu", True)),
         "job2_owns_open": False,
         "measured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "source_report": "<repo>/docs/evidence/npu/ or prime/state/npu_nli_qdq_report.json",

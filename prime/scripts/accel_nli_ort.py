@@ -144,9 +144,6 @@ def load_session(*, force_cpu: bool = False) -> dict[str, Any]:
             "meta": _META,
             "active_provider": (_SESSION.get_providers() or [None])[0],
         }
-    if not ONNX_PATH.is_file() or not ONNX_PATH.with_suffix(".onnx.data").is_file():
-        # external data may be model.onnx.data
-        pass
     if not ONNX_PATH.is_file() or not META_PATH.is_file():
         exp = export()
         if not exp.get("ok"):

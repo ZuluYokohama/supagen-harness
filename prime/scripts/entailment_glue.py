@@ -280,20 +280,23 @@ def nli_cross_encoder(
         # Verify via config when possible
         default_labels = ["contradiction", "entailment", "neutral"]
         labels = list(default_labels)
+        label_source = "default_assumed"
         try:
             id2label = getattr(getattr(ce, "model", None), "config", None)
             id2label = getattr(id2label, "id2label", None) if id2label else None
             if isinstance(id2label, dict) and len(id2label) >= 3:
-                # HF often stores id2label keys as strings "0","1","2"
-                resolved = []
-                for i in range(3):
-                    raw = id2label.get(i)
-                    if raw is None:
-                        raw = id2label.get(str(i), default_labels[i])
-                    resolved.append(str(raw).lower())
-                labels = resolved
-        except Exception:
-            pass
+                # Coerce string keys "0"/"1"/"2" → int (same as accel_nli_ort)
+                coerced: dict[int, str] = {}
+                for k, v in id2label.items():
+                    try:
+                        coerced[int(k)] = str(v).lower()
+                    except (TypeError, ValueError):
+                        continue
+                if len(coerced) >= 3:
+                    labels = [coerced[i] for i in range(3)]
+                    label_source = "model.config.id2label"
+        except Exception as e:
+            label_source = f"default_after_error:{type(e).__name__}"
         if s.size == 3:
             i = int(s.argmax())
             label = _norm_label(labels[i] if i < len(labels) else "neutral")
@@ -312,7 +315,8 @@ def nli_cross_encoder(
                 if conf > 0.55
                 else ("contradiction" if conf < ONEWAY_P else "neutral")
             )
-            probs = None
+            probs = {label: round(conf, 4)}
+            label_source = label_source + "+single_logit"
         else:
             return {
                 "ok": False,
@@ -335,7 +339,10 @@ def nli_cross_encoder(
             "probs": probs,
             "agrees": agrees,
             "gate": gate,
+            "label_source": label_source,
+            "oneway_p": ONEWAY_P,
             "not_open_authority": True,
+            "job2_owns_open": False,
         }
     except Exception as e:
         return {
