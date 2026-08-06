@@ -56,9 +56,19 @@ This is not a product pitch. It is a substrate map for *novel use* of the NPU in
 | **Adreno GPU** | **The Scout (generate)** | LFM/Ministral decode via Vulkan/OpenCL llama.cpp when available | SCOUT drafting only — never OPEN authority |
 | **Oryon CPU** | **The Orchestrator** | Prime MCP, Python, sheaf/compute graph, jina `:8765`, dual_enter, cert_face | Always: control plane + **CPU ORT/CE agreement authority until E3** |
 
-Task Manager **NPU 0%** while Oryon is hot usually means: instruments still on CPU *or* host IO/quant prep only (HTP may still execute — TM is not the NPU oracle on this Windows image). Evidence: `docs/evidence/npu/`, `npu_stress` profile cycles.
+Task Manager **NPU 0%** while Oryon is hot is **not** proof of “silent QNN fallback” on this kit:
 
-**Intent alignment:** absolute precision → finish **E3 label parity** so NPU can *own* agreement measure; efficiency of SCOUT tokens is secondary (GPU llama-server hunt).  
+| Observation | Actual cause (measured) |
+|-------------|-------------------------|
+| Product dual_enter / glue NLI on CPU | **Intentional:** `force_cpu=True` until E3 green |
+| Jina :8765 on CPU | llama.cpp GGUF embed — no QNN path |
+| LFM scout on CPU | LMS default ARM64 build lacks GPU offload |
+| HTP measure runs ~35ms but TM still ~0% | TM often has **no `\NPU*` counters**; use `htp_profile` / session providers |
+| QDQ DeBERTa labels wrong on HTP **and** CPU-EP | **Quant geometry residual**, not silent CPU drop of a good HTP graph |
+
+**Silent fallback prevention (measure path):** `session_qdq(allow_cpu_fallback=False)` + assert active provider is QNN; product path never claims HTP without green cert.
+
+**Intent alignment:** absolute precision → finish **E3 label parity** so NPU can *own* agreement measure; Adreno Vulkan LMS is scout throughput (second).  
 
 That maps cleanly onto our law: **aboutness + agreement are measures; OPEN is a decision.**
 

@@ -152,6 +152,14 @@ def main() -> int:
         "d17_portable_evidence": (
             ROOT / "docs/evidence/vv_push_domains_integrity.json"
         ).is_file(),
+        "qnn_strict_active_provider": (
+            "active provider is not QNN" in t("prime/scripts/npu_qnn.py")
+            or "strict QNN session" in t("prime/scripts/npu_qnn.py")
+        ),
+        "qdq_default_uint16": 'default=os.environ.get("PRIME_NLI_QDQ_ACT", "uint16")'
+        in t("prime/scripts/npu_nli_qdq.py")
+        or '"uint16"' in t("prime/scripts/npu_nli_qdq.py")
+        and "default uint16" in t("prime/scripts/npu_nli_qdq.py"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---

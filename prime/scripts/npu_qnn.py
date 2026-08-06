@@ -142,15 +142,37 @@ def session_qdq(
         except Exception as e2:
             return {"ok": False, "error": f"{e} | {e2}", "reg": reg}
 
-    prov = sess.get_providers()
+    prov = list(sess.get_providers() or [])
     # providers list = EP registered for session, NOT per-node HTP proof
-    qnn_ep_registered = any("QNN" in p for p in prov)
+    qnn_ep_registered = any("QNN" in (p or "") for p in prov)
+    active0 = prov[0] if prov else None
+    # Hard fail silent full-CPU attach when caller demanded QNN-only
+    if not allow_cpu_fallback and not qnn_ep_registered:
+        return {
+            "ok": False,
+            "error": f"strict QNN session attached no QNN EP; providers={prov}",
+            "providers": prov,
+            "reg": reg,
+        }
+    if not allow_cpu_fallback and active0 and "QNN" not in str(active0):
+        return {
+            "ok": False,
+            "error": (
+                f"strict QNN session active provider is not QNN ({active0}); "
+                "ORT may have silently ranked CPU first"
+            ),
+            "providers": prov,
+            "qnn_ep_registered": qnn_ep_registered,
+            "reg": reg,
+        }
     return {
         "ok": True,
         "session": sess,
         "providers": prov,
+        "active_provider": active0,
         "qnn_ep_registered": qnn_ep_registered,
         "on_qnn": qnn_ep_registered,  # legacy alias; HTP cycles = hard proof
+        "cpu_fallback_allowed": allow_cpu_fallback,
         "htp_proof": "htp_profile_cycles_or_disable_cpu_fallback",
         "htp_dll": htp,
         "reg": reg,

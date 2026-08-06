@@ -57,6 +57,6 @@ See: `prime/scripts/measure_fabric.py`, `entailment_glue.glue_agreement`.
 | Block GO_MEASURE for dual-metric instrument law? | **No** — CPU Job2 owns agreement measure |
 | Block production OPEN marketing? | **Yes** (already NO-GO for other reasons too) |
 | Claim product HTP NLI? | **No** until E3 parity cert green |
-| Next engineering | Residual is **quant geometry**, not HTP routing (CPU-EP QDQ same 1/4). Paths: QAI Hub / vendor NLI INT8, distill 3-way head to HTP-friendly student, or keep CPU ORT authority. **Not** blocked on Adreno llama-server (GPU owns SCOUT). Static calib expansion alone is insufficient. |
+| Next engineering | Residual is **quant geometry**, not HTP routing (CPU-EP QDQ same 1/4). Measure path defaults **act=uint16**; strict QNN session refuses silent CPU-first attach. Paths to green: QAI Hub / distill student. **Not** blocked on Adreno llama-server (GPU owns SCOUT). Do **not** force product Job2 onto HTP until parity ≥0.9. |
 
 **Signed residual (author measure):** accepted for GO_MEASURE instrument advertise on 2026-08-06.

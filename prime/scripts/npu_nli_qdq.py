@@ -5,9 +5,9 @@ Export + QDQ-quantize DeBERTa NLI for Qualcomm Hexagon HTP (QNN).
 Steps
 -----
 1. Re-export DeBERTa with FIXED shapes (QNN rejects dynamic seq)
-2. QNN preprocess + static QDQ quantize (uint8 act/weight)
-3. Session on QNNExecutionProvider + QnnHtp.dll
-4. Label parity vs torch CE / ORT CPU on domain pairs
+2. QNN preprocess + static QDQ quantize (default act=UINT16 w=UINT8 for HTP)
+3. Session on QNNExecutionProvider + QnnHtp.dll (strict: no silent CPU attach)
+4. Label parity vs ORT CPU force_cpu on held-out (product Job2 stays CPU until E3 green)
 
 Outputs under prime/state/ort_models/nli-deberta-v3-base-qdq/
 """
@@ -439,7 +439,7 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
         return {"ok": False, "error": "register failed", "reg": reg}
 
     t0 = time.time()
-    # Strict QNN — no silent CPU fallback on the verdict path
+    # Strict QNN — no silent full-CPU attach on the verdict path
     r = session_qdq(qdq_path, burst=True, allow_cpu_fallback=False)
     if not r.get("ok"):
         # Second try with CPU fallback only as liveness probe (not parity PASS)
@@ -449,7 +449,17 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
         r = r_fb
         r["strict_qnn_failed"] = True
         r["probe_only"] = True
+        r["silent_cpu_fallback"] = True
     sess = r["session"]
+    prov = list(r.get("providers") or sess.get_providers() or [])
+    # Belt: refuse to treat as HTP measure if QNN never attached
+    if not any("QNN" in str(p) for p in prov) and not r.get("probe_only"):
+        return {
+            "ok": False,
+            "error": f"session has no QNN provider after open: {prov}",
+            "providers": prov,
+            "reg": reg,
+        }
     tok = AutoTokenizer.from_pretrained(HF_ID)
     meta = json.loads((OUT_DIR / "meta.json").read_text(encoding="utf-8"))
     labels = meta.get("labels") or ["contradiction", "entailment", "neutral"]
@@ -546,13 +556,16 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
         predict(*HELD_OUT[0][:2])
     bench_s = time.time() - t_bench
 
+    qnn_on = any("QNN" in str(p) for p in (r.get("providers") or []))
     return {
         "ok": True,
         "providers": r.get("providers"),
-        "qnn_ep_registered": r.get("qnn_ep_registered", r.get("on_qnn")),
-        "on_qnn": r.get("on_qnn"),  # legacy alias — not HTP cycle proof
+        "active_provider": r.get("active_provider"),
+        "qnn_ep_registered": bool(r.get("qnn_ep_registered", r.get("on_qnn")) and qnn_on),
+        "on_qnn": qnn_on,  # session has QNN EP — not Task Manager NPU%
         "probe_only": bool(r.get("probe_only")),
         "strict_qnn_failed": bool(r.get("strict_qnn_failed")),
+        "silent_cpu_fallback": bool(r.get("silent_cpu_fallback")),
         "session_s": round(time.time() - t0, 2),
         "rows": rows,
         "hits": sum(1 for x in rows if x.get("hit")),
@@ -566,6 +579,10 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
         "ort_force_cpu": True,  # parity authority is always CPU ORT
         "bench_ms_per": round(bench_s * 1000 / n, 2),
         "htp_dll": "<QnnHtp.dll>",  # sanitized — no user path in reports
+        "law": (
+            "Measure path may use QNN HTP; product Job2 stays force_cpu until "
+            "nli_htp_parity_pass green. Task Manager NPU% is not the oracle."
+        ),
     }
 
 
@@ -641,8 +658,17 @@ def main() -> int:
     import os
 
     ap = argparse.ArgumentParser(description="DeBERTa QDQ → Hexagon HTP NLI")
-    ap.add_argument("--act", default=os.environ.get("PRIME_NLI_QDQ_ACT", "uint8"))
-    ap.add_argument("--weight", default=os.environ.get("PRIME_NLI_QDQ_WEIGHT", "uint8"))
+    # Hexagon-friendly default: UINT16 activations (UINT8 often collapses logits)
+    ap.add_argument(
+        "--act",
+        default=os.environ.get("PRIME_NLI_QDQ_ACT", "uint16"),
+        help="activation quant type (default uint16 for HTP)",
+    )
+    ap.add_argument(
+        "--weight",
+        default=os.environ.get("PRIME_NLI_QDQ_WEIGHT", "uint8"),
+        help="weight quant type (default uint8)",
+    )
     ap.add_argument("--skip-export", action="store_true", help="reuse existing FP32")
     ap.add_argument(
         "--cpu-qdq-check",
