@@ -28,10 +28,17 @@ _FAIL_TS: float = 0.0
 _FAIL_BACKOFF_S = float(os.environ.get("PRIME_RERANK_FAIL_BACKOFF_S", "60"))
 
 # Only allow trust_remote_code for these exact Hub IDs.
-# Revision MUST be pinned (PRIME_JINA_RERANK_REV = commit SHA or tag). Empty rev
-# refuses the jina AutoModel path and falls through to CrossEncoder candidates.
+# Revision MUST be a full 40-char git commit SHA (immutable). Tags/branches/short
+# SHAs are refused. Empty rev refuses the jina AutoModel path → CrossEncoder.
+def _immutable_rev(raw: str | None) -> str:
+    rev = (raw or "").strip()
+    if len(rev) == 40 and all(c in "0123456789abcdef" for c in rev.lower()):
+        return rev.lower()
+    return ""
+
+
 TRUSTED_REMOTE = {
-    "jinaai/jina-reranker-v3": (os.environ.get("PRIME_JINA_RERANK_REV") or "").strip(),
+    "jinaai/jina-reranker-v3": _immutable_rev(os.environ.get("PRIME_JINA_RERANK_REV")),
 }
 
 DEFAULT_MODELS = [
@@ -77,13 +84,14 @@ def _load_engine() -> dict[str, Any]:
                     last_err = f"{mid}: not in TRUSTED_REMOTE allowlist"
                     continue
                 rev = TRUSTED_REMOTE.get(mid) or (
-                    (os.environ.get("PRIME_JINA_RERANK_REV") or "").strip()
+                    _immutable_rev(os.environ.get("PRIME_JINA_RERANK_REV"))
                     if mid == "jinaai/jina-reranker-v3"
                     else ""
                 )
                 if not rev:
                     last_err = (
-                        f"{mid}: refuse trust_remote_code without PRIME_JINA_RERANK_REV pin"
+                        f"{mid}: refuse trust_remote_code without immutable "
+                        "PRIME_JINA_RERANK_REV (full 40-char commit SHA)"
                     )
                     continue
                 try:

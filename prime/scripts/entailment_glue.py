@@ -320,8 +320,16 @@ def nli_cross_encoder(
                 for j in range(3)
             }
         elif s.size == 1:
-            # Single-logit: sigmoid p(entail); thresholds coupled to ONEWAY_P only
-            p_ent = float(1 / (1 + np.exp(-s[0])))
+            # Single-logit binary models: avoid double-sigmoid. If score already in
+            # [0,1], treat as p(entail); else apply one sigmoid to raw logit.
+            raw = float(s[0])
+            if 0.0 <= raw <= 1.0:
+                p_ent = raw
+                label_source = label_source + "+single_logit_prob"
+            else:
+                p_ent = float(1.0 / (1.0 + np.exp(-raw)))
+                label_source = label_source + "+single_logit_sigmoid"
+            # Thresholds coupled to ONEWAY_P only (not a free 0.55 constant)
             if p_ent >= ONEWAY_P:
                 label = "entailment"
                 conf = p_ent
@@ -330,13 +338,12 @@ def nli_cross_encoder(
                 conf = 1.0 - p_ent
             else:
                 label = "neutral"
-                conf = 1.0 - abs(2.0 * p_ent - 1.0)  # distance from 0.5
+                conf = 1.0 - abs(2.0 * p_ent - 1.0)
+            # Binary contract: report entail vs not-entail (not a fake 3-class dist)
             probs = {
                 "entailment": round(p_ent, 4),
                 "contradiction": round(1.0 - p_ent, 4),
-                "neutral": round(max(0.0, 1.0 - abs(2.0 * p_ent - 1.0)), 4),
             }
-            label_source = label_source + "+single_logit"
         else:
             return {
                 "ok": False,

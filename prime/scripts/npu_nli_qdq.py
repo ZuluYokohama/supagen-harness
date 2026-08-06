@@ -25,6 +25,21 @@ HF_ID = "cross-encoder/nli-deberta-v3-base"
 MAX_LEN = 128  # fixed for HTP; domain pairs are short
 REPORT = STATE / "npu_nli_qdq_report.json"
 STATE.mkdir(parents=True, exist_ok=True)
+REPO_ROOT = ROOT.parents[1]  # prime/scripts → prime → repo
+
+
+def _rel_path(p: Path | str) -> str:
+    """Emit repo-relative path for evidence (never host-absolute)."""
+    try:
+        return str(Path(p).resolve().relative_to(REPO_ROOT.resolve())).replace("\\", "/")
+    except Exception:
+        s = str(p).replace("\\", "/")
+        # strip common absolute roots
+        for marker in ("/prime/", "/docs/"):
+            i = s.find(marker)
+            if i >= 0:
+                return s[i + 1 :]
+        return Path(s).name
 
 # Calibration bank for static QDQ (NOT held-out).
 # HTP UINT16 previously biased to entailment → overweight short, sharp
@@ -295,12 +310,8 @@ def quantize_qdq(
     from onnxruntime.quantization.calibrate import CalibrationDataReader
 
     tok = AutoTokenizer.from_pretrained(HF_ID)
-    # Separate artifacts per quant recipe so UINT8 residual stays for comparison
-    suffix = f"a{act}_w{weight}".replace("int", "i").replace("uint", "u")
-    qdq = OUT_DIR / f"model.qdq.{suffix}.onnx"
-    if act == "uint8" and weight == "uint8":
-        qdq = OUT_DIR / "model.qdq.onnx"  # legacy default path
-    t0 = time.time()
+    act = (act or "").lower().strip()
+    weight = (weight or "").lower().strip()
     act_map = {
         "uint8": QuantType.QUInt8,
         "uint16": QuantType.QUInt16,
@@ -308,8 +319,19 @@ def quantize_qdq(
         "int16": QuantType.QInt16,
     }
     w_map = dict(act_map)
-    act_t = act_map.get(act.lower(), QuantType.QUInt8)
-    w_t = w_map.get(weight.lower(), QuantType.QUInt8)
+    if act not in act_map or weight not in w_map:
+        raise ValueError(
+            f"unsupported QDQ recipe act={act!r} weight={weight!r}; "
+            f"allowed={sorted(act_map)}"
+        )
+    # Separate artifacts per quant recipe so UINT8 residual stays for comparison
+    suffix = f"a{act}_w{weight}".replace("int", "i").replace("uint", "u")
+    qdq = OUT_DIR / f"model.qdq.{suffix}.onnx"
+    if act == "uint8" and weight == "uint8":
+        qdq = OUT_DIR / "model.qdq.onnx"  # legacy default path
+    t0 = time.time()
+    act_t = act_map[act]
+    w_t = w_map[weight]
 
     # Discover actual input names from the ONNX (preproc may drop token_type_ids)
     import onnx
@@ -647,24 +669,44 @@ def main() -> int:
         REPORT.write_text(json.dumps(report, indent=2), encoding="utf-8")
         print(report, flush=True)
         return 1
+    if ex.get("fp32"):
+        ex = dict(ex)
+        ex["fp32"] = _rel_path(ex["fp32"])
     report["export"] = ex
     print(json.dumps(ex, indent=2), flush=True)
 
     print(f"2) QDQ quantize act={args.act} weight={args.weight}…", flush=True)
     try:
-        q = quantize_qdq(Path(ex["fp32"]), act=args.act, weight=args.weight)
+        # Prefer on-disk OUT_DIR path (export field may be repo-relative for evidence)
+        fp_src = OUT_DIR / "model_fp32_fixed.onnx"
+        if not fp_src.is_file():
+            raise FileNotFoundError(f"missing FP32 export: {fp_src}")
+        q = quantize_qdq(fp_src, act=args.act, weight=args.weight)
     except Exception as e:
         report["ok"] = False
         report["error"] = f"quantize: {e}"
         REPORT.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
         print(report["error"], flush=True)
         return 1
-    report["quantize"] = q
-    print(json.dumps(q, indent=2), flush=True)
+    if q.get("qdq"):
+        q = dict(q)
+        q_path = Path(str(q["qdq"]))
+        q["qdq"] = _rel_path(q_path)
+        q["_qdq_abs"] = str(q_path)  # local-only; stripped before archive
+    report["quantize"] = {k: v for k, v in q.items() if k != "_qdq_abs"}
+    print(json.dumps(report["quantize"], indent=2), flush=True)
 
     print("3) run HTP…", flush=True)
     try:
-        run = run_htp(Path(q["qdq"]))
+        qdq_abs = Path(q.get("_qdq_abs") or (OUT_DIR / "model.qdq.onnx"))
+        if not qdq_abs.is_file():
+            # resolve from recipe suffix
+            suf = f"a{args.act}_w{args.weight}".replace("int", "i").replace("uint", "u")
+            cand = OUT_DIR / f"model.qdq.{suf}.onnx"
+            if args.act == "uint8" and args.weight == "uint8":
+                cand = OUT_DIR / "model.qdq.onnx"
+            qdq_abs = cand
+        run = run_htp(qdq_abs)
     except Exception as e:
         report["ok"] = False
         report["error"] = f"run: {e}"
@@ -683,7 +725,7 @@ def main() -> int:
     ):
         print("3b) CPU EP on same QDQ (isolation)…", flush=True)
         try:
-            cpu_chk = run_cpu_qdq(Path(q["qdq"]))
+            cpu_chk = run_cpu_qdq(qdq_abs)
             report["cpu_qdq_check"] = cpu_chk
             print(json.dumps(cpu_chk, indent=2), flush=True)
             htp_rate = float(run.get("label_parity_rate") or 0.0)

@@ -40,7 +40,9 @@ ORT CPU on the same pairs: contradiction 0.9999 / 0.9999, entailment 0.9985.
 ## Product law (code-enforced)
 
 1. `glue_agreement(prefer="auto")` → **ORT → CE → LFM** only.  
-2. `prefer="htp"` is refused unless `prime/state/npu/nli_htp_parity_cert.json` is green (`measure_fabric.nli_htp_parity_pass`).  
+2. `prefer="htp"|"hexagon"|"npu"`:  
+   - **Red / missing** `nli_htp_parity_pass` → annotate `htp_refused`, normalize to `auto`, run ORT→CE→LFM.  
+   - **Green** cert today still **normalizes to `auto`** and runs ORT→CE→LFM — production HTP Job2 session is **not wired** yet; green cert is a future gate, not a live HTP product path.  
 3. Parity cert never sets `job2_owns_open=true`.  
 4. Production OPEN remains external domain audit + cert_face.
 

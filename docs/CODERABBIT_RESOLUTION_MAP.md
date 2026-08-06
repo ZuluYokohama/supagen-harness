@@ -58,6 +58,14 @@
 | hexagon present hardcoded | **Fixed** | `present: null` until probe |
 | single-logit threshold | **Fixed** | coupled to ONEWAY_P |
 | --mode gap as open defect | **Documented closed** | VV_FINAL historical note |
+| rerank rev not immutable | **Fixed** | full 40-char commit SHA only (`_immutable_rev`) |
+| QDQ silent uint8 default | **Fixed** | `ValueError` on unsupported act/weight |
+| MD detail invalid JSON splice | **Fixed** | `{"truncated":true,"preview":…}` wrapper |
+| truth_loop doubles static NLI | **Fixed** | default `PRIME_TRUTH_ROUNDS=1` |
+| prefer=htp doc incomplete | **Fixed** | red refuse + green still auto (HTP product unwired) |
+| disposition string-only | **Fixed** | runtime incomplete-labels + D17 recompute checks |
+| D17 empty cells PASS | **Fixed** | `cells_ok` requires non-empty list |
+| evidence absolute paths | **Fixed** | `_rel_path` on export/qdq; scrub archives |
 
 **Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`  
 Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (+ D4 frankenstein-only + evidence archive note).

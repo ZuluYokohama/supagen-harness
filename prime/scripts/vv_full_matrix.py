@@ -840,7 +840,9 @@ def d17_push_suite_artifact() -> dict:
         c for c in cells if c.get("critical") and c.get("status") == "FAIL"
     ]
     header_ok = d.get("ok") is True
-    ok = header_ok and not crit_fail and count_ok
+    # Empty/missing cells cannot PASS even if header ok=true
+    cells_ok = isinstance(cells, list) and len(cells) > 0
+    ok = header_ok and not crit_fail and count_ok and cells_ok
     return _gate(
         "D17_push_suite",
         ok,
@@ -850,6 +852,7 @@ def d17_push_suite_artifact() -> dict:
             "n_warn": n_warn,
             "n_fail": n_fail,
             "n_cells": len(cells),
+            "cells_ok": cells_ok,
             "count_ok": count_ok,
             "header_n_pass": d.get("n_pass"),
             "header_n_fail": d.get("n_fail"),
@@ -982,9 +985,15 @@ def _write_md(report: dict) -> None:
         lines.append("```json")
         detail_s = json.dumps(c.get("detail"), indent=2, default=str)
         if len(detail_s) > 3000:
-            # Truncate on a full line so the fenced block stays valid JSON-ish
-            cut = detail_s[:3000].rsplit("\n", 1)[0]
-            detail_s = cut + "\n  \"…\": \"truncated\"\n}"
+            # Never splice JSON — emit a valid wrapper with preview only
+            detail_s = json.dumps(
+                {
+                    "truncated": True,
+                    "preview": detail_s[:2800],
+                    "original_chars": len(detail_s),
+                },
+                indent=2,
+            )
         lines.append(detail_s)
         lines.append("```")
         lines.append("")

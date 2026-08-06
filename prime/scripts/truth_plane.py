@@ -363,12 +363,14 @@ def truth_loop(
     from entailment_glue import mutual_entailment, nli_cross_encoder
 
     try:
-        raw_r = os.environ.get("PRIME_TRUTH_ROUNDS", "3")
+        raw_r = os.environ.get("PRIME_TRUTH_ROUNDS", "1")
         max_rounds = max_rounds or int(raw_r)
     except (TypeError, ValueError):
-        max_rounds = 3
+        max_rounds = 1
     if max_rounds < 1:
-        max_rounds = 3
+        max_rounds = 1
+    # Static claims (prem/hyp fixed): one NLI pass is enough unless caller
+    # sets PRIME_TRUTH_ROUNDS>1 or max_rounds explicitly for stability re-measure.
     domain = domain if domain in TRUTH_DOMAINS else "general"
     history: list[dict[str, Any]] = []
     final: list[dict[str, Any]] = []

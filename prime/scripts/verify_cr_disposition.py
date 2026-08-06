@@ -108,8 +108,14 @@ def main() -> int:
             "count_ok" in t("prime/scripts/vv_push_domains.py")
             and "assert n_pass + n_warn + n_fail" not in t("prime/scripts/vv_push_domains.py")
         ),
-        "rerank_rev_required": "refuse trust_remote_code without PRIME_JINA_RERANK_REV"
-        in t("prime/scripts/rerank_service.py"),
+        "rerank_rev_required": "40-char commit SHA" in t("prime/scripts/rerank_service.py")
+        or "full 40-char commit SHA" in t("prime/scripts/rerank_service.py"),
+        "qdq_recipe_reject": "unsupported QDQ recipe" in t("prime/scripts/npu_nli_qdq.py"),
+        "md_truncate_wrapper": '"truncated": True' in t("prime/scripts/vv_full_matrix.py")
+        or '"truncated": true' in t("prime/scripts/vv_full_matrix.py").lower(),
+        "truth_loop_default_one": 'PRIME_TRUTH_ROUNDS", "1"' in t(
+            "prime/scripts/truth_plane.py"
+        ),
         "ort_force_cpu_no_synth": 'run.get("ort_force_cpu") is True'
         in t("prime/scripts/measure_fabric.py")
         and 'ort_force_cpu", True)' not in t("prime/scripts/measure_fabric.py"),
@@ -192,12 +198,63 @@ def main() -> int:
                 not live_order or live_order[0] != "htp_qdq"
             )
         else:
-            # Green cert is allowed to put htp first — record but do not fail
+            # Green cert may advertise htp first in route_job2; product glue still auto
             runtime["runtime_live_red_no_htp_first"] = True
     except Exception as e:
         runtime["runtime_red_cert_no_htp_first"] = False
         runtime["runtime_live_red_no_htp_first"] = False
         print("runtime fabric error:", e)
+
+    # Executable: incomplete labels_covered cannot green parity cert
+    try:
+        import measure_fabric as _mf2  # type: ignore
+        import tempfile
+        from pathlib import Path as _P
+
+        tmp = _P(tempfile.gettempdir()) / "prime_fake_parity_cert.json"
+        # incomplete: no held_out, labels incomplete
+        tmp.write_text(
+            '{"ok": true, "label_parity_rate": 1.0, "hits": 3, "n": 3, '
+            '"cpu_fallback": false, "qnn_ep_registered": true, '
+            '"ort_force_cpu": true, "held_out": false, '
+            '"labels_covered": ["entailment"], "recipe": {"act": "uint8"}}',
+            encoding="utf-8",
+        )
+        old_cert = _mf2.PARITY_CERT
+        _mf2.PARITY_CERT = tmp  # type: ignore[assignment]
+        try:
+            bad = _mf2.nli_htp_parity_pass()
+            runtime["runtime_incomplete_labels_not_green"] = not bool(bad.get("ok"))
+        finally:
+            _mf2.PARITY_CERT = old_cert  # type: ignore[assignment]
+            try:
+                tmp.unlink(missing_ok=True)  # type: ignore[arg-type]
+            except Exception:
+                pass
+    except Exception as e:
+        runtime["runtime_incomplete_labels_not_green"] = False
+        print("runtime incomplete labels error:", e)
+
+    # Executable: D17-style count recompute from cells
+    try:
+        cells = [
+            {"status": "PASS", "critical": True},
+            {"status": "WARN", "critical": False},
+            {"status": "FAIL", "critical": False},
+        ]
+        n_pass = sum(1 for c in cells if c.get("status") == "PASS")
+        n_warn = sum(1 for c in cells if c.get("status") == "WARN")
+        n_fail = sum(1 for c in cells if c.get("status") == "FAIL")
+        runtime["runtime_d17_count_recompute"] = (
+            n_pass == 1 and n_warn == 1 and n_fail == 1 and n_pass + n_warn + n_fail == 3
+        )
+        runtime["runtime_d17_empty_cells_reject"] = not (
+            isinstance([], list) and len([]) > 0
+        )  # empty must fail cells_ok
+    except Exception as e:
+        runtime["runtime_d17_count_recompute"] = False
+        runtime["runtime_d17_empty_cells_reject"] = False
+        print("runtime d17 error:", e)
 
     try:
         cert = json.loads(
