@@ -483,14 +483,27 @@ def d8_accel_npu() -> dict:
     path_live = bool(hx.get("ok") and (hx.get("n_qnn_devices") or 0) > 0)
     htp_exists = bool(hx.get("htp_dll") or hx.get("htp_exists") or path_live)
     ok = path_live or bool(ort.get("providers_builtin") or ort.get("providers"))
+    parity = {"ok": False, "reason": "unavailable"}
+    job2_order = ["ort_cpu", "cross_encoder", "lfm"]
+    try:
+        from measure_fabric import nli_htp_parity_pass, route_job2
+
+        parity = nli_htp_parity_pass()
+        job2_order = route_job2().get("order") or job2_order
+    except Exception as e:
+        parity = {"ok": False, "reason": str(e)[:200]}
     residual = None
     if path_live:
         residual = (
-            "HTP measure path live (run npu-htp-2026-08-06); "
-            "Job2 DeBERTa QDQ label parity FAIL — CPU ORT/CE remains agreement authority"
+            "HTP measure path live; Job2 QDQ label parity ACCEPTED RESIDUAL "
+            f"(parity_cert ok={parity.get('ok')}); product order={job2_order}"
         )
     else:
         residual = "QNN plugin not registered on this host — Job2/1.5 on CPU"
+    # Product path must not claim HTP while parity red
+    if parity.get("ok") is True and "htp" not in str(job2_order[0]):
+        ok = False
+        residual = "parity green but route order missing htp — fabric inconsistency"
     return _gate(
         "D8_accel_npu",
         ok,
@@ -512,8 +525,12 @@ def d8_accel_npu() -> dict:
             },
             "hexagon_path_live": path_live,
             "htp_backend_present": htp_exists,
+            "htp_parity": parity,
+            "job2_route_order": job2_order,
+            "job2_owns_open": False,
             "residual": residual,
-            "next": "E3: UINT16/calib/distill until label parity PASS before product HTP NLI",
+            "accepted_residual_doc": "docs/RESIDUAL_ACCEPTANCE_E3.md",
+            "next": "E3 green cert required before htp first in route order",
             "proof": "htp_profile cycles (npu_stress) — not providers list alone",
         },
         critical=False,
