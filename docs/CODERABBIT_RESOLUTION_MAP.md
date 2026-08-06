@@ -75,6 +75,11 @@
 | golden claims structure | **Fixed** | require sha256, required_ids, n_claims |
 | ensure invalid mode | **Fixed** | reject non scout/preserve |
 | QDQ SHA isolation | **Fixed** | qdq_sha256 + held_out_manifest_sha256 on evidence |
+| D12 criticality split | **Fixed** | session-load + fixture + exception all critical=True |
+| D17 portable is_file only | **Fixed** | runtime parse integrity JSON + count match |
+| Jina unverified already_running | **Fixed** | no META/gguf/pooling → force_restart (fail closed) |
+| QNN silent CPU attach | **Fixed** | strict session asserts active provider is QNN |
+| QDQ default uint8 | **Fixed** | default act=uint16 for HTP measure |
 
 **Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`  
 Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (+ D4 frankenstein-only + evidence archive note).

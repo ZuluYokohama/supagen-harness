@@ -309,51 +309,61 @@ def ensure_jina(
                         live_meta = json.loads(META_FILE.read_text(encoding="utf-8"))
                     except Exception:
                         live_meta = {}
-                hyp = live_meta.get("hyperparams") or {}
-                want_pool = os.environ.get("PRIME_JINA_POOLING", "last")
-                live_pool = hyp.get("pooling") or want_pool
-                # Desired GGUF: explicit env, else first candidate on disk
-                want_gguf = (os.environ.get("PRIME_JINA_GGUF") or "").strip()
-                if not want_gguf:
-                    try:
-                        cand = _first_file(_gguf_candidates())
-                        want_gguf = str(cand) if cand else ""
-                    except Exception:
-                        want_gguf = ""
-                live_gguf = str(live_meta.get("gguf") or "")
-                config_mismatch = False
-                if live_pool != want_pool:
-                    config_mismatch = True
-                if want_gguf and live_gguf:
-                    # basename match when full paths differ
-                    wb = Path(want_gguf).name.lower()
-                    lb = Path(live_gguf).name.lower()
-                    if wb != lb and want_gguf not in live_gguf and live_gguf not in want_gguf:
-                        config_mismatch = True
-                if config_mismatch:
+                # Fail closed / force re-bind when config is not verified
+                if not live_meta or not live_meta.get("gguf"):
                     force_restart = True
                 else:
-                    out = {
-                        "ok": True,
-                        "started": False,
-                        "status": "already_running",
-                        "base": BASE,
-                        "dim": p.get("dim"),
-                        "latency_ms": p.get("latency_ms"),
-                        # confirmed running GGUF from live meta
-                        "gguf": live_gguf or live_meta.get("gguf"),
-                        "model_field": p.get("model_field"),
-                        "hyperparams": {
-                            "context_length": live_meta.get("ctx")
-                            or hyp.get("context_length")
-                            or CTX,
-                            "pooling": live_pool,
-                            "prefixes": PREFIX,
-                        },
-                        "seamless": True,
-                    }
-                    _LAST_ENSURE = out
-                    return out
+                    hyp = live_meta.get("hyperparams") or {}
+                    want_pool = os.environ.get("PRIME_JINA_POOLING", "last")
+                    live_pool = hyp.get("pooling")
+                    # Desired GGUF: explicit env, else first candidate on disk
+                    want_gguf = (os.environ.get("PRIME_JINA_GGUF") or "").strip()
+                    if not want_gguf:
+                        try:
+                            cand = _first_file(_gguf_candidates())
+                            want_gguf = str(cand) if cand else ""
+                        except Exception:
+                            want_gguf = ""
+                    live_gguf = str(live_meta.get("gguf") or "")
+                    config_mismatch = False
+                    # Unverified pooling in meta → fail closed to restart
+                    if not live_pool:
+                        config_mismatch = True
+                    elif live_pool != want_pool:
+                        config_mismatch = True
+                    if want_gguf and live_gguf:
+                        wb = Path(want_gguf).name.lower()
+                        lb = Path(live_gguf).name.lower()
+                        if (
+                            wb != lb
+                            and want_gguf not in live_gguf
+                            and live_gguf not in want_gguf
+                        ):
+                            config_mismatch = True
+                    if config_mismatch:
+                        force_restart = True
+                    else:
+                        out = {
+                            "ok": True,
+                            "started": False,
+                            "status": "already_running",
+                            "base": BASE,
+                            "dim": p.get("dim"),
+                            "latency_ms": p.get("latency_ms"),
+                            "gguf": live_gguf,
+                            "config_verified": True,
+                            "model_field": p.get("model_field"),
+                            "hyperparams": {
+                                "context_length": live_meta.get("ctx")
+                                or hyp.get("context_length")
+                                or CTX,
+                                "pooling": live_pool,
+                                "prefixes": PREFIX,
+                            },
+                            "seamless": True,
+                        }
+                        _LAST_ENSURE = out
+                        return out
             # zombie: pid alive, port dead → force restart
             if PID_FILE.is_file():
                 try:

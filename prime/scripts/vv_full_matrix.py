@@ -640,13 +640,13 @@ def d12_ort_nli() -> dict:
 
         st = load_session(force_cpu=True)
         if not st.get("ok"):
-            return _gate("D12_ort_nli", False, st, critical=False)
+            # Same criticality as fixture path — product Job2 hot path is critical
+            return _gate("D12_ort_nli", False, st, critical=True)
         b = bench()
         hits = (b.get("ort") or {}).get("hits")
         n = (b.get("ort") or {}).get("n") or 0
         parity = b.get("label_parity")
         ok = bool(b.get("ok")) and hits is not None and hits >= max(n - 1, 1)
-        # Product Job2 hot path is ORT CPU — gate is critical when session loads
         return _gate(
             "D12_ort_nli",
             ok,

@@ -149,9 +149,6 @@ def main() -> int:
         "d12_critical": 'critical=True' in t("prime/scripts/vv_full_matrix.py")
         and "D12_ort_nli" in t("prime/scripts/vv_full_matrix.py"),
         "smoke_no_device_ptrs": "0x0000" not in t("docs/evidence/npu/npu_qnn_smoke.json"),
-        "d17_portable_evidence": (
-            ROOT / "docs/evidence/vv_push_domains_integrity.json"
-        ).is_file(),
         "qnn_strict_active_provider": (
             "active provider is not QNN" in t("prime/scripts/npu_qnn.py")
             or "strict QNN session" in t("prime/scripts/npu_qnn.py")
@@ -299,6 +296,33 @@ def main() -> int:
         runtime["runtime_d17_count_recompute"] = False
         runtime["runtime_d17_empty_cells_reject"] = False
         print("runtime d17 error:", e)
+
+    # Executable: portable D17 integrity artifact structure + count match
+    try:
+        art_path = ROOT / "docs/evidence/vv_push_domains_integrity.json"
+        art = json.loads(art_path.read_text(encoding="utf-8"))
+        cells = art.get("cells")
+        if not isinstance(cells, list) or not cells:
+            runtime["runtime_d17_portable_integrity"] = False
+        else:
+            statuses = {"PASS", "WARN", "FAIL"}
+            ok_status = all(
+                isinstance(c, dict) and c.get("status") in statuses for c in cells
+            )
+            n_pass = sum(1 for c in cells if c.get("status") == "PASS")
+            n_warn = sum(1 for c in cells if c.get("status") == "WARN")
+            n_fail = sum(1 for c in cells if c.get("status") == "FAIL")
+            header_match = (
+                art.get("n_pass") == n_pass
+                and art.get("n_warn") == n_warn
+                and art.get("n_fail") == n_fail
+                and art.get("n_cells") == len(cells)
+                and art.get("count_ok") is True
+            )
+            runtime["runtime_d17_portable_integrity"] = ok_status and header_match
+    except Exception as e:
+        runtime["runtime_d17_portable_integrity"] = False
+        print("runtime d17 portable error:", e)
 
     try:
         cert = json.loads(
