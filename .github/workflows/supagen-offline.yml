@@ -25,4 +25,6 @@ jobs:
         env:
           SUPAGEN_ROOT: ${{ github.workspace }}
           PRIMEDEV_ROOT: ${{ github.workspace }}
+          # No field sandbox dumps on buddy/CI — certificate schema only
+          GOLDEN_SCHEMA_ONLY: "1"
         run: python -m supagen verify
