@@ -1,0 +1,27 @@
+{
+  "artifact": "DOMAIN_COMPLETION_CERTIFICATE",
+  "pr": "https://github.com/ZuluYokohama/supagen-harness/pull/1",
+  "branch": "vv/dual-metric-npu-measure-fabric",
+  "timestamp": "2026-08-06T13:37:10.811069Z",
+  "seal": "GO_MEASURE",
+  "production_open": "NO-GO",
+  "matrix": {
+    "go_no_go": "GO_MEASURE",
+    "n_pass": 18,
+    "n_fail": 0,
+    "n_critical_fail": 0
+  },
+  "contract_live_author": "21/21 prior + law path recheck",
+  "disposition_verifier": "PASS",
+  "job2_auto_ep": "CPUExecutionProvider",
+  "htp_refuse": true,
+  "e3_residual": "accepted",
+  "domains_d0_d15": "SEALED",
+  "law": [
+    "aboutness != agreement",
+    "cosine never OPEN",
+    "Job2 owns agreement not OPEN",
+    "auto never QNN",
+    "HTP only after nli_htp_parity_pass"
+  ]
+}

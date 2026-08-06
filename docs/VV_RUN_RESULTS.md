@@ -1,7 +1,7 @@
 # V&V Run Results — Full Matrix
 
 **Verdict:** `GO_MEASURE`  
-**Seconds:** 26.1  
+**Seconds:** 28.4  
 **Pass/Fail:** 18 pass / 0 warn / 0 fail (0 critical fail)  
 **Count rule:** `WARN does not increment n_fail; only status=FAIL does`  
 **Job2 OPEN authority:** `False` (production OPEN = external domain audit + cert_face)
@@ -243,8 +243,29 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   },
   "hexagon_path_live": true,
   "htp_backend_present": true,
-  "residual": "HTP measure path live (run npu-htp-2026-08-06); Job2 DeBERTa QDQ label parity FAIL \u2014 CPU ORT/CE remains agreement authority",
-  "next": "E3: UINT16/calib/distill until label parity PASS before product HTP NLI",
+  "htp_parity": {
+    "ok": false,
+    "path": "C:\\PRIMEdEV-1\\prime\\state\\npu\\nli_htp_parity_cert.json",
+    "reason": "cert_not_green",
+    "age_h": 0.26,
+    "hits": 0,
+    "n": 3,
+    "hit_rate": 0.0,
+    "recipe": {
+      "act": "uint16",
+      "weight": "uint8"
+    },
+    "verdict": "NPU_NLI_PARTIAL"
+  },
+  "job2_route_order": [
+    "ort_cpu",
+    "cross_encoder",
+    "lfm"
+  ],
+  "job2_owns_open": false,
+  "residual": "HTP measure path live; Job2 QDQ label parity ACCEPTED RESIDUAL (parity_cert ok=False); product order=['ort_cpu', 'cross_encoder', 'lfm']",
+  "accepted_residual_doc": "docs/RESIDUAL_ACCEPTANCE_E3.md",
+  "next": "E3 green cert required before htp first in route order",
   "proof": "htp_profile cycles (npu_stress) \u2014 not providers list alone"
 }
 ```
@@ -287,7 +308,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
     "kind": "jina_rerank_api",
     "error": null
   },
-  "seconds": 18.25
+  "seconds": 19.29
 }
 ```
 
@@ -315,15 +336,15 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   "ort_hits": 3,
   "torch_hits": 3,
   "label_parity": true,
-  "ort_s": 0.695,
-  "torch_s": 0.699,
+  "ort_s": 0.964,
+  "torch_s": 1.329,
   "rows": [
     {
       "expect": "contradiction",
       "label": "contradiction",
       "conf": 0.9999,
       "hit": true,
-      "ms": 197.7,
+      "ms": 217.7,
       "provider": "CPUExecutionProvider"
     },
     {
@@ -331,7 +352,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
       "label": "contradiction",
       "conf": 0.9999,
       "hit": true,
-      "ms": 178.2,
+      "ms": 299.1,
       "provider": "CPUExecutionProvider"
     },
     {
@@ -339,7 +360,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
       "label": "entailment",
       "conf": 0.9985,
       "hit": true,
-      "ms": 158.2,
+      "ms": 281.1,
       "provider": "CPUExecutionProvider"
     },
     {
@@ -347,7 +368,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
       "label": "contradiction",
       "conf": 0.9773,
       "hit": false,
-      "ms": 160.6,
+      "ms": 165.5,
       "provider": "CPUExecutionProvider"
     }
   ]

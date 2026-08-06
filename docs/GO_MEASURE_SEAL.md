@@ -4,6 +4,7 @@
 **Branch:** `vv/dual-metric-npu-measure-fabric`  
 **Seal class:** **GO_MEASURE** (instrument advertise)  
 **Not sealed:** production OPEN marketing  
+**HEAD (seal refresh):** run `git rev-parse --short HEAD` on branch; CI must pass `verify_cr_disposition` + offline verify  
 
 ---
 
