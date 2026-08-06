@@ -7,14 +7,14 @@ Design law: `restrict → measure → audit → OPEN | STOP` — residue never f
 ## Buddy install (replicate)
 
 ```powershell
-git clone <THIS_REPO_URL>
+git clone https://github.com/ZuluYokohama/supagen-harness.git
 cd <repo-root>
 .\install.ps1
 # → pip install -e supagen + bootstrap .pth (no PYTHONPATH) + offline verify
 ```
 
 ```bash
-git clone <THIS_REPO_URL>
+git clone https://github.com/ZuluYokohama/supagen-harness.git
 cd <repo-root>
 bash install.sh
 ```
@@ -55,7 +55,7 @@ git config --global --add safe.directory <repo-root>   # if "dubious ownership"
 git add .
 git commit -m "supagen 0.3.1 buddy-ready"
 # create GH repo, then:
-git remote add origin https://github.com/<you>/<repo>.git
+git remote add origin https://github.com/ZuluYokohama/supagen-harness.git
 git push -u origin main
 ```
 

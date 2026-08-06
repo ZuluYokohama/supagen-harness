@@ -3,7 +3,7 @@
 ## One door
 
 ```powershell
-git clone <THIS_REPO_URL>
+git clone https://github.com/ZuluYokohama/supagen-harness.git
 cd <repo-root>
 .\install.ps1                 # sets SUPAGEN_ROOT, pip install -e supagen, smoke+contract offline
 python -m supagen ensure      # jina :8765 + LMS fiber @ ctx_policy

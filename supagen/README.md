@@ -32,7 +32,7 @@ bash supagen/install.sh
 ### From GitHub
 
 ```bash
-git clone https://github.com/<YOU>/<REPO>.git
+git clone https://github.com/ZuluYokohama/supagen-harness.git
 cd <REPO>
 # Windows:
 .\install.ps1
