@@ -45,6 +45,11 @@
 | E3 held_out OR rate bypass | **Fixed** | `held_out` mandatory + `label_parity_rate` present + `n>=2` |
 | D17 count assert not gate | **Fixed** | runtime `count_ok`; false → `ok=false` / `NO_GO` |
 | rerank trust_remote unpinned | **Fixed** | refuse jina AutoModel path unless `PRIME_JINA_RERANK_REV` set; CE fallback |
+| synthesize ort_force_cpu=True | **Fixed** | require `run.ort_force_cpu is True`; persist False if missing |
+| LFM fiber env-only | **Fixed** | `glue_agreement(fiber_mode=…)`; dual_enter passes request mode |
+| held-out missing neutral | **Fixed** | neutral fixture + `labels_covered` / complete gate |
+| red-cert disposition on green | **Fixed** | inject red for route check; live green no longer fails CI |
+| contract_live commit_hint only | **Fixed** | full `commit` + `tree` SHA on certificate |
 
 **Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`  
 Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (+ D4 frankenstein-only + evidence archive note).

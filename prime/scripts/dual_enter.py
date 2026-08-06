@@ -353,7 +353,13 @@ def dual_enter(
                     hyp = f"Proceed using evidence from: {hits[0].get('title') or hits[0].get('id')}"
                 else:
                     hyp = f"Operationalize: {clean[:400]}"
-            agreement = glue_agreement(clean[:1800], hyp[:800], prefer="auto", base=base)
+            agreement = glue_agreement(
+                clean[:1800],
+                hyp[:800],
+                prefer="auto",
+                base=base,
+                fiber_mode=mode,
+            )
             card["agreement"] = agreement
         except Exception as e:
             agreement = {

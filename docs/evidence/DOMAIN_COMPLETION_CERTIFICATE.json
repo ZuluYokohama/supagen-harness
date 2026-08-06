@@ -19,7 +19,9 @@
     "live": true,
     "measured_count": "21/21",
     "run_id": "contract_live_author_kit",
-    "commit_hint": "43c8ce3+",
+    "commit": "fc22d7230146c85b83ef9783643afbd2e159c2e4",
+    "tree": "6543746849eae6ab6016c9cb19846a05b671032a",
+    "commit_hint": "fc22d72",
     "evidence_path": "docs/evidence/buddy_l8_live_protocol_run.json",
     "recheck": "law_path_auto_cpu_htp_refuse",
     "job2_force_cpu": true

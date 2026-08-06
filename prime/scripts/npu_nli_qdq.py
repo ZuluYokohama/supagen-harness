@@ -79,6 +79,12 @@ HELD_OUT_PAIRS: list[tuple[str, str, str]] = [
         "Task Manager NPU counters are the sole proof of Hexagon HTP execution.",
         "contradiction",
     ),
+    # Neutral: related topic, neither entailment nor contradiction (text-disjoint from CALIB)
+    (
+        "The lab inventory lists three oscilloscopes and one spectrum analyzer.",
+        "Tomorrow's weather forecast mentions light rain in the valley.",
+        "neutral",
+    ),
 ]
 
 
@@ -395,6 +401,9 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
     n_parity = sum(1 for x in rows if x.get("parity_with_ort") is True)
     n_parity_den = sum(1 for x in rows if x.get("parity_with_ort") is not None)
     label_parity_rate = (n_parity / n_parity_den) if n_parity_den else 0.0
+    labels_covered = sorted({exp for _a, _b, exp in HELD_OUT})
+    required_labels = {"contradiction", "entailment", "neutral"}
+    labels_complete = set(labels_covered) >= required_labels
 
     # bench
     for _ in range(5):
@@ -420,6 +429,8 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
         "label_parity_n": n_parity,
         "label_parity_den": n_parity_den,
         "held_out": True,
+        "labels_covered": labels_covered,
+        "labels_complete": labels_complete,
         "ort_force_cpu": True,  # parity authority is always CPU ORT
         "bench_ms_per": round(bench_s * 1000 / n, 2),
         "htp_dll": "<QnnHtp.dll>",  # sanitized — no user path in reports

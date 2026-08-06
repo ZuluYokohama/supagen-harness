@@ -494,10 +494,13 @@ def glue_agreement(
     domain: str,
     prefer: str = "auto",
     base: str = DEFAULT_BASE,
+    fiber_mode: str | None = None,
 ) -> dict[str, Any]:
     """
     Job 2 entry: does domain stalk *agree* with human intent (entailment).
     prefer: auto (ORT→DeBERTa CE→LFM) | ort | cross_encoder | lfm | mutual | htp
+    fiber_mode: optional request fiber (preserve|scout); overrides PRIME_FIBER_MODE
+    for LFM scout-only guard when dual_enter passes an explicit mode.
 
     HTP is never first on auto. prefer=htp only runs when measure_fabric
     nli_htp_parity_pass() is green; otherwise falls through to ORT/CE.
@@ -600,7 +603,7 @@ def glue_agreement(
                 "gate": "NEED_INFO",
             }
         )
-    fiber = (_os.environ.get("PRIME_FIBER_MODE") or "scout").lower().strip()
+    fiber = (fiber_mode or _os.environ.get("PRIME_FIBER_MODE") or "scout").lower().strip()
     if fiber != "scout":
         return _annotate(
             {

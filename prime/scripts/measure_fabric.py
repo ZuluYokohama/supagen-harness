@@ -67,6 +67,11 @@ def nli_htp_parity_pass(*, max_age_h: float = 168.0) -> dict[str, Any]:
             and not bool(cert.get("probe_only") or cert.get("strict_qnn_failed"))
             and not bool(cert.get("uncalibrated_probe"))
             and cert.get("ort_force_cpu") is True  # parity authority must be CPU ORT
+            and (
+                not cert.get("labels_covered")
+                or set(cert.get("labels_covered") or [])
+                >= {"contradiction", "entailment", "neutral"}
+            )
         )
         green = required_ok
         out.update(
@@ -160,17 +165,28 @@ def write_parity_cert_from_report(report_path: Path | str) -> dict[str, Any]:
     )
     probe_only = bool(run.get("probe_only") or run.get("strict_qnn_failed"))
     cpu_fallback = probe_only or bool(run.get("cpu_fallback"))
-    # held_out mandatory; rate present; n>=2 — no OR bypass via rate alone
+    # Never synthesize CPU-reference evidence — missing ort_force_cpu is False
+    ort_force_cpu = run.get("ort_force_cpu") is True
+    # Label coverage: require all three NLI labels in held-out bank when present
+    labels_covered = set(run.get("labels_covered") or [])
+    labels_ok = not labels_covered or labels_covered >= {
+        "contradiction",
+        "entailment",
+        "neutral",
+    }
+    # held_out mandatory; rate present; n>=2; ort_force_cpu proven — no defaults
     green = bool(
         run.get("ok")
         and rate >= min_rate
         and hits >= 2
         and n >= 2
+        and ort_force_cpu
         and not probe_only
         and not cpu_fallback
         and bool(run.get("held_out"))
         and run.get("label_parity_rate") is not None
         and bool(run.get("qnn_ep_registered") or run.get("on_qnn"))
+        and labels_ok
     )
     cert = {
         "ok": green,
@@ -181,6 +197,9 @@ def write_parity_cert_from_report(report_path: Path | str) -> dict[str, Any]:
         "label_parity_n": hits,
         "label_parity_den": n,
         "held_out": bool(run.get("held_out")),
+        "labels_covered": sorted(labels_covered) if labels_covered else list(
+            run.get("labels_covered") or []
+        ),
         "recipe": rep.get("recipe")
         or {
             "act": (rep.get("quantize") or {}).get("act"),
@@ -195,7 +214,7 @@ def write_parity_cert_from_report(report_path: Path | str) -> dict[str, Any]:
         "probe_only": probe_only,
         "strict_qnn_failed": bool(run.get("strict_qnn_failed")),
         "uncalibrated_probe": not green,
-        "ort_force_cpu": bool(run.get("ort_force_cpu", True)),
+        "ort_force_cpu": ort_force_cpu,
         "job2_owns_open": False,
         "measured_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "source_report": "<repo>/docs/evidence/npu/ or prime/state/npu_nli_qdq_report.json",

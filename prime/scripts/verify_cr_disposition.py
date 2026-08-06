@@ -110,6 +110,14 @@ def main() -> int:
         ),
         "rerank_rev_required": "refuse trust_remote_code without PRIME_JINA_RERANK_REV"
         in t("prime/scripts/rerank_service.py"),
+        "ort_force_cpu_no_synth": 'run.get("ort_force_cpu") is True'
+        in t("prime/scripts/measure_fabric.py")
+        and 'ort_force_cpu", True)' not in t("prime/scripts/measure_fabric.py"),
+        "glue_fiber_mode_param": "fiber_mode: str | None = None"
+        in t("prime/scripts/entailment_glue.py"),
+        "dual_enter_passes_fiber": "fiber_mode=mode" in t("prime/scripts/dual_enter.py"),
+        "held_out_neutral": '"neutral"' in t("prime/scripts/npu_nli_qdq.py")
+        and "labels_covered" in t("prime/scripts/npu_nli_qdq.py"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---
@@ -131,22 +139,47 @@ def main() -> int:
             if _norm_pair_text(a) in calib or _norm_pair_text(b) in calib:
                 overlap = True
                 break
-        runtime["runtime_held_out_disjoint"] = not overlap and len(HELD_OUT_PAIRS) >= 3
+        labels = {lab for _a, _b, lab in HELD_OUT_PAIRS}
+        labels_ok = labels >= {"contradiction", "entailment", "neutral"}
+        runtime["runtime_held_out_disjoint"] = (
+            not overlap and len(HELD_OUT_PAIRS) >= 3 and labels_ok
+        )
+        runtime["runtime_held_out_has_neutral"] = "neutral" in labels
     except Exception as e:
         runtime["runtime_held_out_disjoint"] = False
+        runtime["runtime_held_out_has_neutral"] = False
         print("runtime held_out error:", e)
 
     try:
-        from measure_fabric import nli_htp_parity_pass, route_job2  # type: ignore
+        import measure_fabric as _mf  # type: ignore
 
-        par = nli_htp_parity_pass()
-        order = route_job2().get("order") or []
-        # Red cert → no htp first
-        runtime["runtime_red_cert_no_htp_first"] = (not par.get("ok")) and (
-            not order or order[0] != "htp_qdq"
-        )
+        # Inject red parity so this check never fails on a future green E3 cert
+        _orig = _mf.nli_htp_parity_pass
+
+        def _red_parity(*_a, **_k):
+            return {"ok": False, "reason": "disposition_injected_red"}
+
+        _mf.nli_htp_parity_pass = _red_parity  # type: ignore[assignment]
+        try:
+            order = _mf.route_job2().get("order") or []
+            runtime["runtime_red_cert_no_htp_first"] = (
+                not order or order[0] != "htp_qdq"
+            ) and "htp_qdq" not in (order[:1] or [])
+        finally:
+            _mf.nli_htp_parity_pass = _orig  # type: ignore[assignment]
+        # Live path still honest: if currently red, order must not start with htp
+        par = _orig()
+        live_order = _mf.route_job2().get("order") or []
+        if not par.get("ok"):
+            runtime["runtime_live_red_no_htp_first"] = (
+                not live_order or live_order[0] != "htp_qdq"
+            )
+        else:
+            # Green cert is allowed to put htp first — record but do not fail
+            runtime["runtime_live_red_no_htp_first"] = True
     except Exception as e:
         runtime["runtime_red_cert_no_htp_first"] = False
+        runtime["runtime_live_red_no_htp_first"] = False
         print("runtime fabric error:", e)
 
     try:
