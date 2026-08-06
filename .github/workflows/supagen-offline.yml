@@ -1,0 +1,28 @@
+name: supagen-offline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          export SUPAGEN_ROOT="$GITHUB_WORKSPACE"
+          export PRIMEDEV_ROOT="$GITHUB_WORKSPACE"
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e ./supagen
+          python -m supagen bootstrap
+      - name: Offline contract + smoke + harness
+        env:
+          SUPAGEN_ROOT: ${{ github.workspace }}
+          PRIMEDEV_ROOT: ${{ github.workspace }}
+        run: python -m supagen verify

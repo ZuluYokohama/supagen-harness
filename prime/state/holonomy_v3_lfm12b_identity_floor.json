@@ -1,0 +1,109 @@
+{
+  "model": "liquid/lfm2.5-1.2b",
+  "protocol": "v3 identity floor \u2014 closure=mutual entailment; cos diagnostic only",
+  "identity_closure_p": 0.2857,
+  "cosine_would_say_ge_0.75": 0.0,
+  "median_cos": 0.6635,
+  "gate_threshold": 0.8,
+  "gate_failed": true,
+  "modes": {
+    "dropped": 4,
+    "inverted": 1,
+    "closed": 2
+  },
+  "n": 7,
+  "seconds": 8.3,
+  "fiber_ctx": 128000,
+  "compare": {
+    "frankenstein_prior": "~0.88\u20130.94 PASS",
+    "gemma12b_prior": "0.38 FAIL",
+    "lfm_prior_partial": 0.286
+  },
+  "reading": "LFM1.2B identity p=0.29 (need \u22650.80 to pass identity gate). Cosine\u22650.75 would claim 0.00 \u2014 do not gate on cos. Modes={'dropped': 4, 'inverted': 1, 'closed': 2}.",
+  "rows": [
+    {
+      "depth": 1,
+      "N": 3,
+      "fwd": "entailment",
+      "rev": "neutral",
+      "closed": false,
+      "mode": "dropped",
+      "cos": 0.6029877661741128,
+      "theta": 1.3930536508422564e-30,
+      "lam": 0.0,
+      "collapsed": false
+    },
+    {
+      "depth": 1,
+      "N": 3,
+      "fwd": "entailment",
+      "rev": "neutral",
+      "closed": false,
+      "mode": "dropped",
+      "cos": 0.6215905084307367,
+      "theta": 2.6145945788908903e-30,
+      "lam": 0.0,
+      "collapsed": false
+    },
+    {
+      "depth": 1,
+      "N": 3,
+      "fwd": "entailment",
+      "rev": "neutral",
+      "closed": false,
+      "mode": "dropped",
+      "cos": 0.7026449940888804,
+      "theta": -2.7575662201280963e-30,
+      "lam": 0.0,
+      "collapsed": false
+    },
+    {
+      "depth": 1,
+      "N": 3,
+      "fwd": "entailment",
+      "rev": "neutral",
+      "closed": false,
+      "mode": "dropped",
+      "cos": 0.6908833076485053,
+      "theta": -1.2706710968283028e-30,
+      "lam": 0.0,
+      "collapsed": false
+    },
+    {
+      "depth": 1,
+      "N": 3,
+      "fwd": "contradiction",
+      "rev": "contradiction",
+      "closed": false,
+      "mode": "inverted",
+      "cos": 0.6833660784495491,
+      "theta": 5.626361025555066e-31,
+      "lam": 0.0,
+      "collapsed": false
+    },
+    {
+      "depth": 1,
+      "N": 3,
+      "fwd": "entailment",
+      "rev": "entailment",
+      "closed": true,
+      "mode": "closed",
+      "cos": 0.61428352743027,
+      "theta": -2.0159081754914166e-31,
+      "lam": 0.0,
+      "collapsed": false
+    },
+    {
+      "depth": 1,
+      "N": 3,
+      "fwd": "entailment",
+      "rev": "entailment",
+      "closed": true,
+      "mode": "closed",
+      "cos": 0.6634559930835939,
+      "theta": 2.675852766522556e-30,
+      "lam": 0.0,
+      "collapsed": false
+    }
+  ]
+}

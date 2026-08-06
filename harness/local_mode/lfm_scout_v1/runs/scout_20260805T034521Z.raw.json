@@ -1,0 +1,29 @@
+{
+  "id": "chatcmpl-0us5jvte0bxpri7b56yv9gd",
+  "object": "chat.completion",
+  "created": 1785901517,
+  "model": "liquid/lfm2.5-1.2b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Planes observed: 4 distinct modalities present \u2013 tool_magpi, wits_surface, decoder_rt, vision.  \nExpected process: Sequential data ingestion, real-time parsing, and cross-plane validation. Deviation: decoder_rt is DEAD in burst, indicating a critical failure point that must be addressed before further assembly.  \n\nDRAFT multi-plane claim (tagged):  \n- Item ID: DRAFT-001  \n- Description: Incomplete integration; missing decoder output and vision data. Current state relies on tool_magpi but lacks downstream processing confirmation.  \n\nResidue: Missing decoder_rt and vision evidence; no clear path to completion without external intervention.  \n\nCERTIFY: NOT AUTHORIZED \u2014 external gate required",
+        "reasoning_content": "",
+        "tool_calls": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 603,
+    "completion_tokens": 168,
+    "total_tokens": 771,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "stats": {},
+  "system_fingerprint": "liquid/lfm2.5-1.2b"
+}

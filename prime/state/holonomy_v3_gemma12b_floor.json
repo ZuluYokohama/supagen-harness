@@ -1,0 +1,88 @@
+{
+  "model": "gemma-4-12b-agentic-fable5-composer2.5-v2-3.5x-tau2@q4_k_m",
+  "backend": "llama-server :8766 ctx=512 flash_attn",
+  "identity_closure": 0.375,
+  "n": 8,
+  "modes": {
+    "closed": 3,
+    "dropped": 3,
+    "unrelated": 2
+  },
+  "gate_failed": true,
+  "seconds": 289.3,
+  "rows": [
+    {
+      "fwd": "entailment",
+      "rev": "entailment",
+      "closed": true,
+      "mode": "closed",
+      "seed": "A claim may not open unless a restriction was recorded before the measures.",
+      "mid": "A claim may not open unless a restriction was filed before the measures.",
+      "final": "A claim may not open unless a restriction was filed before the measures."
+    },
+    {
+      "fwd": "entailment",
+      "rev": "entailment",
+      "closed": true,
+      "mode": "closed",
+      "seed": "Strain that no choice of dihedrals can remove belongs to the ring, not to any residue.",
+      "mid": "Strains that no choice of dihedrals can remove belong to the ring, not to any residue.",
+      "final": "Strains that no choice of dihedrals can eliminate belong to the ring, not to any residue."
+    },
+    {
+      "fwd": "entailment",
+      "rev": "neutral",
+      "closed": false,
+      "mode": "dropped",
+      "seed": "The decoder was offline while the tool recorded fifty interference events downhole.",
+      "mid": "I can replace 'offline' with 'down' (one word) or 'offline' with 'inoperative' (one word). Both preserve meaning. 'Inoperative' is more precise.",
+      "final": "I can replace 'offline' with 'down' (one word) or 'offline' with 'inoperative' (one word). Both preserve meaning. 'Inoperative' is more precise. -> I can replace 'offline' with 'down' (one word) or 'offline' with 'inoperative' (one word). Both preserve meaning. 'Inoperative' is more precise. -> I can replace 'offline' with 'down' (one word) or 'offline"
+    },
+    {
+      "fwd": "entailment",
+      "rev": "neutral",
+      "closed": false,
+      "mode": "dropped",
+      "seed": "An instrument that returns the same value on every input carries no information.",
+      "mid": "An instrument that returns the same value for every input carries no information.",
+      "final": "An instrument returning the same11111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "fwd": "entailment",
+      "rev": "entailment",
+      "closed": true,
+      "mode": "closed",
+      "seed": "Sequence sets the cost of ring closure and has no bearing on its feasibility.",
+      "mid": "Sequence sets the cost of ring closure and does not affect its feasibility.",
+      "final": "Sequence sets the cost of ring closure and does not influence its feasibility."
+    },
+    {
+      "fwd": "neutral",
+      "rev": "neutral",
+      "closed": false,
+      "mode": "unrelated",
+      "seed": "Where the mismatch is written down is bookkeeping; the total is not.",
+      "mid": "Where the mismatch is recorded is bookkeeping; the total is not.",
+      "final": "Restate this sentence with identical meaning, changing at most two words."
+    },
+    {
+      "fwd": "neutral",
+      "rev": "neutral",
+      "closed": false,
+      "mode": "unrelated",
+      "seed": "A lift earns its keep only if something can be wrong upstairs that could not be wrong downstairs.",
+      "mid": "A lift earns its keep only if something can be wrong upstairs that could not be wrong downstairs.",
+      "final": "A lift earns its keep only if something can be wrong upstairs that could not be wrong downstairs. -> A lift earns its keep only if something can be wrong upstairs that could not be wrong downstairs. (identical) -> A lift earns its keep only if something can be wrong upstairs that could not be wrong downstairs. (identical) -> A lift earns its keep only if something can be wrong upstairs that could not be wrong downstairs. (identical) -> A lift earns its1000"
+    },
+    {
+      "fwd": "entailment",
+      "rev": "neutral",
+      "closed": false,
+      "mode": "dropped",
+      "seed": "Longer chains tolerate more accumulated drift before they stop cohering.",
+      "mid": "Longer chains tolerate more accumulated drift before they cease cohering.",
+      "final": "Longer chains tolerate more accumulated drift before they break down."
+    }
+  ],
+  "note": "Cosine omitted (no nomic co-resident). LMS /api/v1/chat returned empty or 500 under RAM pressure; used llama-server /completion + channel strip."
+}

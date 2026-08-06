@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "supagen"
+version = "0.3.1"
+description = "Super agent harness: Prime dual-metric stack + multiplane OPEN|STOP field harness (LM Studio + jina aboutness)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Blake A. Jones / JtechAI", email = "b.jones@jtech.ai" }]
+keywords = [
+  "agent-harness",
+  "OPEN-STOP",
+  "LM-Studio",
+  "jina",
+  "sheaf",
+  "multiplane",
+  "prime",
+]
+dependencies = [
+  "numpy>=1.26",
+  "psutil>=5.9",
+]
+[project.optional-dependencies]
+nli = ["sentence-transformers>=3.0", "torch"]
+full = ["sentence-transformers>=3.0", "torch"]
+
+[project.scripts]
+supagen = "supagen.cli:main"
+prime-harness = "supagen.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/JtechAI/supagen"
+Documentation = "https://github.com/JtechAI/supagen#readme"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["supagen*"]

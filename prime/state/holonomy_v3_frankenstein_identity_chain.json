@@ -1,0 +1,444 @@
+{
+  "model": "frankenstein-2.0-i1",
+  "protocol": "identity-chain control: pure identity multi-hop, DeBERTa mutual entailment",
+  "thesis": "If p stays high under identity chain but drops under transform ladder, divergence from speculative-decoding alpha is about transform content, not missing anchor. If identity chain also decays, accumulation without fixed anchor is the mechanism.",
+  "depths": {
+    "1": {
+      "ok": true,
+      "identity_closure": 0.875,
+      "cosine_would_say": 1.0,
+      "median_cos": 0.9124542062655763,
+      "modes": {
+        "closed": 7,
+        "dropped": 1
+      },
+      "n": 8,
+      "rows": [
+        {
+          "depth": 1,
+          "N": 3,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9636412829208607,
+          "theta": -3.249753550819689e-32,
+          "lam": 0.0,
+          "collapsed": false
+        },
+        {
+          "depth": 1,
+          "N": 3,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8598637594177073,
+          "theta": -7.888609052210118e-31,
+          "lam": 0.0,
+          "collapsed": false
+        },
+        {
+          "depth": 1,
+          "N": 3,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9728046836075697,
+          "theta": -1.9721522630525295e-31,
+          "lam": 0.0,
+          "collapsed": false
+        },
+        {
+          "depth": 1,
+          "N": 3,
+          "fwd": "entailment",
+          "rev": "neutral",
+          "closed": false,
+          "mode": "dropped",
+          "cos": 0.9118634938157579,
+          "theta": 5.698996905696833e-31,
+          "lam": 0.0,
+          "collapsed": false
+        },
+        {
+          "depth": 1,
+          "N": 3,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9800293436894111,
+          "theta": 1.8572703778700468e-30,
+          "lam": 0.0,
+          "collapsed": false
+        },
+        {
+          "depth": 1,
+          "N": 3,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8654341732685621,
+          "theta": -7.888609052210116e-31,
+          "lam": 0.0,
+          "collapsed": false
+        },
+        {
+          "depth": 1,
+          "N": 3,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9130449187153946,
+          "theta": -5.19869491445084e-31,
+          "lam": 0.0,
+          "collapsed": false
+        },
+        {
+          "depth": 1,
+          "N": 3,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8356287880380243,
+          "theta": 1.9283695974113209e-31,
+          "lam": 0.0,
+          "collapsed": false
+        }
+      ]
+    },
+    "2": {
+      "ok": true,
+      "identity_closure": 0.875,
+      "cosine_would_say": 1.0,
+      "median_cos": 0.8944312713635496,
+      "modes": {
+        "closed": 7,
+        "unrelated": 1
+      },
+      "n": 8,
+      "rows": [
+        {
+          "depth": 2,
+          "N": 5,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9113866641069545,
+          "theta": 0.8038169475106526,
+          "lam": 0.02578925223800632,
+          "collapsed": false
+        },
+        {
+          "depth": 2,
+          "N": 5,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8655018756794504,
+          "theta": NaN,
+          "lam": NaN,
+          "collapsed": false
+        },
+        {
+          "depth": 2,
+          "N": 5,
+          "fwd": "neutral",
+          "rev": "neutral",
+          "closed": false,
+          "mode": "unrelated",
+          "cos": 0.9422048027699947,
+          "theta": 1.2620868597409765,
+          "lam": 0.06337695221398376,
+          "collapsed": false
+        },
+        {
+          "depth": 2,
+          "N": 5,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9003699226968538,
+          "theta": 0.515784238758021,
+          "lam": 0.010631902083340083,
+          "collapsed": false
+        },
+        {
+          "depth": 2,
+          "N": 5,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9345601033112065,
+          "theta": 2.67266794496866,
+          "lam": 0.2789873376654275,
+          "collapsed": false
+        },
+        {
+          "depth": 2,
+          "N": 5,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8654341732685621,
+          "theta": -1.2293542720929873,
+          "lam": 0.06014854823562743,
+          "collapsed": false
+        },
+        {
+          "depth": 2,
+          "N": 5,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8884926200302453,
+          "theta": 2.3438932213978405,
+          "lam": 0.2157584833346593,
+          "collapsed": false
+        },
+        {
+          "depth": 2,
+          "N": 5,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8551770970734691,
+          "theta": -0.07487514964861905,
+          "lam": 0.00022424733069881242,
+          "collapsed": false
+        }
+      ]
+    },
+    "3": {
+      "ok": true,
+      "identity_closure": 0.875,
+      "cosine_would_say": 1.0,
+      "median_cos": 0.8883992079707483,
+      "modes": {
+        "closed": 7,
+        "unrelated": 1
+      },
+      "n": 8,
+      "rows": [
+        {
+          "depth": 3,
+          "N": 7,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.876428493244643,
+          "theta": -1.4516550551049279,
+          "lam": 0.042852264621750624,
+          "collapsed": false
+        },
+        {
+          "depth": 3,
+          "N": 7,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8655018756794504,
+          "theta": NaN,
+          "lam": NaN,
+          "collapsed": false
+        },
+        {
+          "depth": 3,
+          "N": 7,
+          "fwd": "neutral",
+          "rev": "neutral",
+          "closed": false,
+          "mode": "unrelated",
+          "cos": 0.9422048027699947,
+          "theta": NaN,
+          "lam": NaN,
+          "collapsed": false
+        },
+        {
+          "depth": 3,
+          "N": 7,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9003699226968538,
+          "theta": 0.5761472101445423,
+          "lam": 0.006770576647011417,
+          "collapsed": false
+        },
+        {
+          "depth": 3,
+          "N": 7,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9360514436468579,
+          "theta": 2.333655767596966,
+          "lam": 0.11011625188433305,
+          "collapsed": false
+        },
+        {
+          "depth": 3,
+          "N": 7,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8654341732685621,
+          "theta": -0.823486972009909,
+          "lam": 0.013823450542846949,
+          "collapsed": false
+        },
+        {
+          "depth": 3,
+          "N": 7,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9028696600835153,
+          "theta": 0.8556059027324946,
+          "lam": 0.014921438698356715,
+          "collapsed": false
+        },
+        {
+          "depth": 3,
+          "N": 7,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8519102189693428,
+          "theta": 2.57351888983701,
+          "lam": 0.13364767183796689,
+          "collapsed": false
+        }
+      ]
+    },
+    "4": {
+      "ok": true,
+      "identity_closure": 0.875,
+      "cosine_would_say": 1.0,
+      "median_cos": 0.875223247531798,
+      "modes": {
+        "closed": 7,
+        "unrelated": 1
+      },
+      "n": 8,
+      "rows": [
+        {
+          "depth": 4,
+          "N": 9,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8783075252108187,
+          "theta": NaN,
+          "lam": NaN,
+          "collapsed": false
+        },
+        {
+          "depth": 4,
+          "N": 9,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8655018756794504,
+          "theta": NaN,
+          "lam": NaN,
+          "collapsed": false
+        },
+        {
+          "depth": 4,
+          "N": 9,
+          "fwd": "neutral",
+          "rev": "neutral",
+          "closed": false,
+          "mode": "unrelated",
+          "cos": 0.9422048027699947,
+          "theta": NaN,
+          "lam": NaN,
+          "collapsed": false
+        },
+        {
+          "depth": 4,
+          "N": 9,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9003699226968538,
+          "theta": 0.6060971642796977,
+          "lam": 0.004533517991686997,
+          "collapsed": false
+        },
+        {
+          "depth": 4,
+          "N": 9,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.9443673189401287,
+          "theta": -2.035602771447405,
+          "lam": 0.050938815480331856,
+          "collapsed": false
+        },
+        {
+          "depth": 4,
+          "N": 9,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8654341732685621,
+          "theta": -0.6369359525165843,
+          "lam": 0.005006396451213924,
+          "collapsed": false
+        },
+        {
+          "depth": 4,
+          "N": 9,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8721389698527774,
+          "theta": -1.8221861640408819,
+          "lam": 0.040852290244204115,
+          "collapsed": false
+        },
+        {
+          "depth": 4,
+          "N": 9,
+          "fwd": "entailment",
+          "rev": "entailment",
+          "closed": true,
+          "mode": "closed",
+          "cos": 0.8519102189693428,
+          "theta": -1.8268418879559143,
+          "lam": 0.04106059568627396,
+          "collapsed": false
+        }
+      ]
+    }
+  },
+  "seconds": 340.6
+}

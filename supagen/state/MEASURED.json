@@ -1,0 +1,121 @@
+{
+  "ok": true,
+  "fails": [],
+  "checks": [
+    {
+      "name": "family_jina_default",
+      "ok": true,
+      "detail": "jina"
+    },
+    {
+      "name": "prefix_query",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ctx_lfm_rich",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ctx_no_ui_default_as_max",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fence_json",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "token_cap",
+      "ok": true,
+      "detail": "387"
+    },
+    {
+      "name": "pick_chat_model",
+      "ok": true,
+      "detail": "{\"key\": \"liquid/lfm2.5-1.2b\", \"reason\": \"already_loaded_max_ctx\", \"loaded_ctx\": 128000}"
+    },
+    {
+      "name": "jina_up",
+      "ok": true,
+      "detail": "already_running"
+    },
+    {
+      "name": "aboutness_floor_lt_0.35",
+      "ok": true,
+      "detail": "cos=0.2305 fam=jina"
+    },
+    {
+      "name": "aboutness_uses_jina",
+      "ok": true,
+      "detail": "jina"
+    },
+    {
+      "name": "jina_base_ignores_lms",
+      "ok": true,
+      "detail": "http://127.0.0.1:8765"
+    },
+    {
+      "name": "embed_via_lms_base_still_jina",
+      "ok": true,
+      "detail": "fam=jina model=jina-embeddings-v5-text-nano-retrieval err=None"
+    },
+    {
+      "name": "aboutness_ceil_gt_0.70",
+      "ok": true,
+      "detail": "cos=0.9427"
+    },
+    {
+      "name": "aboutness_range_gt_0.40",
+      "ok": true,
+      "detail": "range=0.712"
+    },
+    {
+      "name": "dual_enter_has_face",
+      "ok": true,
+      "detail": "OPEN_CANDIDATE"
+    },
+    {
+      "name": "cosine_never_open_authority",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no_force_open_string",
+      "ok": true,
+      "detail": "OPEN_CANDIDATE"
+    },
+    {
+      "name": "substrate_jina",
+      "ok": true,
+      "detail": "{\"ok\": true, \"status\": \"already_running\", \"base\": \"http://127.0.0.1:8765\", \"dim\": 768, \"started\": false}"
+    },
+    {
+      "name": "rerank_prefers_domain",
+      "ok": true,
+      "detail": "E_ref sheaf"
+    },
+    {
+      "name": "no_ctx_downgrade",
+      "ok": true,
+      "detail": "cur=128000 des=32768 act=keep_high_ctx"
+    },
+    {
+      "name": "kb_family_reembed",
+      "ok": true,
+      "detail": "{\"ok\": true, \"reembedded\": true, \"family\": \"jina\", \"dim\": 768, \"error\": null}"
+    }
+  ],
+  "n_pass": 21,
+  "n_fail": 0,
+  "live": true,
+  "ts": 1786008356.8862178,
+  "instruments": {
+    "job1": "jina-embeddings-v5-text-nano-retrieval",
+    "job2": "NLI (LFM structured + optional DeBERTa)",
+    "ctx_policy": true,
+    "rerank": "cosine*lex_gate"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "prime-session": {
+    "type": "stdio",
+    "command": "python",
+    "args": [
+      "${GROK_PLUGIN_ROOT}/scripts/mcp_server.py"
+    ],
+    "env": {
+      "GROK_PLUGIN_ROOT": "${GROK_PLUGIN_ROOT}",
+      "PYTHONPATH": "${GROK_PLUGIN_ROOT}/scripts",
+      "PRIME_STATE_DIR": "${GROK_PLUGIN_ROOT}/state"
+    },
+    "description": "Prime Session MCP — compute graph, OPEN|STOP audit, LM Studio scouts, rplc/E_ref measures, condition pulse. Dynamic companion for the whole development arc."
+  }
+}

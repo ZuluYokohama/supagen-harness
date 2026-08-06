@@ -1,0 +1,65 @@
+{
+  "bundle_id": "frozen_lakes_surface_pipeline",
+  "value_function": "multi_plane_operational_truth_NPT_integrity",
+  "expected_process": "Surface-section multi-trip character with decoder LIVE across sessions; Mag-PI light vs Filmore RIH burst.",
+  "planes": [
+    {
+      "id": "wits_surface",
+      "modality": "wits",
+      "present": true,
+      "state": "LIVE",
+      "evidence_refs": [
+        "Post_Run_SSI_Reports/ACQ_RT/TD26323/wits_merged_1s_ish.csv",
+        "Post_Run_SSI_Reports/ACQ_RT/TD26323/acq_rt_analysis.json"
+      ]
+    },
+    {
+      "id": "decoder_rt",
+      "modality": "decoder",
+      "present": true,
+      "state": "LIVE",
+      "evidence_refs": [
+        "Post_Run_SSI_Reports/ACQ_RT/TD26323/decoder_sessions.csv"
+      ]
+    },
+    {
+      "id": "tool_magpi",
+      "modality": "tool_dump",
+      "present": true,
+      "state": "LIVE",
+      "evidence_refs": [
+        "Post_Run_SSI_Reports/ACQ_RT/TD26323/FORENSIC_DOSSIER/claims.json"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "SURFACE_SECTION",
+      "text": "Short surface-section campaign with multi-trip depth character; decoder sessions present across window.",
+      "required_planes": ["wits_surface", "decoder_rt"],
+      "confidence_requested": "HIGH",
+      "relation_summary": "wits_surface LIVE trajectory + decoder_rt LIVE session topology",
+      "tags": ["from_pack", "td26323"]
+    },
+    {
+      "id": "MAGPI_LIGHT_VS_FILMORE",
+      "text": "Mag-PI light on Frozen Lakes tool window vs Filmore concentrated RIH burst — quiet mag system contrast.",
+      "required_planes": ["tool_magpi", "wits_surface"],
+      "confidence_requested": "HIGH",
+      "relation_summary": "tool_magpi event count light + surface multi-trip character (contrast to Filmore)",
+      "tags": ["from_pack", "td26323", "cross_well"]
+    },
+    {
+      "id": "NO_24H_TOPDRIVE_ANALOG",
+      "text": "No ~24h surface static hold near TD analogous to Filmore top-drive repair (largest decoder gap modest).",
+      "required_planes": ["wits_surface", "decoder_rt"],
+      "confidence_requested": "HIGH",
+      "relation_summary": "wits depth continuity + decoder gap structure without 24h park",
+      "tags": ["from_pack", "td26323"]
+    }
+  ],
+  "continuity_guards": [
+    "require_wits_and_decoder_for_surface_character",
+    "contrast_claims_need_tool_or_cross_well_context"
+  ]
+}

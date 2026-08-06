@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+state/*.log
+state/*.pid
+state/jina_embed.*
+!state/.gitkeep
+*.gguf
+.DS_Store

@@ -1,0 +1,62 @@
+{
+  "golden_id": "filmore_multiplane_v1",
+  "status": "OPEN",
+  "kind": "multi_plane_sealed_claim",
+  "lineage": {
+    "charter": "PRIMEdEV-1/LINEAGE_CHARTER.md",
+    "validity_ledger": "PRIMEdEV-1/VALIDITY_LEDGER.md",
+    "term_series": "X -> M -> Mv -> Hk -> Q",
+    "value_function": "multi_plane_operational_truth_NPT_integrity"
+  },
+  "well": {
+    "td": "TD26324",
+    "name": "Mount Filmore 3974-24-25-36-1NH",
+    "tool_sn": "1989",
+    "tool_family": "MicroPulse"
+  },
+  "planes": [
+    {"id": "tool_magpi", "role": "tool_memory", "burst_state": "LIVE"},
+    {"id": "wits_surface", "role": "surface_sensors", "burst_state": "LIVE_HOLD"},
+    {"id": "decoder_rt", "role": "mud_pulse_decode", "burst_state": "DEAD"},
+    {"id": "survey", "role": "directional", "burst_state": "LIVE"},
+    {"id": "bha_health", "role": "shock_bus", "park_state": "QUIET"}
+  ],
+  "golden_claim_id": "MAGPI_DOWNHOLE_ONLY_NO_RT_DECODE",
+  "burst_window": {
+    "t0": "2026-08-01 11:12:22",
+    "t1": "2026-08-01 11:21:55",
+    "depth_ft_range": [415.42, 419.51],
+    "n_magpi": 50,
+    "rpm": 0.0,
+    "decoder_sessions_in_burst": 0,
+    "first_reacquire_session": "S0029",
+    "first_reacquire_t": "2026-08-01 11:50:10"
+  },
+  "claims_artifact": {
+    "relative_path": "Post_Run_SSI_Reports/ACQ_RT/TD26324/FORENSIC_DOSSIER/claims.json",
+    "sha256": "baea65a9f52a820d98eec0ebb3d75b072a77f1edc71a48e966d076493c924405",
+    "n_claims": 8,
+    "required_ids": [
+      "PRE_DRILL_WAIT",
+      "TOPDRIVE_POOH_DOWNTIME",
+      "BHA_WITNESS",
+      "MAGPI_NOT_PARK",
+      "MAGPI_BURST_415",
+      "SURVEY_BETWEEN_TICKS",
+      "MAGPI_DOWNHOLE_ONLY_NO_RT_DECODE",
+      "DECODER_REACQUIRE_SNR_LIVE"
+    ]
+  },
+  "release_chain_sha256": "593e217dc01c317f153ff35f5ca0afe3dc246c38608864c6e0e5b5b3084a4c7a",
+  "continuity_guards": [
+    "reject_single_plane_decode_glitch_story",
+    "reject_surface_quiet_equals_tool_quiet",
+    "require_dump_and_emz_for_cross_plane_OPEN"
+  ],
+  "residue": [
+    "phm_db_mining_not_used",
+    "full_edr_tensor_product_not_required_for_this_Q",
+    "atft_numerics_not_used"
+  ],
+  "verify": "python golden_paths/filmore_multiplane_v1/verify_golden.py"
+}

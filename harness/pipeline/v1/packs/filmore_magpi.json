@@ -1,0 +1,48 @@
+{
+  "bundle_id": "filmore_magpi_pipeline",
+  "value_function": "multi_plane_operational_truth_NPT_integrity",
+  "expected_process": "If tool Mag-PI fires during RIH, RT decoder should be LIVE in-window unless DEAD is an explicit multi-plane fact with evidence.",
+  "planes": [
+    {
+      "id": "tool_magpi",
+      "modality": "tool_dump",
+      "present": true,
+      "state": "LIVE",
+      "evidence_refs": [
+        "Post_Run_SSI_Reports/ACQ_RT/TD26324/bha_surface_fusion/rih_magpi_onset.json"
+      ]
+    },
+    {
+      "id": "wits_surface",
+      "modality": "wits",
+      "present": true,
+      "state": "HOLD",
+      "evidence_refs": [
+        "Post_Run_SSI_Reports/ACQ_RT/TD26324/bha_surface_fusion/magpi_burst_zoom.json"
+      ]
+    },
+    {
+      "id": "decoder_rt",
+      "modality": "decoder",
+      "present": true,
+      "state": "DEAD",
+      "evidence_refs": [
+        "Post_Run_SSI_Reports/ACQ_RT/TD26324/decoder_raw/decoder_raw_probe.json"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "MAGPI_DOWNHOLE_ONLY_NO_RT_DECODE",
+      "text": "Zero decoder sessions during Mag-PI burst; tool memory LIVE; surface HOLD — Mag-PI is downhole-only, not RT decode glitch.",
+      "required_planes": ["tool_magpi", "wits_surface", "decoder_rt"],
+      "confidence_requested": "HIGH",
+      "relation_summary": "tool_magpi LIVE + decoder_rt DEAD + wits_surface HOLD in same burst window",
+      "tags": ["allow_dead_plane", "golden_filmore", "from_pack"]
+    }
+  ],
+  "continuity_guards": [
+    "reject_decode_glitch_without_decoder_plane",
+    "reject_surface_quiet_equals_tool_quiet"
+  ]
+}

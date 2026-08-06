@@ -1,0 +1,29 @@
+{
+  "id": "chatcmpl-wcw4weyxwxfejb025s235",
+  "object": "chat.completion",
+  "created": 1785902040,
+  "model": "liquid/lfm2.5-1.2b",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Planes observed:  \n- Tool magpi status: LIVE, 50 events at ~415 ft (file: rih_magpi_onset.json)  \n- Wits surface: HOLD, RPM=0 SPP~0 (file: magpi_burst_zoom.json)  \n- Decoder RT: DEAD in burst; S0029 re-acquire later (file: decoder_raw_probe.json)  \n- Vision: Absent  \n\nExpected process vs deviation:  \n- Tool data aligns with live event stream but lacks consistent RPM tracking.  \n- Decoder output is missing and not resolving, indicating potential data loss or corruption.  \n- Vision absence suggests no visual confirmation of surface features.  \n\nDRAFT multi-plane claim (tagged):  \nID: 42  \nText: Tool magpi shows live activity with limited events; decoder issues suggest incomplete processing. Vision missing \u2014 cannot confirm surface state.  \n\nResidue: Incomplete data coverage; gaps in event streams and decoding.  \n\nCERTIFY: NOT AUTHORIZED \u2014 external gate required",
+        "reasoning_content": "",
+        "tool_calls": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 603,
+    "completion_tokens": 235,
+    "total_tokens": 838,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "stats": {},
+  "system_fingerprint": "liquid/lfm2.5-1.2b"
+}

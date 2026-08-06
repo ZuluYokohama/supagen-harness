@@ -1,0 +1,19 @@
+{
+  "name": "prime",
+  "version": "1.0.0",
+  "description": "One door: /prime starts session MCP + operator. Design law restrict→measure→audit→OPEN|STOP. Compute graph, LM Studio, rplc/E_ref measures, condition gate. Residue never forced.",
+  "author": {
+    "name": "Blake A. Jones / JtechAI",
+    "email": "b.jones@jtech.ai"
+  },
+  "keywords": [
+    "OPEN-STOP",
+    "sheaf",
+    "compute-graph",
+    "LM-Studio",
+    "rplc",
+    "multiplane",
+    "prime",
+    "lineage"
+  ]
+}

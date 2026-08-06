@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+*.egg
+
+# Local runtime
+prime/state/jina_embed.pid
+prime/state/jina_embed.log
+prime/state/jina_embed.meta.json
+supagen/state/*.log
+supagen/state/*.pid
+supagen/state/SUPAGEN_ROOT.txt
+
+# Large / private
+**/*.gguf
+**/*.emz
+**/node_modules/
+.DS_Store
+Thumbs.db
+
+# Optional heavy extracts (keep structure; buddy may not need dumps)
+# _sandbox_extract/ can be large — comment out to include field packs
+# **/_sandbox_extract/**
+
+harness/**/out/
+prime/state/**/*.json
+!prime/state/kb/
+supagen/state/e2e_last.json
+

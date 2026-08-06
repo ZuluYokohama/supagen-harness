@@ -1,0 +1,55 @@
+{
+  "preset_id": "bonsai_scout_v1",
+  "status": "OPEN_OPERATIONAL",
+  "role": "explore_only_local_scout",
+  "lineage": {
+    "charter": "PRIMEdEV-1/LINEAGE_CHARTER.md",
+    "validity_ledger": "PRIMEdEV-1/VALIDITY_LEDGER.md",
+    "law": "explore_neq_certify",
+    "term_series_stage": "X_to_Mv_search_not_Q_open"
+  },
+  "model": {
+    "family": "prism-ml/bonsai-27b",
+    "variant": "1-bit GGUF Q1_0",
+    "gguf_path": "C:\\LM_STUDIO_MODELS\\00.LLM HF MODELS4 CODING-RESEARCH-TESTING-USE-RESEARCH-TESTING-USE-1JUN26\\lmstudio-community\\Bonsai-27B-GGUF\\Bonsai-27B-Q1_0.gguf",
+    "mmproj_path_when_ready": "C:\\LM_STUDIO_MODELS\\00.LLM HF MODELS4 CODING-RESEARCH-TESTING-USE-RESEARCH-TESTING-USE-1JUN26\\lmstudio-community\\Bonsai-27B-GGUF\\mmproj-Bonsai-27B-BF16.gguf",
+    "mmproj_note": "vision plane offline until .part download completes",
+    "capabilities_expected": ["reasoning", "tool_use", "vision_when_mmproj"]
+  },
+  "lm_studio": {
+    "api_base": "http://127.0.0.1:1234/v1",
+    "models_path": "/models",
+    "chat_path": "/chat/completions",
+    "server_must_be_started_by_user": true
+  },
+  "sampling_regimes": {
+    "scout_default": {
+      "temperature": 0.7,
+      "top_p": 0.95,
+      "top_k": 20,
+      "thinking": true
+    },
+    "tight_draft": {
+      "temperature": 0.3,
+      "top_p": 0.9,
+      "top_k": 20,
+      "thinking": true
+    },
+    "boundary_explore": {
+      "temperature": 0.95,
+      "top_p": 0.98,
+      "top_k": 40,
+      "thinking": true
+    }
+  },
+  "authority": {
+    "may_explore": true,
+    "may_draft_claims": true,
+    "may_inventory_planes": true,
+    "may_certify_open": false,
+    "may_ship_or_merge": false,
+    "certify_owner": "external_gate_not_this_model"
+  },
+  "system_prompt_file": "system_scout_explore_only.txt",
+  "smoke_script": "smoke_local.py"
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness.certify.v1.bundle",
+  "title": "MultiPlaneClaimBundle",
+  "type": "object",
+  "required": ["bundle_id", "value_function", "planes", "claims", "expected_process"],
+  "properties": {
+    "bundle_id": { "type": "string" },
+    "value_function": {
+      "type": "string",
+      "description": "Observer value v — what OPEN is for"
+    },
+    "expected_process": {
+      "type": "string",
+      "description": "Baseline process against which deviation is measured"
+    },
+    "planes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "modality", "present"],
+        "properties": {
+          "id": { "type": "string" },
+          "modality": {
+            "type": "string",
+            "enum": [
+              "tool_dump",
+              "acq_db",
+              "wits",
+              "decoder",
+              "code",
+              "git",
+              "text",
+              "vision",
+              "audio",
+              "web",
+              "agent",
+              "other"
+            ]
+          },
+          "present": { "type": "boolean" },
+          "state": {
+            "type": "string",
+            "description": "e.g. LIVE, DEAD, HOLD, MISSING, UNKNOWN"
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Paths, URIs, or artifact ids — not free prose only"
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "required_planes", "confidence_requested"],
+        "properties": {
+          "id": { "type": "string" },
+          "text": { "type": "string" },
+          "required_planes": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" },
+            "description": "Plane ids that must be present and non-MISSING for OPEN"
+          },
+          "confidence_requested": {
+            "type": "string",
+            "enum": ["HIGH", "MED", "LOW", "DRAFT"]
+          },
+          "relation_summary": {
+            "type": "string",
+            "description": "What must glue across planes"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "continuity_guards": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Named STOP rules this bundle must not violate"
+    },
+    "meta": { "type": "object" }
+  }
+}

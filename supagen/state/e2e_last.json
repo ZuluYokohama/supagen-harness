@@ -1,0 +1,104 @@
+{
+  "ok": true,
+  "mode": "live",
+  "paths": {
+    "workspace": "C:\\PRIMEdEV-1",
+    "prime_scripts": "C:\\PRIMEdEV-1\\prime\\scripts",
+    "harness": "C:\\PRIMEdEV-1\\harness"
+  },
+  "steps": [
+    {
+      "name": "imports_prime",
+      "ok": true,
+      "detail": "family_default=jina",
+      "ms": 10.1,
+      "required": true
+    },
+    {
+      "name": "ctx_policy_tiers",
+      "ok": true,
+      "detail": "lfm@128000 ministral@32768 frank@16384 (free=8 sim)",
+      "ms": 51.8,
+      "required": true
+    },
+    {
+      "name": "jina_prefixes",
+      "ok": true,
+      "detail": "q='Query: hello' d='Document: world'",
+      "ms": 0.0,
+      "required": true
+    },
+    {
+      "name": "strip_envelope",
+      "ok": true,
+      "detail": "E_ref opens after audit",
+      "ms": 0.0,
+      "required": true
+    },
+    {
+      "name": "harness_smoke_offline",
+      "ok": true,
+      "detail": "exit=0 314\\python.exe C:\\PRIMEdEV-1\\harness\\ingest\\v1\\ingest.py --sandbox-filmore\nexit=0\n\n=== local_scout (optional online) ===\nSkip in offline smoke. When LM Studio server is up:\n  C:\\Python314\\python.exe C:\\PRIMEdEV-1\\harness\\local_mode\\lfm_scout_v1\\smoke_local.py\n\nHARNESS OFFLINE SMOKE OK\nHARNESS=C:\\PRI",
+      "ms": 620.2,
+      "required": true
+    },
+    {
+      "name": "harness_pipeline_filmore",
+      "ok": true,
+      "detail": "exit=0",
+      "ms": 118.5,
+      "required": true
+    },
+    {
+      "name": "jina_ensure",
+      "ok": true,
+      "detail": "{\"status\": \"already_running\", \"base\": \"http://127.0.0.1:8765\", \"dim\": 768, \"started\": false}",
+      "ms": 162.7,
+      "required": true
+    },
+    {
+      "name": "aboutness_pasta_floor",
+      "ok": true,
+      "detail": "family=jina cos=0.2305 svc=None",
+      "ms": 216.0,
+      "required": true
+    },
+    {
+      "name": "aboutness_paraphrase_ceiling",
+      "ok": true,
+      "detail": "cos=0.9427",
+      "ms": 104.3,
+      "required": true
+    },
+    {
+      "name": "ensure_substrate",
+      "ok": true,
+      "detail": "{\"jina\": \"already_running\", \"lms_ctx\": 128000, \"lms_ok\": true, \"errors\": []}",
+      "ms": 172.9,
+      "required": true
+    },
+    {
+      "name": "dual_enter",
+      "ok": true,
+      "detail": "verdict=NEED_INFO keys=['ok', 'mode', 'layer', 'thesis', 'model', 'roles', 'outputs', 'verdict', 'fatal_flag', 'policy_reason', 'embeddings', 'mean_cosine']",
+      "ms": 9428.8,
+      "required": true
+    },
+    {
+      "name": "json_fence_sanitize",
+      "ok": true,
+      "detail": "{\"ok\": true, \"echo\": \"ping\"}",
+      "ms": 0.0,
+      "required": true
+    },
+    {
+      "name": "token_budget",
+      "ok": true,
+      "detail": "tokens\u2248205",
+      "ms": 1.1,
+      "required": true
+    }
+  ],
+  "n_ok": 13,
+  "n_fail": 0
+}

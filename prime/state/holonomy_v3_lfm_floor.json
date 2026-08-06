@@ -1,0 +1,5 @@
+{
+  "model": "liquid/lfm2.5-1.2b",
+  "identity_closure": 0.2857142857142857,
+  "gated": true
+}
