@@ -35,7 +35,11 @@
 | Smoke double quantize | **Fixed** | single `quantize()` pass |
 | Profile full-file load | **Fixed** | stream scan `n_lines_scanned` |
 | PowerShell `;` vs `,` | **Fixed** | calculated properties use commas |
+| HELD_OUT overlaps CALIB | **Fixed** (`43c8ce3`) | `validate_held_out_disjoint()` + CI runtime check |
+| ORT parity without force_cpu | **Fixed** (`43c8ce3`/`4110aee`) | held-out loop always `force_cpu=True` |
+| Free-form contract_live_author | **Fixed** (`43c8ce3`) | structured `contract_live` object |
 
-**Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`
+**Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`  
+Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (42/42).
 
 Stale inline comments may still map to new line numbers after re-review; this table + verifier are authoritative until CR re-submits on current HEAD.
