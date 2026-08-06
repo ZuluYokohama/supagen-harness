@@ -1,0 +1,50 @@
+{
+  "role": "author_live_protocol_runner",
+  "independent_buddy": false,
+  "timestamp": "2026-08-06T13:24:07.703989Z",
+  "checks": {
+    "L8-05_jina": {
+      "floor": 0.0381,
+      "ceil": 0.8811,
+      "range": 0.843,
+      "family": "jina",
+      "dim": 1024,
+      "ok": true
+    },
+    "L8-06_cos_never_open": true,
+    "L8-08_nli_contra": {
+      "label": "contradiction",
+      "gate": "STOP",
+      "p": 0.9999,
+      "ok": true
+    },
+    "L8-htp_refuse": {
+      "engine": "ort_nli",
+      "htp_refused": {
+        "ok": false,
+        "path": "prime/state/npu/nli_htp_parity_cert.json",
+        "reason": "cert_not_green",
+        "age_h": 0.06,
+        "hits": 0,
+        "n": 3,
+        "hit_rate": 0.0,
+        "recipe": {
+          "act": "uint16",
+          "weight": "uint8"
+        },
+        "verdict": "NPU_NLI_PARTIAL"
+      },
+      "ok": true
+    }
+  },
+  "fabric_job2_order": [
+    "ort_cpu",
+    "cross_encoder",
+    "lfm"
+  ],
+  "parity_cert_green": false,
+  "job2_owns_open": false,
+  "live_verdict": "PASS",
+  "python": "Python 3.x",
+  "root": "<repo-root>"
+}

@@ -1,0 +1,49 @@
+{
+  "artifact": "DOMAIN_COMPLETION_CERTIFICATE",
+  "pr": "1",
+  "branch": "vv/dual-metric-npu-measure-fabric",
+  "timestamp": "2026-08-06T21:58:36.414559Z",
+  "seal": "GO_MEASURE",
+  "production_open": "NO-GO",
+  "matrix": {
+    "go_no_go": "GO_MEASURE",
+    "n_pass": 18,
+    "n_fail": 0,
+    "n_critical_fail": 0,
+    "evidence_path": "docs/VV_RUN_RESULTS.md",
+    "generator": "prime/scripts/vv_full_matrix.py"
+  },
+  "contract_live": {
+    "pass": 21,
+    "fail": 0,
+    "live": true,
+    "measured_count": "21/21",
+    "run_id": "contract_live_author_kit",
+    "commit": "e884b7cc19f14f3982823e5dd331c9abd4e1074e",
+    "tree": "15aaba892842fe7b804a98b9841ad98e9b85e4c3",
+    "commit_hint": "e884b7c",
+    "evidence_path": "docs/evidence/buddy_l8_live_protocol_run.json",
+    "recheck": "law_path_auto_cpu_htp_refuse",
+    "job2_force_cpu": true
+  },
+  "disposition_verifier": {
+    "status": "PASS",
+    "command": "python prime/scripts/verify_cr_disposition.py",
+    "checks": "78+"
+  },
+  "job2_auto_ep": "CPUExecutionProvider",
+  "htp_refuse": true,
+  "e3_residual": "accepted_quant_geometry",
+  "domains_d0_d15": "SEALED",
+  "law": [
+    "aboutness != agreement",
+    "cosine never OPEN",
+    "Job2 owns agreement not OPEN",
+    "auto never QNN",
+    "NPU = measure fabric only",
+    "Job2 gate = CPU ORT/CE permanently",
+    "product nli_ort force_cpu=True"
+  ],
+  "head": "e884b7cc19f14f3982823e5dd331c9abd4e1074e",
+  "d17_integrity": "docs/evidence/vv_push_domains_integrity.json"
+}

@@ -460,6 +460,15 @@ def retrieve(
         hits.append(hit)
     if rerank:
         hits = rerank_hits(query, hits)
+        # Job1.5 neural rerank (asymmetric) — PRIME_RERANK gated inside rerank_service
+        try:
+            from rerank_service import rerank_hits as neural_rerank_hits
+
+            hits = neural_rerank_hits(query, hits)
+        except Exception as e:
+            if hits:
+                hits[0] = dict(hits[0])
+                hits[0]["rerank_error"] = str(e)[:200]
     return hits[:k]
 
 

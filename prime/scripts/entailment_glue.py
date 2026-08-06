@@ -4,8 +4,9 @@ Job 2 — AGREEMENT / GLUE (not aboutness).
 Instrument: NLI over (premise, hypothesis) jointly.
   Labels: entailment | contradiction | neutral
 
-Primary: LFM structured NLI — reason FIRST, label LAST (label is conclusion, not prior).
-Optional: transformers CrossEncoder (DeBERTa-MNLI) if installed.
+Primary: DeBERTa cross-encoder NLI (PRIME_NLI_MODEL, default nli-deberta-v3-base).
+Fallback: LFM structured NLI — reason FIRST, label LAST (label is conclusion, not prior).
+Mutual entailment (p≥PRIME_NLI_MUTUAL_P, default 0.80) for strong agreement.
 
 Null failure (pre-fix): 7/7 neutral; reason said "contradicts" while label=neutral
 because label was sampled at token ~5 before reasoning. Fixed by field order.
@@ -214,14 +215,62 @@ def nli_lfm(
     }
 
 
+# Job2 default: DeBERTa-v3-base MNLI (cached on this kit; large multi-NLI is upgrade path)
+import os as _os
+
+DEFAULT_NLI_MODEL = _os.environ.get(
+    "PRIME_NLI_MODEL", "cross-encoder/nli-deberta-v3-base"
+)
+def _env_float(name: str, default: float) -> float:
+    """Parse env float; invalid/missing → default (never break import)."""
+    raw = _os.environ.get(name)
+    if raw is None or raw == "":
+        return default
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return default
+
+
+# Mutual entailment confidence floor for "agrees" (dual direction)
+MUTUAL_P = _env_float("PRIME_NLI_MUTUAL_P", 0.80)
+# One-way entailment floor — must match accel_nli_ort.ONEWAY_P
+ONEWAY_P = _env_float("PRIME_NLI_ONEWAY_P", 0.45)
+
+_CE_CACHE: dict[str, Any] = {}
+_CE_GLOBAL = __import__("threading").Lock()
+_CE_MODEL_LOCKS: dict[str, Any] = {}
+
+
+def _get_cross_encoder(model_name: str):
+    """Load CrossEncoder with per-model lock so different models can load concurrently."""
+    # Fast path: cache hit without any lock contention on unrelated models
+    if model_name in _CE_CACHE:
+        return _CE_CACHE[model_name]
+    with _CE_GLOBAL:
+        lock = _CE_MODEL_LOCKS.get(model_name)
+        if lock is None:
+            lock = __import__("threading").Lock()
+            _CE_MODEL_LOCKS[model_name] = lock
+    with lock:
+        if model_name in _CE_CACHE:
+            return _CE_CACHE[model_name]
+        from sentence_transformers import CrossEncoder  # type: ignore
+
+        ce = CrossEncoder(model_name)
+        _CE_CACHE[model_name] = ce
+        return ce
+
+
 def nli_cross_encoder(
     premise: str,
     hypothesis: str,
-    model_name: str = "cross-encoder/nli-deberta-v3-xsmall",
+    model_name: str | None = None,
 ) -> dict[str, Any]:
-    """Optional true cross-encoder if sentence-transformers is installed."""
+    """True cross-encoder NLI (DeBERTa-MNLI). Owns agreement; not aboutness."""
+    model_name = model_name or DEFAULT_NLI_MODEL
     try:
-        from sentence_transformers import CrossEncoder  # type: ignore
+        from sentence_transformers import CrossEncoder  # type: ignore  # noqa: F401
     except Exception as e:
         return {
             "ok": False,
@@ -235,21 +284,66 @@ def nli_cross_encoder(
     try:
         import numpy as np
 
-        ce = CrossEncoder(model_name)
+        ce = _get_cross_encoder(model_name)
         scores = ce.predict([(premise[:1500], hypothesis[:500])])
         s = np.array(scores).reshape(-1)
+        # sentence-transformers NLI models: typically [contradiction, entailment, neutral]
+        # Verify via config when possible
+        default_labels = ["contradiction", "entailment", "neutral"]
+        labels = list(default_labels)
+        label_source = "default_assumed"
+        try:
+            id2label = getattr(getattr(ce, "model", None), "config", None)
+            id2label = getattr(id2label, "id2label", None) if id2label else None
+            if isinstance(id2label, dict) and len(id2label) >= 3:
+                # Coerce string keys "0"/"1"/"2" → int (same as accel_nli_ort)
+                coerced: dict[int, str] = {}
+                for k, v in id2label.items():
+                    try:
+                        coerced[int(k)] = str(v).lower()
+                    except (TypeError, ValueError):
+                        continue
+                if len(coerced) >= 3:
+                    labels = [coerced[i] for i in range(3)]
+                    label_source = "model.config.id2label"
+        except Exception as e:
+            label_source = f"default_after_error:{type(e).__name__}"
         if s.size == 3:
-            labels = ["contradiction", "entailment", "neutral"]
             i = int(s.argmax())
-            label = _norm_label(labels[i])
+            label = _norm_label(labels[i] if i < len(labels) else "neutral")
             ex = np.exp(s - s.max())
             conf = float(ex[i] / ex.sum())
+            probs = {
+                _norm_label(labels[j] if j < len(labels) else str(j)): round(
+                    float(ex[j] / ex.sum()), 4
+                )
+                for j in range(3)
+            }
         elif s.size == 1:
-            conf = float(1 / (1 + np.exp(-s[0])))
-            label = (
-                "entailment" if conf > 0.55
-                else ("contradiction" if conf < 0.45 else "neutral")
-            )
+            # Single-logit binary models: avoid double-sigmoid. If score already in
+            # [0,1], treat as p(entail); else apply one sigmoid to raw logit.
+            raw = float(s[0])
+            if 0.0 <= raw <= 1.0:
+                p_ent = raw
+                label_source = label_source + "+single_logit_prob"
+            else:
+                p_ent = float(1.0 / (1.0 + np.exp(-raw)))
+                label_source = label_source + "+single_logit_sigmoid"
+            # Thresholds coupled to ONEWAY_P only (not a free 0.55 constant)
+            if p_ent >= ONEWAY_P:
+                label = "entailment"
+                conf = p_ent
+            elif p_ent <= (1.0 - ONEWAY_P):
+                label = "contradiction"
+                conf = 1.0 - p_ent
+            else:
+                label = "neutral"
+                conf = 1.0 - abs(2.0 * p_ent - 1.0)
+            # Binary contract: report entail vs not-entail (not a fake 3-class dist)
+            probs = {
+                "entailment": round(p_ent, 4),
+                "contradiction": round(1.0 - p_ent, 4),
+            }
         else:
             return {
                 "ok": False,
@@ -259,7 +353,8 @@ def nli_cross_encoder(
                 "agrees": False,
                 "gate": "NEED_INFO",
             }
-        agrees = label == "entailment" and conf >= 0.45
+        # Gate: entailment needs calibrated conf (ONEWAY_P; mutual uses MUTUAL_P)
+        agrees = label == "entailment" and conf >= ONEWAY_P
         gate = "PASS" if agrees else ("STOP" if label == "contradiction" else "NEED_INFO")
         return {
             "ok": True,
@@ -268,9 +363,13 @@ def nli_cross_encoder(
             "model": model_name,
             "label": label,
             "confidence": round(conf, 3),
+            "probs": probs,
             "agrees": agrees,
             "gate": gate,
+            "label_source": label_source,
+            "oneway_p": ONEWAY_P,
             "not_open_authority": True,
+            "job2_owns_open": False,
         }
     except Exception as e:
         return {
@@ -284,25 +383,267 @@ def nli_cross_encoder(
         }
 
 
+def _nli_one_way(
+    premise: str,
+    hypothesis: str,
+    *,
+    prefer: str = "auto",
+    model_name: str | None = None,
+) -> dict[str, Any]:
+    """Single-direction NLI using same engine order as glue_agreement."""
+    if prefer in ("ort", "auto") and _os.environ.get("PRIME_NLI_ORT", "1").strip() not in (
+        "0",
+        "false",
+        "no",
+    ):
+        r = nli_ort(premise, hypothesis, force_cpu=True)
+        if r.get("ok"):
+            return r
+        if prefer == "ort":
+            return r
+    return nli_cross_encoder(premise, hypothesis, model_name=model_name)
+
+
+def mutual_entailment(
+    a: str,
+    b: str,
+    model_name: str | None = None,
+    p_floor: float | None = None,
+    prefer: str = "auto",
+) -> dict[str, Any]:
+    """
+    Bidirectional entailment: both a→b and b→a must be entailment with conf ≥ p_floor.
+    Uses the same engine selection as glue_agreement (ORT→CE under auto).
+    Never OPEN authority alone.
+    """
+    p_floor = MUTUAL_P if p_floor is None else p_floor
+    ab = _nli_one_way(a, b, prefer=prefer, model_name=model_name)
+    ba = _nli_one_way(b, a, prefer=prefer, model_name=model_name)
+    if not ab.get("ok") or not ba.get("ok"):
+        return {
+            "ok": False,
+            "job": "mutual_entailment",
+            "error": ab.get("error") or ba.get("error"),
+            "ab": ab,
+            "ba": ba,
+            "agrees": False,
+            "gate": "NEED_INFO",
+            "not_open_authority": True,
+        }
+    ab_e = ab.get("label") == "entailment" and float(ab.get("confidence") or 0) >= p_floor
+    ba_e = ba.get("label") == "entailment" and float(ba.get("confidence") or 0) >= p_floor
+    contra = ab.get("label") == "contradiction" or ba.get("label") == "contradiction"
+    agrees = bool(ab_e and ba_e)
+    if contra and not agrees:
+        gate = "STOP"
+    elif agrees:
+        gate = "PASS"
+    else:
+        gate = "NEED_INFO"
+    return {
+        "ok": True,
+        "job": "mutual_entailment",
+        "model": ab.get("model"),
+        "p_floor": p_floor,
+        "ab": {
+            "label": ab.get("label"),
+            "confidence": ab.get("confidence"),
+            "probs": ab.get("probs"),
+        },
+        "ba": {
+            "label": ba.get("label"),
+            "confidence": ba.get("confidence"),
+            "probs": ba.get("probs"),
+        },
+        "agrees": agrees,
+        "gate": gate,
+        "min_entail_conf": round(
+            min(
+                float(ab.get("confidence") or 0) if ab.get("label") == "entailment" else 0.0,
+                float(ba.get("confidence") or 0) if ba.get("label") == "entailment" else 0.0,
+            ),
+            3,
+        ),
+        "not_open_authority": True,
+        "note": "Mutual entailment owns agreement; aboutness must not promote OPEN.",
+    }
+
+
+def nli_ort(
+    premise: str,
+    hypothesis: str,
+    *,
+    force_cpu: bool = True,
+) -> dict[str, Any]:
+    """ONNX Runtime DeBERTa NLI.
+
+    Product/auto path: force_cpu=True (CPUExecutionProvider only).
+    Explicit non-CPU requires force_cpu=False and PRIME_ACCEL opt-in.
+    """
+    fail = {
+        "ok": False,
+        "job": "agreement_nli",
+        "engine": "ort_nli",
+        "error": None,
+        "label": "unknown",
+        "agrees": False,
+        "gate": "NEED_INFO",
+        "not_open_authority": True,
+        "job2_owns_open": False,
+        "force_cpu": force_cpu,
+    }
+    try:
+        from accel_nli_ort import predict
+
+        r = predict(premise, hypothesis, force_cpu=force_cpu)
+        if not r.get("ok"):
+            fail["error"] = str(r.get("error") or "ort_nli_failed")[:300]
+            return fail
+        # Success path — ensure law flags always present
+        out = dict(r)
+        out.setdefault("job", "agreement_nli")
+        out.setdefault("not_open_authority", True)
+        out["job2_owns_open"] = False
+        out["force_cpu"] = force_cpu
+        # Belt-and-suspenders: refuse QNN on product path
+        prov = str(out.get("provider") or "")
+        if force_cpu and "QNN" in prov:
+            fail["error"] = f"refused QNN on product Job2 path: {prov}"
+            return fail
+        return out
+    except Exception as e:
+        fail["error"] = str(e)[:300]
+        return fail
+
+
 def glue_agreement(
     human: str,
     domain: str,
-    prefer: str = "lfm",
+    prefer: str = "auto",
     base: str = DEFAULT_BASE,
+    fiber_mode: str | None = None,
 ) -> dict[str, Any]:
     """
     Job 2 entry: does domain stalk *agree* with human intent (entailment).
-    prefer: lfm | cross_encoder | auto
+    prefer: auto (ORT→DeBERTa CE→LFM) | ort | cross_encoder | lfm | mutual | htp
+    fiber_mode: optional request fiber (preserve|scout); overrides PRIME_FIBER_MODE
+    for LFM scout-only guard when dual_enter passes an explicit mode.
+
+    HTP is never first on auto. prefer=htp only runs when measure_fabric
+    nli_htp_parity_pass() is green; otherwise falls through to ORT/CE.
+    Never authorizes production OPEN.
     """
     from metric_text import strip_envelope, strip_prompt_chrome
 
-    human = strip_prompt_chrome(strip_envelope(human) if (human or "").strip().startswith("{") else (human or ""))
-    domain = strip_envelope(domain) if domain else ""
+    def _clean(s: str) -> str:
+        s = s or ""
+        if s.strip().startswith("{"):
+            s = strip_envelope(s)
+        return strip_prompt_chrome(s)
+
+    # Symmetric chrome strip on both stalks before agreement measure
+    human = _clean(human)
+    domain = _clean(domain)
+    if prefer == "mutual":
+        return mutual_entailment(human, domain, prefer="auto")
+
+    # Explicit HTP only after E3 parity cert (session-ready QDQ is not enough)
+    if prefer in ("htp", "hexagon", "npu"):
+        try:
+            from measure_fabric import nli_htp_parity_pass
+
+            gate = nli_htp_parity_pass()
+        except Exception as e:
+            gate = {"ok": False, "reason": str(e)}
+        if not gate.get("ok"):
+            # refuse HTP — fall through to CPU authority
+            prefer = "auto"
+            # annotate path taken after CPU result
+            _htp_refused = gate
+        else:
+            _htp_refused = None
+            # Product HTP path not implemented until E3 green; still refuse force-OPEN
+            # by falling through to ORT (measure fabric documents order only).
+            prefer = "auto"
+    else:
+        _htp_refused = None
+
+    def _annotate(r: dict[str, Any]) -> dict[str, Any]:
+        out = dict(r)
+        out["job2_owns_open"] = False
+        out.setdefault("not_open_authority", True)
+        if _htp_refused is not None:
+            out["htp_refused"] = _htp_refused
+        return out
+
+    known = {
+        "auto",
+        "ort",
+        "cross_encoder",
+        "lfm",
+        "mutual",
+        "htp",
+        "hexagon",
+        "npu",
+    }
+    # After HTP remap, prefer may be "auto"; unknown values never reach LFM
+    if prefer not in known:
+        return _annotate(
+            {
+                "ok": False,
+                "job": "agreement_nli",
+                "engine": "none",
+                "error": f"unknown prefer={prefer!r}; allowed={sorted(known)}",
+                "label": "unknown",
+                "agrees": False,
+                "gate": "NEED_INFO",
+            }
+        )
+
+    if prefer == "ort":
+        return _annotate(nli_ort(human, domain, force_cpu=True))
     if prefer in ("cross_encoder", "auto"):
+        # Prefer ORT CPU when model exported; fall back CE
+        if prefer == "auto" and _os.environ.get("PRIME_NLI_ORT", "1").strip() not in (
+            "0",
+            "false",
+            "no",
+        ):
+            r_ort = nli_ort(human, domain, force_cpu=True)
+            if r_ort.get("ok"):
+                return _annotate(r_ort)
         r = nli_cross_encoder(human, domain)
         if r.get("ok") or prefer == "cross_encoder":
-            return r
-    return nli_lfm(human, domain, base=base)
+            return _annotate(r)
+        # prefer=auto only continues to LFM scout fallback
+
+    # prefer=lfm explicit, or prefer=auto after ORT+CE exhaustion — SCOUT only
+    if prefer not in ("auto", "lfm"):
+        return _annotate(
+            {
+                "ok": False,
+                "job": "agreement_nli",
+                "engine": "none",
+                "error": f"prefer={prefer!r} produced no usable agreement path",
+                "label": "unknown",
+                "agrees": False,
+                "gate": "NEED_INFO",
+            }
+        )
+    fiber = (fiber_mode or _os.environ.get("PRIME_FIBER_MODE") or "scout").lower().strip()
+    if fiber != "scout":
+        return _annotate(
+            {
+                "ok": False,
+                "job": "agreement_nli",
+                "engine": "lfm_nli",
+                "error": f"lfm_nli refused in fiber_mode={fiber} (scout only)",
+                "label": "unknown",
+                "agrees": False,
+                "gate": "NEED_INFO",
+            }
+        )
+    return _annotate(nli_lfm(human, domain, base=base))
 
 
 def interface_jaccard(a: str, b: str, symbols: list[str] | None = None) -> dict[str, Any]:
@@ -352,7 +693,7 @@ def dual_measure(
         mean=aboutness_mean,
         base=base,
     )
-    agree = glue_agreement(human, domain, prefer="lfm", base=base)
+    agree = glue_agreement(human, domain, prefer="auto", base=base)
     sym = None
     if domain_kind.lower() in ("code", "field", "rplc", "eref"):
         sym = interface_jaccard(human, domain)

@@ -145,14 +145,22 @@ def dual_enter(
     max_tokens: int = 140,
     ensure: bool = True,
     roles: list[str] | None = None,
+    fiber_mode: str | None = None,
 ) -> dict[str, Any]:
     """
     Canonical enter for the whole stack.
     Returns layered LFM ops + retrieval + agreement + cert_face.
 
-    Seamless: jina auto-ensure + unload heavies + promote chat fiber to policy ctx.
+    Hybrid architecture (not off-LMS):
+      LMS chat fiber (SCOUT small / PRESERVE frankenstein)
+      jina :8765 aboutness + DeBERTa NLI + neural rerank (off-LMS instruments)
+
+    Seamless: jina ensure + fiber mode residency + promote chat to policy ctx.
+    Frankenstein is NOT required for scout dual_enter.
     """
     t0 = time.time()
+    import os as _os
+
     from lms_layers import DEFAULT_LFM, layered_enter
     from metric_text import pack_to_token_budget, strip_code_fences
 
@@ -160,17 +168,49 @@ def dual_enter(
     if not clean.strip():
         clean = (prompt or "").strip()
 
-    substrate: dict[str, Any] = {"ok": True, "skipped": not ensure}
+    mode = (fiber_mode or _os.environ.get("PRIME_FIBER_MODE") or "scout").lower()
+    if mode not in ("scout", "preserve"):
+        mode = "scout"
+
+    substrate: dict[str, Any] = {"ok": True, "skipped": not ensure, "fiber_mode": mode}
     chat_model = model or DEFAULT_LFM
+    instruments: dict[str, Any] = {}
+    substrate_ok = not ensure  # if not ensuring, residency will load fiber itself
     if ensure:
         try:
-            from residency import seamless_substrate
+            # Full truth-plane substrate when available (jina + mode + warm NLI/rerank)
+            if _os.environ.get("PRIME_TRUTH_PLANE", "1").strip() not in (
+                "0",
+                "false",
+                "no",
+            ):
+                from truth_plane import ensure_substrate
 
-            substrate = seamless_substrate(chat_model=chat_model, base=base)
-            if substrate.get("fiber", {}).get("model"):
-                chat_model = substrate["fiber"]["model"]
+                plane = ensure_substrate(
+                    mode=mode, base=base, chat_model=chat_model
+                )
+                substrate = plane.get("substrate") or {}
+                substrate["fiber_mode"] = mode
+                substrate["truth_plane_ok"] = plane.get("ok")
+                instruments = plane.get("instruments") or {}
+                fiber_m = (substrate.get("fiber") or {}).get("model")
+                if fiber_m:
+                    chat_model = fiber_m
+                # Fiber result is the residency authority (not plane ok OR soft ok)
+                substrate_ok = bool((substrate.get("fiber") or {}).get("ok"))
+            else:
+                from residency import seamless_substrate
+
+                substrate = seamless_substrate(
+                    chat_model=chat_model, base=base, fiber_mode=mode
+                )
+                if substrate.get("fiber", {}).get("model"):
+                    chat_model = substrate["fiber"]["model"]
+                substrate["fiber_mode"] = mode
+                substrate_ok = bool((substrate.get("fiber") or {}).get("ok"))
         except Exception as e:
-            substrate = {"ok": False, "error": str(e)}
+            substrate = {"ok": False, "error": str(e), "fiber_mode": mode}
+            substrate_ok = False
 
     retrieval: dict[str, Any] = {"ok": False, "skipped": True}
     work_prompt = clean
@@ -188,8 +228,6 @@ def dual_enter(
             )
 
     # Fast enter (PRIME_FAST_ENTER=1): SCOUT+FALSIFY+VERDICT only — still dual metric
-    import os as _os
-
     use_roles = roles
     if use_roles is None and _os.environ.get("PRIME_FAST_ENTER", "0") in (
         "1",
@@ -198,13 +236,13 @@ def dual_enter(
     ):
         use_roles = ["SCOUT", "FALSIFY", "VERDICT"]
 
-    # Substrate already promoted fiber — skip second L1 thrash (big latency win)
+    # Skip residency thrash only when substrate actually loaded the fiber
     card = layered_enter(
         work_prompt,
         base=base,
         model=chat_model,
         embed=embed,
-        ensure_residency=not ensure,  # False when seamless_substrate just ran
+        ensure_residency=not (ensure and substrate_ok),
         roles=use_roles,
     )
 
@@ -316,7 +354,13 @@ def dual_enter(
                     hyp = f"Proceed using evidence from: {hits[0].get('title') or hits[0].get('id')}"
                 else:
                     hyp = f"Operationalize: {clean[:400]}"
-            agreement = glue_agreement(clean[:1800], hyp[:800], prefer="lfm", base=base)
+            agreement = glue_agreement(
+                clean[:1800],
+                hyp[:800],
+                prefer="auto",
+                base=base,
+                fiber_mode=mode,
+            )
             card["agreement"] = agreement
         except Exception as e:
             agreement = {
@@ -414,9 +458,28 @@ def dual_enter(
         "jina": (substrate.get("jina") or {}).get("status")
         if isinstance(substrate, dict)
         else None,
+        "fiber_mode": mode,
         "elapsed_s": round(time.time() - t0, 2),
         "not_open_authority": True,
     }
+    card["fiber_mode"] = mode
+    if instruments:
+        card["instruments"] = {
+            "nli": instruments.get("nli"),
+            "rerank": instruments.get("rerank"),
+            "accel": instruments.get("accel"),
+        }
+        op = card.get("operator_summary")
+        if isinstance(op, dict):
+            # Prefer the engine that produced this card's agreement (request path)
+            agree = card.get("agreement") or {}
+            if agree.get("engine") or agree.get("provider"):
+                op["nli_engine"] = agree.get("engine") or agree.get("provider")
+                op["nli_engine_source"] = "request_agreement"
+            else:
+                op["nli_engine"] = (instruments.get("nli") or {}).get("engine")
+                op["nli_engine_source"] = "warm_probe_only"
+            op["rerank_model"] = (instruments.get("rerank") or {}).get("model")
     return card
 
 

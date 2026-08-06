@@ -1,0 +1,38 @@
+{
+  "role": "author_live_self",
+  "not_independent_buddy": true,
+  "protocol": "docs/BUDDY_L8_SIGNOFF.md",
+  "commit": "pending_this_push",
+  "timestamp": "2026-08-06T13:16:36.639209Z",
+  "checks": {
+    "L8-01_offline_contract": true,
+    "L8-02_smoke": true,
+    "L8-03_harness": true,
+    "L8-04_golden_schema_only": true,
+    "L8-05_jina_floor_ceil_range": {
+      "floor": 0.0381,
+      "ceil": 0.8811,
+      "range": 0.843,
+      "family": "jina",
+      "dim": 1024
+    },
+    "L8-06_cos_never_open": true,
+    "L8-07_force_open_face_not_open": true,
+    "L8-08_nli_contra_stop": {
+      "label": "contradiction",
+      "gate": "STOP",
+      "p": 0.9999
+    }
+  },
+  "vv_full_matrix": {
+    "go_no_go": "GO_MEASURE",
+    "n_pass": 18,
+    "n_fail": 0,
+    "n_critical_fail": 0
+  },
+  "job2_owns_open": false,
+  "note": "Independent buddy signature still required for D15 full close; this is author live re-measure only",
+  "python": "Python 3.x",
+  "root": "<repo-root>",
+  "independent_buddy": false
+}

@@ -1,0 +1,380 @@
+#!/usr/bin/env python3
+"""
+Force Hexagon NPU (QNN HTP) work — prove the silicon is not decorative.
+
+Why zero NPU processes before
+-----------------------------
+1. onnxruntime-qnn 2.x is a *plugin* EP — must register_execution_provider_library
+2. HTP/NPU only runs *quantized* (QDQ) graphs — FP32 DeBERTa stayed on CPU
+3. Conflicting onnxruntime / directml / qnn packages hid the EP
+
+This script:
+  - registers QNN plugin
+  - builds a tiny MatMul ONNX → QDQ quantizes it
+  - runs on QNNExecutionProvider + QnnHtp.dll (Hexagon HTP)
+  - writes prime/state/npu_qnn_smoke.json
+
+Usage:
+  python npu_qnn_smoke.py
+  python npu_qnn_smoke.py --bench   # longer HTP loop (extra latency sample)
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+STATE = ROOT.parent / "state" / "npu"
+STATE.mkdir(parents=True, exist_ok=True)
+OUT = ROOT.parent / "state" / "npu_qnn_smoke.json"
+
+
+def register_qnn() -> dict:
+    """Delegate to npu_qnn.register() — single source of truth for plugin EP."""
+    try:
+        from npu_qnn import register
+
+        r = register()
+        # Sanitize absolute paths for any report that embeds this dict
+        out = dict(r)
+        if out.get("lib"):
+            out["lib"] = "<onnxruntime_qnn>/onnxruntime_providers_qnn.dll"
+        if out.get("htp_dll"):
+            out["htp_dll"] = "<onnxruntime_qnn>/QnnHtp.dll"
+        out["providers_list"] = out.get("providers_builtin") or out.get("providers_list")
+        return out
+    except Exception as e:
+        return {"ok": False, "error": f"npu_qnn.register: {e}"}
+
+
+def build_and_quantize() -> dict:
+    """Tiny Gemm/MatMul float32 → QDQ for HTP."""
+    import numpy as np
+    import onnx
+    from onnx import TensorProto, helper, numpy_helper
+    from onnxruntime.quantization import QuantType, quantize_static
+    from onnxruntime.quantization.calibrate import CalibrationDataReader
+
+    fp_path = STATE / "tiny_gemm.onnx"
+    qdq_path = STATE / "tiny_gemm.qdq.onnx"
+
+    # y = x @ W + b   x:[1,16] W:[16,8] b:[8]
+    W = np.random.randn(16, 8).astype(np.float32) * 0.1
+    b = np.random.randn(8).astype(np.float32) * 0.01
+    X = helper.make_tensor_value_info("X", TensorProto.FLOAT, [1, 16])
+    Y = helper.make_tensor_value_info("Y", TensorProto.FLOAT, [1, 8])
+    w_init = numpy_helper.from_array(W, "W")
+    b_init = numpy_helper.from_array(b, "B")
+    node = helper.make_node("Gemm", ["X", "W", "B"], ["Y"], alpha=1.0, beta=1.0)
+    graph = helper.make_graph([node], "tiny_gemm", [X], [Y], [w_init, b_init])
+    model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 13)])
+    model.ir_version = 8
+    onnx.save(model, str(fp_path))
+
+    class Reader(CalibrationDataReader):
+        def __init__(self):
+            self.data = [
+                {"X": np.random.randn(1, 16).astype(np.float32)} for _ in range(16)
+            ]
+            self.i = 0
+
+        def get_next(self):
+            if self.i >= len(self.data):
+                return None
+            d = self.data[self.i]
+            self.i += 1
+            return d
+
+        def rewind(self):
+            self.i = 0
+
+    # Prefer QNN-aware quant if available
+    try:
+        from onnxruntime.quantization.execution_providers.qnn import (
+            get_qnn_qdq_config,
+            qnn_preprocess_model,
+        )
+
+        pre = STATE / "tiny_gemm.pre.onnx"
+        changed = qnn_preprocess_model(str(fp_path), str(pre))
+        src = str(pre) if changed else str(fp_path)
+        reader = Reader()
+        cfg = get_qnn_qdq_config(
+            src,
+            reader,
+            activation_type=QuantType.QUInt8,
+            weight_type=QuantType.QUInt8,
+        )
+        # Single pass: get_qnn_qdq_config → quantize() (do not pre-write via quantize_static)
+        # Write to temp then rename so an interrupted run cannot leave a truncated QDQ.
+        from onnxruntime.quantization import quantize
+        import os
+        import tempfile
+
+        reader.rewind()
+        fd, tmp_name = tempfile.mkstemp(suffix=".qdq.onnx", dir=str(STATE))
+        os.close(fd)
+        tmp_path = Path(tmp_name)
+        try:
+            quantize(src, str(tmp_path), cfg)
+            os.replace(str(tmp_path), str(qdq_path))
+        except Exception:
+            try:
+                tmp_path.unlink(missing_ok=True)
+            except Exception:
+                pass
+            raise
+        method = "qnn_qdq_config"
+    except Exception as e1:
+        # fallback classic static quant
+        try:
+            from onnxruntime.quantization import QuantFormat
+            import os
+            import tempfile
+
+            reader = Reader()
+            fd, tmp_name = tempfile.mkstemp(suffix=".qdq.onnx", dir=str(STATE))
+            os.close(fd)
+            tmp_path = Path(tmp_name)
+            try:
+                quantize_static(
+                    str(fp_path),
+                    str(tmp_path),
+                    reader,
+                    quant_format=QuantFormat.QDQ,
+                    activation_type=QuantType.QUInt8,
+                    weight_type=QuantType.QUInt8,
+                )
+                os.replace(str(tmp_path), str(qdq_path))
+            except Exception:
+                try:
+                    tmp_path.unlink(missing_ok=True)
+                except Exception:
+                    pass
+                raise
+            method = f"quantize_static_fallback after {e1}"
+        except Exception as e2:
+            return {
+                "ok": False,
+                "error": f"quantize failed: {e1} | {e2}",
+                "fp": str(fp_path),
+            }
+
+    return {
+        "ok": True,
+        "fp_model": str(fp_path),
+        "qdq_model": str(qdq_path),
+        "qdq_mb": round(qdq_path.stat().st_size / 1e6, 3),
+        "method": method,
+    }
+
+
+def run_on_htp(qdq_path: str, *, disable_cpu_fallback: bool = False) -> dict:
+    import numpy as np
+    import onnxruntime as ort
+    import onnxruntime_qnn as qnn
+
+    # ensure registered
+    reg = register_qnn()
+    if not reg.get("ok"):
+        return reg
+
+    name = "QNNExecutionProvider"
+    htp = qnn.get_qnn_htp_path()
+    selected = [
+        d for d in ort.get_ep_devices() if d.ep_name == name
+    ]
+    if not selected:
+        return {"ok": False, "error": "no QNN EP devices after register", "reg": reg}
+
+    so = ort.SessionOptions()
+    if disable_cpu_fallback:
+        so.add_session_config_entry("session.disable_cpu_ep_fallback", "1")
+
+    # backend_path OR backend_type — not both (QNN EP hard error)
+    ep_options = {
+        "backend_path": htp,
+        "htp_performance_mode": "burst",
+        "enable_htp_fp16_precision": "1",
+    }
+
+    t0 = time.time()
+    err = None
+    sess = None
+    api = ""
+    # Plugin API (2.x) — only QNN devices
+    try:
+        so.add_provider_for_devices(selected, ep_options)
+        sess = ort.InferenceSession(qdq_path, sess_options=so)
+        api = "plugin_add_provider_for_devices"
+    except Exception as e:
+        err = str(e)
+        # Classic providers= API (no SessionOptions pre-config)
+        try:
+            so2 = ort.SessionOptions()
+            if disable_cpu_fallback:
+                so2.add_session_config_entry("session.disable_cpu_ep_fallback", "1")
+            sess = ort.InferenceSession(
+                qdq_path,
+                sess_options=so2,
+                providers=["QNNExecutionProvider"],
+                provider_options=[ep_options],
+            )
+            api = "classic_providers_qnn_only"
+            err = None
+        except Exception as e2:
+            # last resort: allow CPU fallback to report error path
+            try:
+                so3 = ort.SessionOptions()
+                sess = ort.InferenceSession(
+                    qdq_path,
+                    sess_options=so3,
+                    providers=["QNNExecutionProvider", "CPUExecutionProvider"],
+                    provider_options=[ep_options, {}],
+                )
+                api = "classic_providers_qnn_cpu_fallback"
+                err = f"strict QNN failed: {e2}"
+            except Exception as e3:
+                return {
+                    "ok": False,
+                    "error": f"plugin: {err} | classic: {e2} | fallback: {e3}",
+                    "reg": reg,
+                    "ep_options": ep_options,
+                }
+
+    assert sess is not None
+    providers_used = sess.get_providers()
+    inp = sess.get_inputs()[0]
+    shape = [d if isinstance(d, int) and d > 0 else 1 for d in (inp.shape or [1, 16])]
+    x = np.random.randn(*shape).astype(np.float32)
+    # warm
+    for _ in range(3):
+        sess.run(None, {inp.name: x})
+    t1 = time.time()
+    n = 50
+    for _ in range(n):
+        out = sess.run(None, {inp.name: x})
+    elapsed = time.time() - t1
+    y = out[0]
+    qnn_ep_registered = any("QNN" in p for p in providers_used)
+    session_create_s = max(0.0, (time.time() - t0) - elapsed)
+    return {
+        "ok": True,
+        "api": api,
+        "providers_used": providers_used,
+        "qnn_ep_registered": qnn_ep_registered,
+        "on_qnn_ep": qnn_ep_registered,  # legacy alias
+        "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll",
+        "htp_exists": reg.get("htp_exists"),
+        "strict_qnn_error": err,  # preserved when classic fell back to CPU path
+        "input_shape": shape,
+        "output_shape": list(y.shape),
+        "runs": n,
+        "total_s": round(elapsed, 4),
+        "ms_per_run": round(elapsed * 1000 / n, 3),
+        "session_create_s": round(session_create_s, 3),
+        "reg_devices": reg.get("n_qnn_devices"),
+        "note": (
+            "qnn_ep_registered means QNN is in the session provider list — "
+            "not per-node HTP proof. Hard proof = htp_profile HVX/accelerator "
+            "cycles (npu_stress) or disable_cpu_fallback strict session."
+        ),
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Hexagon QNN HTP smoke")
+    ap.add_argument(
+        "--bench",
+        action="store_true",
+        help="extra latency sample (250 runs) after smoke",
+    )
+    args = ap.parse_args()
+    t0 = time.time()
+    report: dict = {"ok": False, "seconds": 0, "bench": bool(args.bench)}
+    print("1) register QNN plugin…", flush=True)
+    reg = register_qnn()
+    report["register"] = reg
+    print(json.dumps(reg, indent=2), flush=True)
+    if not reg.get("ok") or reg.get("n_qnn_devices", 0) < 1:
+        report["error"] = "QNN devices not available"
+        OUT.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        print("FAIL: no QNN devices", flush=True)
+        return 1
+
+    print("2) build+quantize tiny gemm…", flush=True)
+    q = build_and_quantize()
+    report["quantize"] = q
+    print(json.dumps(q, indent=2), flush=True)
+    if not q.get("ok"):
+        report["error"] = q.get("error")
+        OUT.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        return 1
+
+    print("3) run on HTP (Hexagon NPU)…", flush=True)
+    run = run_on_htp(q["qdq_model"], disable_cpu_fallback=False)
+    report["run"] = run
+    print(json.dumps(run, indent=2), flush=True)
+    if args.bench and run.get("ok"):
+        # Longer sample for ms/run stability (same session path)
+        print("3b) --bench: extra 250 runs…", flush=True)
+        try:
+            import numpy as np
+            import onnxruntime as ort
+            from npu_qnn import register
+
+            register()
+            so = ort.SessionOptions()
+            sess = ort.InferenceSession(
+                q["qdq_model"],
+                sess_options=so,
+                providers=["QNNExecutionProvider", "CPUExecutionProvider"],
+            )
+            inp = sess.get_inputs()[0]
+            shape = [d if isinstance(d, int) and d > 0 else 1 for d in (inp.shape or [1, 16])]
+            x = np.random.randn(*shape).astype(np.float32)
+            for _ in range(5):
+                sess.run(None, {inp.name: x})
+            n = 250
+            t1 = time.time()
+            for _ in range(n):
+                sess.run(None, {inp.name: x})
+            elapsed = time.time() - t1
+            report["bench_result"] = {
+                "runs": n,
+                "total_s": round(elapsed, 4),
+                "ms_per_run": round(elapsed * 1000 / n, 3),
+                "providers": sess.get_providers(),
+            }
+            print(json.dumps(report["bench_result"], indent=2), flush=True)
+        except Exception as e:
+            report["bench_result"] = {"ok": False, "error": str(e)}
+
+    # NPU_PATH_LIVE requires QNN EP registered + HTP dll present.
+    # Per-node HTP proof remains npu_stress htp_profile (not providers list alone).
+    report["ok"] = bool(
+        run.get("ok")
+        and (run.get("qnn_ep_registered") or run.get("on_qnn_ep"))
+        and (run.get("htp_exists") or reg.get("htp_exists"))
+    )
+    report["seconds"] = round(time.time() - t0, 1)
+    report["verdict"] = (
+        "NPU_PATH_LIVE"
+        if report["ok"]
+        else "NPU_PATH_FAIL"
+    )
+    report["proof_note"] = (
+        "qnn_ep_registered + htp_exists = path live; "
+        "HTP cycle proof = prime/state/npu/htp_profile.csv via npu_stress"
+    )
+    OUT.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    print("verdict", report["verdict"], "wrote", OUT, flush=True)
+    return 0 if report["ok"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

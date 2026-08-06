@@ -1,0 +1,128 @@
+{
+  "recipe": {
+    "act": "uint16",
+    "weight": "uint8"
+  },
+  "export": {
+    "ok": true,
+    "model_id": "cross-encoder/nli-deberta-v3-base",
+    "max_length": 128,
+    "labels": [
+      "contradiction",
+      "entailment",
+      "neutral"
+    ],
+    "input_names": [
+      "input_ids",
+      "attention_mask",
+      "token_type_ids"
+    ],
+    "fp32": "model_fp32_fixed.onnx",
+    "export_s": 12.1,
+    "size_mb": 738.3
+  },
+  "quantize": {
+    "ok": true,
+    "qdq": "model.qdq.aui16_wui8.onnx",
+    "qdq_mb": 296.2,
+    "method": "qnn_qdq_config act=uint16 w=uint8",
+    "act": "uint16",
+    "weight": "uint8",
+    "input_names": [
+      "input_ids",
+      "attention_mask"
+    ],
+    "seconds": 89.7
+  },
+  "run": {
+    "ok": true,
+    "providers": [
+      "QNNExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "qnn_ep_registered": true,
+    "on_qnn": true,
+    "probe_only": false,
+    "strict_qnn_failed": false,
+    "session_s": 18.85,
+    "rows": [
+      {
+        "label": "entailment",
+        "confidence": 0.8209,
+        "ms": 37.04,
+        "expect": "contradiction",
+        "hit_expect": false,
+        "ort_label": "contradiction",
+        "ort_ok": true,
+        "ort_force_cpu": true,
+        "ort_provider": "CPUExecutionProvider",
+        "parity_with_ort": false,
+        "hit": false
+      },
+      {
+        "label": "entailment",
+        "confidence": 0.818,
+        "ms": 35.49,
+        "expect": "entailment",
+        "hit_expect": true,
+        "ort_label": "entailment",
+        "ort_ok": true,
+        "ort_force_cpu": true,
+        "ort_provider": "CPUExecutionProvider",
+        "parity_with_ort": true,
+        "hit": true
+      },
+      {
+        "label": "entailment",
+        "confidence": 0.9253,
+        "ms": 35.84,
+        "expect": "contradiction",
+        "hit_expect": false,
+        "ort_label": "contradiction",
+        "ort_ok": true,
+        "ort_force_cpu": true,
+        "ort_provider": "CPUExecutionProvider",
+        "parity_with_ort": false,
+        "hit": false
+      },
+      {
+        "label": "contradiction",
+        "confidence": 0.8632,
+        "ms": 35.85,
+        "expect": "neutral",
+        "hit_expect": false,
+        "ort_label": "neutral",
+        "ort_ok": true,
+        "ort_force_cpu": true,
+        "ort_provider": "CPUExecutionProvider",
+        "parity_with_ort": false,
+        "hit": false
+      }
+    ],
+    "hits": 1,
+    "n": 4,
+    "label_parity_rate": 0.25,
+    "label_parity_n": 1,
+    "label_parity_den": 4,
+    "held_out": true,
+    "labels_covered": [
+      "contradiction",
+      "entailment",
+      "neutral"
+    ],
+    "labels_complete": true,
+    "ort_force_cpu": true,
+    "bench_ms_per": 33.78,
+    "htp_dll": "<QnnHtp.dll>"
+  },
+  "ok": false,
+  "verdict": "NPU_NLI_LIVENESS_PROBE",
+  "hit_rate": 0.25,
+  "label_parity_rate": 0.25,
+  "uncalibrated_probe": true,
+  "law": "Job2 HTP never owns production OPEN; E3 held-out ORT parity required; LIVENESS_PROBE \u2260 calibrated agreement authority",
+  "job2_owns_open": false,
+  "seconds": 128.9,
+  "archive_note": "post-expanded-calib UINT16 act / UINT8 weight; parity still red",
+  "archived_at": "2026-08-06T14:40:49.850637Z"
+}

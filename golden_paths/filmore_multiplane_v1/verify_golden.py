@@ -32,12 +32,71 @@ def sha256_file(path: Path) -> str:
 
 
 def main() -> int:
-    cert = json.loads(CERT_PATH.read_text(encoding="utf-8"))
-    sandbox = Path(os.environ.get("GOLDEN_SANDBOX_ROOT", DEFAULT_SANDBOX))
-    rel = cert["claims_artifact"]["relative_path"]
-    claims_path = sandbox / rel.replace("\\", "/")
+    if not CERT_PATH.is_file():
+        print(json.dumps({"ok": False, "error": "certificate missing", "path": str(CERT_PATH)}, indent=2))
+        print("GOLDEN VERIFY FAIL")
+        return 1
+    try:
+        cert = json.loads(CERT_PATH.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(json.dumps({"ok": False, "error": f"certificate unreadable: {e}"}, indent=2))
+        print("GOLDEN VERIFY FAIL")
+        return 1
+    # Structure gate before any claims_artifact key access
+    claims_art = cert.get("claims_artifact")
+    if not isinstance(claims_art, dict):
+        print(
+            json.dumps(
+                {
+                    "ok": False,
+                    "error": "certificate missing claims_artifact object",
+                    "keys": list(cert.keys())[:20],
+                },
+                indent=2,
+            )
+        )
+        print("GOLDEN VERIFY FAIL")
+        return 1
+    # Required structure fields before full-seal indexing
+    for req in ("sha256", "required_ids", "n_claims"):
+        if req not in claims_art:
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "error": f"claims_artifact missing required field: {req}",
+                        "keys": list(claims_art.keys())[:20],
+                    },
+                    indent=2,
+                )
+            )
+            print("GOLDEN VERIFY FAIL")
+            return 1
+    # Prefer portable roots: GOLDEN_SANDBOX_ROOT, monorepo extract, legacy absolute.
+    # CI/buddy without field dumps: schema-only PASS when sandbox missing.
+    # Force schema-only: GOLDEN_SANDBOX_ROOT=0 or GOLDEN_SCHEMA_ONLY=1
+    repo = HERE.parents[1]  # …/golden_paths/filmore → repo root
+    schema_only = os.environ.get("GOLDEN_SCHEMA_ONLY", "").strip() in (
+        "1",
+        "true",
+        "yes",
+    ) or os.environ.get("GOLDEN_SANDBOX_ROOT", "").strip() in ("0", "none", "schema")
+    env_root = (os.environ.get("GOLDEN_SANDBOX_ROOT") or "").strip()
+    if schema_only:
+        sandbox = Path("__no_sandbox__")
+    elif env_root and env_root not in ("0", "none", "schema"):
+        sandbox = Path(env_root)
+    else:
+        candidates = [
+            repo / "123abc" / "_sandbox_extract" / "SandBox",
+            repo / "_sandbox_extract" / "SandBox",
+            DEFAULT_SANDBOX,
+        ]
+        sandbox = next((p for p in candidates if p.is_dir()), Path("__no_sandbox__"))
+    rel = str(claims_art.get("relative_path") or "")
+    claims_path = sandbox / rel.replace("\\", "/") if rel else sandbox / "__missing__"
     # Windows path as stored
-    if not claims_path.is_file():
+    if rel and not claims_path.is_file():
         claims_path = sandbox / Path(rel)
 
     checks = []
@@ -49,7 +108,60 @@ def main() -> int:
         if not passed:
             ok = False
 
-    check("certificate_present", CERT_PATH.is_file())
+    check("certificate_present", True)
+    check("claims_artifact_structure", isinstance(claims_art, dict))
+
+    # Fail-closed: schema-only PASS only when explicitly requested.
+    # Implicit missing sandbox without GOLDEN_SCHEMA_ONLY → incomplete (non-zero).
+    if not sandbox.is_dir():
+        planes = {p["id"] for p in cert.get("planes", [])}
+        for need in ("tool_magpi", "wits_surface", "decoder_rt"):
+            check(f"plane_declared_{need}", need in planes)
+        check("golden_claim_id_set", bool(cert.get("golden_claim_id")))
+        check("claims_artifact_meta", bool(cert.get("claims_artifact")))
+        if not schema_only:
+            check(
+                "sandbox_required_or_schema_only",
+                False,
+                "set GOLDEN_SCHEMA_ONLY=1 for portable CI, or GOLDEN_SANDBOX_ROOT to full seal",
+            )
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "incomplete": True,
+                        "skipped_sandbox": True,
+                        "sandbox": str(sandbox),
+                        "checks": checks,
+                        "note": (
+                            "Sandbox extract not present and GOLDEN_SCHEMA_ONLY not set — "
+                            "fail-closed (incomplete). CI sets GOLDEN_SCHEMA_ONLY=1."
+                        ),
+                    },
+                    indent=2,
+                )
+            )
+            print("GOLDEN VERIFY INCOMPLETE (no sandbox; not schema-only mode)")
+            return 2
+        print(
+            json.dumps(
+                {
+                    "ok": ok,
+                    "schema_only": True,
+                    "skipped_sandbox": True,
+                    "sandbox": str(sandbox),
+                    "checks": checks,
+                    "note": "Explicit GOLDEN_SCHEMA_ONLY — certificate schema only (not full seal)",
+                },
+                indent=2,
+            )
+        )
+        if ok:
+            print("GOLDEN VERIFY OK (schema-only; no sandbox)")
+            return 0
+        print("GOLDEN VERIFY FAIL")
+        return 1
+
     check("sandbox_root_exists", sandbox.is_dir(), str(sandbox))
     check("claims_json_exists", claims_path.is_file(), str(claims_path))
 

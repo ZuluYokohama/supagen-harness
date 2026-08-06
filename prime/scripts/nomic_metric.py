@@ -22,7 +22,17 @@ Env
   PRIME_EMBED_FALLBACK 1 (default) — if jina unreachable, fall back to nomic
 
 Not Job 2 (agreement). Cosine has no contradiction channel.
-Measured (2026-08-05): jina C-floor ~0.10, A−C ~0.83; nomic C-floor ~0.47, A−C ~0.45.
+Contract: aboutness must not promote OPEN; NLI owns agreement.
+
+Bakeoff_30 (2026-08-06, 30 matched strings, model-correct prefixes):
+  jina floor_mean 0.257  range 0.558  negation_cos 0.655  adv_cos 0.643
+  nomic floor_mean 0.566  range 0.339  negation_cos 0.896  adv_cos 0.806
+  E_ref vs pasta: jina 0.20 (was 0.83 envelope-era → 0.47 prefix-fix → 0.20 v5)
+  Adversarial spread jina 0.47–0.85; pearson cos~jaccard ≈ 0.76 (surface-form
+  predictable, not arbitrary). Worst twin (benign_audit/adv_audit) glues at 0.85
+  — any pure-cos retrieval threshold below that is an exposure.
+  Polarity remains cosine structure (symmetry / missing zero); encoder only
+  moves floor/range.
 """
 from __future__ import annotations
 
@@ -42,7 +52,7 @@ Family = Literal["jina", "nomic"]
 
 NOMIC_MODEL = "text-embedding-nomic-embed-text-v1.5"
 JINA_MODEL = os.environ.get(
-    "PRIME_JINA_MODEL", "jina-embeddings-v5-text-nano-retrieval"
+    "PRIME_JINA_MODEL", "jina-embeddings-v5-text-small-retrieval"
 )
 JINA_BASE = os.environ.get("PRIME_JINA_BASE", "http://127.0.0.1:8765").rstrip("/")
 

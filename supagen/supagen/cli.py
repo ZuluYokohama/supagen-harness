@@ -49,15 +49,35 @@ def _cmd_e2e(args: argparse.Namespace) -> int:
 
 
 def _cmd_ensure(args: argparse.Namespace) -> int:
+    import os
+
     from .ensure import ensure_all
 
+    # Resolve fiber mode: explicit --mode → PRIME_FIBER_MODE → scout
+    mode = getattr(args, "mode", None)
+    if mode is None:
+        mode = (os.environ.get("PRIME_FIBER_MODE") or "").strip() or None
+    if mode is not None:
+        mode = str(mode).lower().strip()
+        if mode not in ("scout", "preserve"):
+            print(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "error": f"invalid fiber_mode={mode!r}; allowed=['scout','preserve']",
+                    },
+                    indent=2,
+                )
+            )
+            return 2
     r = ensure_all(
         chat_model=args.model,
         purpose=args.purpose,
         jina=not args.no_jina,
         lms=not args.no_lms,
+        fiber_mode=mode,
     )
-    print(json.dumps(r, indent=2))
+    print(json.dumps(r, indent=2, default=str))
     return 0 if r.get("ok") else 1
 
 
@@ -289,6 +309,15 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("ensure", help="jina + LMS substrate (seamless)")
     p.add_argument("--model", default=None, help="chat model key")
+    p.add_argument(
+        "--mode",
+        choices=("scout", "preserve"),
+        default=None,
+        help=(
+            "SCOUT=small fiber; PRESERVE=frankenstein alone. "
+            "When omitted: PRIME_FIBER_MODE env if set, else scout"
+        ),
+    )
     p.add_argument("--purpose", default="chat")
     p.add_argument("--no-jina", action="store_true")
     p.add_argument("--no-lms", action="store_true")

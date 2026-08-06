@@ -12,16 +12,27 @@ def ensure_all(
     purpose: str = "chat",
     jina: bool = True,
     lms: bool = True,
+    fiber_mode: str | None = None,
 ) -> dict[str, Any]:
     """
     One call → Job1 jina up, unload heavies, promote chat fiber to policy ctx.
 
+    fiber_mode: scout | preserve | None (→ PRIME_FIBER_MODE / scout)
     Never uses LMS UI default 4096 as the intentional target.
     """
+    import os
+
     paths = ensure_sys_path()
+    mode = (fiber_mode or os.environ.get("PRIME_FIBER_MODE") or "scout").lower().strip()
+    if mode not in ("scout", "preserve"):
+        mode = "scout"
+    if mode == "preserve" and purpose == "chat":
+        purpose = "preserve"
+
     out: dict[str, Any] = {
         "ok": True,
         "paths": paths,
+        "fiber_mode": mode,
         "jina": None,
         "lms": None,
         "ctx_policy": None,
@@ -34,12 +45,16 @@ def ensure_all(
             from residency import seamless_substrate
             from lms_layers import DEFAULT_LFM
 
-            r = seamless_substrate(chat_model=chat_model or DEFAULT_LFM)
+            r = seamless_substrate(
+                chat_model=chat_model or DEFAULT_LFM,
+                fiber_mode=mode,
+            )
             out["jina"] = r.get("jina")
             out["lms"] = r.get("fiber")
             out["ctx_policy"] = (r.get("fiber") or {}).get("ctx_policy")
             out["nomic"] = r.get("nomic")
             out["errors"] = list(r.get("errors") or [])
+            out["fiber_mode"] = r.get("fiber_mode") or mode
             out["ok"] = bool(r.get("ok"))
             return out
         except Exception as e:

@@ -33,3 +33,43 @@ prime/state/**/*.json
 !prime/state/kb/
 supagen/state/e2e_last.json
 
+# ONNX / NPU local artifacts (regenerate via scripts)
+# Proofs / sealed reports live under docs/evidence/npu/ (tracked).
+# prime/state/npu/ is working scratch only — never the archive.
+**/*.onnx
+**/*.onnx.data
+prime/state/ort_models/
+prime/state/npu/
+prime/state/*.csv
+prime/state/*_qnn.log
+
+# Local isolation clones / ledgers (not product)
+_buddy_isolate/
+_buddy_wt/
+VALIDITY_LEDGER.md
+_cr_*.md
+
+# Nested repos / foreign trees (not part of supagen-harness product)
+123abc/
+123abc-grok/
+.grok/
+.superpowers/
+C1PO/
+Our_Concious_Intel_ops_research/
+ToeStub/
+autoresearch/
+convnetjs/
+cpython/
+hn-time-capsule/
+llm-council/
+llm.c/
+micrograd/
+minGPT/
+minbpe/
+nanoGPT/
+nanochat/
+nn-zero-to-hero/
+primed-topology/
+topology-sees-sequence/
+desktop.ini
+

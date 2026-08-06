@@ -1,0 +1,77 @@
+{
+  "recipe": {
+    "act": "uint16",
+    "weight": "uint8"
+  },
+  "export": {
+    "ok": true,
+    "fp32": "model_fp32_fixed.onnx",
+    "reused": true,
+    "model_id": "cross-encoder/nli-deberta-v3-base",
+    "max_length": 128,
+    "labels": [
+      "contradiction",
+      "entailment",
+      "neutral"
+    ],
+    "input_names": [
+      "input_ids",
+      "attention_mask",
+      "token_type_ids"
+    ],
+    "export_s": 12.1,
+    "size_mb": 738.3
+  },
+  "quantize": {
+    "ok": true,
+    "qdq": "model.qdq.aui16_wui8.onnx",
+    "qdq_mb": 296.2,
+    "method": "qnn_qdq_config act=uint16 w=uint8",
+    "act": "uint16",
+    "weight": "uint8",
+    "input_names": [
+      "input_ids",
+      "attention_mask"
+    ],
+    "seconds": 99.6
+  },
+  "run": {
+    "ok": true,
+    "providers": [
+      "QNNExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "on_qnn": true,
+    "session_s": 15.41,
+    "rows": [
+      {
+        "label": "entailment",
+        "confidence": 0.9443,
+        "ms": 41.04,
+        "expect": "contradiction",
+        "hit": false
+      },
+      {
+        "label": "entailment",
+        "confidence": 0.8293,
+        "ms": 33.57,
+        "expect": "contradiction",
+        "hit": false
+      },
+      {
+        "label": "contradiction",
+        "confidence": 0.6662,
+        "ms": 31.52,
+        "expect": "entailment",
+        "hit": false
+      }
+    ],
+    "hits": 0,
+    "n": 3,
+    "bench_ms_per": 32.06,
+    "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll"
+  },
+  "ok": false,
+  "verdict": "NPU_NLI_PARTIAL",
+  "seconds": 125.0
+}

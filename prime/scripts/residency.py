@@ -3,13 +3,18 @@ Aggressive residency: free RAM for policy ctx, promote under-loaded fibers.
 
 Called before dual_enter / ensure so we don't sit forever at UI-ish 4k/8k
 while a 7B+ ghost holds the box.
+
+Fiber modes (PRIME_FIBER_MODE / seamless_substrate fiber_mode)
+--------------------------------------------------------------
+  scout     daily: small LFM/Ministral; UNLOAD frankenstein + other heavies
+  preserve  identity/holonomy: frankenstein ALONE @ policy ctx; unload scouts
 """
 from __future__ import annotations
 
 from typing import Any
 
 
-# Models that must never be co-resident with daily fiber on 16GB
+# Models that must never be co-resident with daily SCOUT fiber on 16GB
 HEAVY_KEYS = (
     "gemma-4-12b",
     "frankenstein",
@@ -18,6 +23,12 @@ HEAVY_KEYS = (
     "queen-opus",
     "ibm/granite",
     "prism-ml/bonsai",
+)
+
+PRESERVE_KEYS = (
+    "frankenstein",
+    "frankenstein-2.0",
+    "thedrummer/frankenstein",
 )
 
 
@@ -74,17 +85,46 @@ def pick_chat_model(
     preferred: str | None = None,
     *,
     base: str = "http://127.0.0.1:1234",
+    fiber_mode: str = "scout",
 ) -> dict[str, Any]:
     """
-    Prefer: explicit preferred → already-loaded non-heavy LLM with largest ctx
-    → DEFAULT_LFM → first small catalog model (ministral/lfm).
-    Never picks embedders or jina-as-llm.
+    scout: explicit preferred → already-loaded non-heavy LLM max ctx
+           → DEFAULT_LFM → ministral. Never embedders / jina-as-llm / frankenstein.
+    preserve: frankenstein (or PRIME_PRESERVE_MODEL) only.
     """
+    import os
+
     from lms_layers import DEFAULT_LFM, l1_catalog
 
     cat = l1_catalog(base=base)
     models = cat.get("models") or []
-    if preferred:
+    keys = [m.get("key") for m in models]
+
+    if fiber_mode == "preserve":
+        # frankenstein alone
+        env_p = os.environ.get("PRIME_PRESERVE_MODEL")
+        if preferred and any(p in preferred.lower() for p in PRESERVE_KEYS):
+            return {"key": preferred, "reason": "preserve_preferred", "loaded": preferred in keys}
+        # Only honor PRIME_PRESERVE_MODEL when it names a preserve-class key
+        if env_p and any(p in env_p.lower() for p in PRESERVE_KEYS):
+            return {"key": env_p, "reason": "preserve_env", "loaded": env_p in keys}
+        for m in models:
+            key = m.get("key") or ""
+            if any(p in key.lower() for p in PRESERVE_KEYS):
+                return {
+                    "key": key,
+                    "reason": "preserve_catalog",
+                    "loaded": bool(m.get("loaded")),
+                }
+        # Never fall back to a scout preferred key as the preserve pick
+        return {
+            "key": "frankenstein-2.0-i1",
+            "reason": "preserve_fallback_name",
+            "loaded": False,
+            "warning": "frankenstein key not in catalog — set PRIME_PRESERVE_MODEL",
+        }
+
+    if preferred and not any(p in preferred.lower() for p in PRESERVE_KEYS):
         for m in models:
             if m.get("key") == preferred:
                 return {"key": preferred, "reason": "preferred", "loaded": bool(m.get("loaded"))}
@@ -109,8 +149,6 @@ def pick_chat_model(
         loaded.sort(reverse=True)
         return {"key": loaded[0][1], "reason": "already_loaded_max_ctx", "loaded_ctx": loaded[0][0]}
 
-    # prefer LFM if in catalog, else ministral, else DEFAULT
-    keys = [m.get("key") for m in models]
     for cand in (DEFAULT_LFM, "liquid/lfm2.5-1.2b", "mistralai/ministral-3-3b"):
         if cand in keys:
             return {"key": cand, "reason": "catalog_prefer", "loaded": False}
@@ -179,9 +217,34 @@ def seamless_substrate(
     *,
     chat_model: str | None = None,
     base: str = "http://127.0.0.1:1234",
+    fiber_mode: str | None = None,
 ) -> dict[str, Any]:
-    """One shot: jina ensure + pick/promote chat fiber + nomic embed fallback."""
-    out: dict[str, Any] = {"ok": True, "jina": None, "fiber": None, "errors": [], "pick": None}
+    """
+    One shot: jina ensure + pick/promote chat fiber by mode.
+
+    scout:    unload heavies (incl. frankenstein), load small fiber
+    preserve: unload everything else, load frankenstein alone
+    nomic ensure is optional fallback only — Job1 is jina.
+
+    fiber_mode=None → PRIME_FIBER_MODE env → scout
+    """
+    import os
+
+    mode = (fiber_mode if fiber_mode is not None else None) or os.environ.get(
+        "PRIME_FIBER_MODE"
+    ) or "scout"
+    mode = str(mode).lower().strip()
+    if mode not in ("scout", "preserve"):
+        mode = "scout"
+
+    out: dict[str, Any] = {
+        "ok": True,
+        "fiber_mode": mode,
+        "jina": None,
+        "fiber": None,
+        "errors": [],
+        "pick": None,
+    }
     try:
         from jina_service import ensure_jina
 
@@ -199,26 +262,127 @@ def seamless_substrate(
         out["jina"] = {"ok": False, "error": str(e)}
         out["errors"].append(f"jina:{e}")
 
-    pick = pick_chat_model(chat_model, base=base)
+    pick = pick_chat_model(chat_model, base=base, fiber_mode=mode)
     out["pick"] = pick
     model = pick["key"]
+
+    # Mode-specific unload before promote
     try:
-        out["fiber"] = promote_chat_fiber(model, base=base)
+        if mode == "preserve":
+            # keep only frankenstein; unload scouts + other heavies
+            freed = unload_heavies(keep={model}, base=base)
+            # also unload non-heavy chat that is not the preserve model
+            from lms_layers import l0_post, l1_catalog
+
+            extra_acts: list[dict[str, Any]] = []
+            for m in (l1_catalog(base=base).get("models") or []):
+                key = m.get("key") or ""
+                if key == model or m.get("type") == "embedding":
+                    continue
+                if "jina" in key.lower():
+                    continue
+                for inst in m.get("loaded_instances") or []:
+                    iid = inst.get("id")
+                    if iid:
+                        r = l0_post(
+                            "/api/v1/models/unload",
+                            {"instance_id": iid},
+                            base=base,
+                            timeout=180,
+                        )
+                        extra_acts.append(
+                            {
+                                "unload": iid,
+                                "key": key,
+                                "ok": bool(getattr(r, "ok", r) if not isinstance(r, dict) else r.get("ok")),
+                                "err": (
+                                    getattr(r, "error", "")
+                                    if not isinstance(r, dict)
+                                    else (r.get("error") or "")
+                                ),
+                            }
+                        )
+            freed = dict(freed or {})
+            acts = list(freed.get("actions") or []) + extra_acts
+            freed["actions"] = acts
+            freed["n_unloaded"] = sum(1 for a in acts if a.get("ok"))
+            freed["n_failed"] = sum(1 for a in acts if not a.get("ok"))
+            out["preserve_freed"] = freed
+            # Preserve must be frankenstein alone — any failed unload is substrate FAIL
+            if any(not a.get("ok") for a in acts):
+                out["errors"].append("preserve_unload_failed")
+                out["preserve_alone"] = False
+            else:
+                # Defer alone-check until after promote; measure loaded residency below
+                out["preserve_alone"] = None
+        else:
+            # scout: frankenstein is HEAVY — unload_heavies inside promote
+            out["preserve_alone"] = None
+    except Exception as e:
+        out["errors"].append(f"mode_unload:{e}")
+        if mode == "preserve":
+            out["preserve_alone"] = False
+
+    try:
+        purpose = "chat" if mode == "scout" else "preserve"
+        out["fiber"] = promote_chat_fiber(model, purpose=purpose, base=base)
         if not out["fiber"].get("ok"):
             out["errors"].append(f"fiber:{out['fiber'].get('ensure', {}).get('error')}")
     except Exception as e:
         out["fiber"] = {"ok": False, "error": str(e)}
         out["errors"].append(f"fiber:{e}")
 
-    try:
-        from holonomy_capacity_bench import ensure_embed
+    # Measure preserve residency: selected model alone (not any PRESERVE_KEYS match)
+    if mode == "preserve" and out.get("preserve_alone") is not False:
+        try:
+            from lms_layers import l1_catalog
 
-        ensure_embed()
-        out["nomic"] = {"ok": True}
-    except Exception as e:
-        out["nomic"] = {"ok": False, "error": str(e)}
+            cat2 = l1_catalog(base=base)
+            selected = (model or (out.get("fiber") or {}).get("model") or "").lower().strip()
+            loaded_keys = [
+                (m.get("key") or "").lower().strip()
+                for m in (cat2.get("models") or [])
+                if m.get("loaded") and m.get("type") != "embedding"
+            ]
+            # Exact key equality only — other frankenstein variants are foreign
+            selected_loaded = bool(selected) and selected in loaded_keys
+            foreign = [
+                k
+                for k in loaded_keys
+                if "jina" not in k and "embed" not in k and k != selected
+            ]
+            alone = selected_loaded and not foreign
+            out["preserve_alone"] = alone
+            out["preserve_residency"] = {
+                "selected": selected,
+                "selected_loaded": selected_loaded,
+                "foreign_loaded": foreign,
+            }
+            if not alone:
+                out["errors"].append("preserve_not_alone_measured")
+        except Exception as e:
+            out["preserve_alone"] = False
+            out["errors"].append(f"preserve_residency_measure:{e}")
 
-    out["ok"] = bool((out.get("jina") or {}).get("ok")) and bool(
-        (out.get("fiber") or {}).get("ok")
+    # nomic only as degraded aboutness fallback — do not thrash if jina ok
+    if not (out.get("jina") or {}).get("ok"):
+        try:
+            from holonomy_capacity_bench import ensure_embed
+
+            ensure_embed()
+            out["nomic"] = {"ok": True, "role": "fallback_only"}
+        except Exception as e:
+            out["nomic"] = {"ok": False, "error": str(e)}
+    else:
+        out["nomic"] = {"ok": True, "skipped": True, "reason": "jina_primary"}
+
+    jina_ok = bool((out.get("jina") or {}).get("ok"))
+    fiber_ok = bool((out.get("fiber") or {}).get("ok"))
+    preserve_ok = mode != "preserve" or out.get("preserve_alone") is True
+    out["ok"] = jina_ok and fiber_ok and preserve_ok
+    out["frankenstein_note"] = (
+        "PRESERVE: frankenstein required alone"
+        if mode == "preserve"
+        else "SCOUT: frankenstein must NOT be loaded (HEAVY); instruments are off-LMS"
     )
     return out

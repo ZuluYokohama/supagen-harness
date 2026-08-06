@@ -71,14 +71,28 @@ PREFIX = {
 
 
 def _gguf_candidates() -> list[Path]:
+    """Prefer v5-small if present (Tier-B upgrade); else nano."""
     out: list[Path] = []
     if os.environ.get("PRIME_JINA_GGUF"):
         out.append(Path(os.environ["PRIME_JINA_GGUF"]))
+    base = Path(
+        r"C:\LM_STUDIO_MODELS\00.LLM HF MODELS4 CODING-RESEARCH-TESTING-USE-RESEARCH-TESTING-USE-1JUN26"
+        r"\jinaai"
+    )
+    # Tier-B: small before nano (prefer Q4_K_M then higher quality quants)
+    small_dir = base / "jina-embeddings-v5-text-small-retrieval"
+    for name in (
+        "v5-small-retrieval-Q4_K_M.gguf",
+        "v5-small-retrieval-Q5_K_M.gguf",
+        "v5-small-retrieval-Q8_0.gguf",
+        "v5-small-retrieval-F16.gguf",
+    ):
+        out.append(small_dir / name)
+    out.extend(sorted(small_dir.glob("*.gguf")))
     out.append(
-        Path(
-            r"C:\LM_STUDIO_MODELS\00.LLM HF MODELS4 CODING-RESEARCH-TESTING-USE-RESEARCH-TESTING-USE-1JUN26"
-            r"\jinaai\jina-embeddings-v5-text-nano-retrieval\v5-nano-retrieval-F16.gguf"
-        )
+        base
+        / "jina-embeddings-v5-text-nano-retrieval"
+        / "v5-nano-retrieval-F16.gguf"
     )
     # LMS downloadsFolder variants
     try:
@@ -86,12 +100,12 @@ def _gguf_candidates() -> list[Path]:
 
         dl = (read_settings() or {}).get("downloads_folder")
         if dl:
-            out.append(
-                Path(dl)
-                / "jinaai"
-                / "jina-embeddings-v5-text-nano-retrieval"
-                / "v5-nano-retrieval-F16.gguf"
-            )
+            dlp = Path(dl) / "jinaai"
+            for name in (
+                "jina-embeddings-v5-text-small-retrieval",
+                "jina-embeddings-v5-text-nano-retrieval",
+            ):
+                out.extend(sorted((dlp / name).glob("*.gguf")))
     except Exception:
         pass
     return out
@@ -214,8 +228,9 @@ def _build_cmd(gguf: Path, srv: Path) -> list[str]:
         str(UBATCH),
         "-b",
         str(max(UBATCH, 512)),
+        # jina-embeddings-v5: last-token pooling (mean collapses paraphrase ceiling)
         "--pooling",
-        os.environ.get("PRIME_JINA_POOLING", "mean"),
+        os.environ.get("PRIME_JINA_POOLING", "last"),
     ]
     # optional flash-attn if backend supports
     if os.environ.get("PRIME_JINA_FLASH", "0") in ("1", "true", "yes"):
@@ -258,9 +273,9 @@ def _start_detached(gguf: Path, srv: Path) -> dict[str, Any]:
         "hyperparams": {
             "embedding": True,
             "context_length": CTX,
-            "pooling": os.environ.get("PRIME_JINA_POOLING", "mean"),
+            "pooling": os.environ.get("PRIME_JINA_POOLING", "last"),
             "task_prefixes": PREFIX,
-            "note": "Prefixes are the retrieval system channel; no chat system_prompt.",
+            "note": "Prefixes are the retrieval system channel; no chat system_prompt. Pooling=last for v5.",
         },
     }
     _write_meta(meta)
@@ -287,22 +302,84 @@ def ensure_jina(
         if not force_restart:
             p = probe_jina(timeout=2.5)
             if p.get("ok"):
-                out = {
-                    "ok": True,
-                    "started": False,
-                    "status": "already_running",
-                    "base": BASE,
-                    "dim": p.get("dim"),
-                    "latency_ms": p.get("latency_ms"),
-                    "hyperparams": {
-                        "context_length": CTX,
-                        "pooling": os.environ.get("PRIME_JINA_POOLING", "mean"),
-                        "prefixes": PREFIX,
-                    },
-                    "seamless": True,
-                }
-                _LAST_ENSURE = out
-                return out
+                # Reconcile with live meta (actual GGUF/pooling that is running)
+                live_meta: dict[str, Any] = {}
+                if META_FILE.is_file():
+                    try:
+                        live_meta = json.loads(META_FILE.read_text(encoding="utf-8"))
+                    except Exception:
+                        live_meta = {}
+                # Fail closed / force re-bind when config is not verified
+                if not live_meta or not live_meta.get("gguf"):
+                    force_restart = True
+                else:
+                    hyp = live_meta.get("hyperparams") or {}
+                    want_pool = os.environ.get("PRIME_JINA_POOLING", "last")
+                    live_pool = hyp.get("pooling")
+                    # Desired GGUF: explicit env, else first candidate on disk
+                    want_gguf = (os.environ.get("PRIME_JINA_GGUF") or "").strip()
+                    if not want_gguf:
+                        try:
+                            cand = _first_file(_gguf_candidates())
+                            want_gguf = str(cand) if cand else ""
+                        except Exception:
+                            want_gguf = ""
+                    live_gguf = str(live_meta.get("gguf") or "")
+                    config_mismatch = False
+                    # Unverified pooling in meta → fail closed to restart
+                    if not live_pool:
+                        config_mismatch = True
+                    elif live_pool != want_pool:
+                        config_mismatch = True
+                    if want_gguf and live_gguf:
+                        # Identity: same resolved file (or same size+mtime fallback),
+                        # never basename-only or substring path match.
+                        try:
+                            wp = Path(want_gguf).expanduser().resolve()
+                            lp = Path(live_gguf).expanduser().resolve()
+                            same = False
+                            if wp.is_file() and lp.is_file():
+                                try:
+                                    same = wp.samefile(lp)
+                                except OSError:
+                                    same = False
+                                if not same:
+                                    same = (
+                                        wp.stat().st_size == lp.stat().st_size
+                                        and abs(wp.stat().st_mtime - lp.stat().st_mtime)
+                                        < 1.0
+                                        and wp.name.lower() == lp.name.lower()
+                                    )
+                            else:
+                                same = str(wp).lower() == str(lp).lower()
+                            if not same:
+                                config_mismatch = True
+                        except Exception:
+                            config_mismatch = True
+                    if config_mismatch:
+                        force_restart = True
+                    else:
+                        out = {
+                            "ok": True,
+                            "started": False,
+                            "status": "already_running",
+                            "base": BASE,
+                            "dim": p.get("dim"),
+                            "latency_ms": p.get("latency_ms"),
+                            "gguf": live_gguf,
+                            "config_verified": True,
+                            "model_field": p.get("model_field"),
+                            "hyperparams": {
+                                "context_length": live_meta.get("ctx")
+                                or hyp.get("context_length")
+                                or CTX,
+                                "pooling": live_pool,
+                                "prefixes": PREFIX,
+                            },
+                            "seamless": True,
+                        }
+                        _LAST_ENSURE = out
+                        return out
             # zombie: pid alive, port dead → force restart
             if PID_FILE.is_file():
                 try:
