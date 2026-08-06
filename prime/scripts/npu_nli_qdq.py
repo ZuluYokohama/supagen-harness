@@ -327,13 +327,14 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
     return {
         "ok": True,
         "providers": r.get("providers"),
-        "on_qnn": r.get("on_qnn"),
+        "qnn_ep_registered": r.get("qnn_ep_registered", r.get("on_qnn")),
+        "on_qnn": r.get("on_qnn"),  # legacy alias
         "session_s": round(time.time() - t0, 2),
         "rows": rows,
         "hits": sum(1 for x in rows if x.get("hit")),
         "n": len(rows),
         "bench_ms_per": round(bench_s * 1000 / n, 2),
-        "htp_dll": r.get("htp_dll"),
+        "htp_dll": "<QnnHtp.dll>",  # sanitized — no user path in reports
     }
 
 

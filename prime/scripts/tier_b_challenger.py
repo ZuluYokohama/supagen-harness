@@ -289,7 +289,7 @@ def main() -> int:
 
     worst_adv = adversarial.get("max")
     report = {
-        "ok": True,
+        "ok": False,  # filled from tier_b_ready below
         "seconds": round(time.time() - t0, 1),
         "contract": "aboutness must not promote OPEN; NLI owns agreement",
         "job1_jina": {
@@ -325,11 +325,14 @@ def main() -> int:
         },
     }
     v = report["verdict"]
+    # All D3 NLI gates required — neutral-only path must not tier_b_ready
     v["tier_b_ready"] = bool(
         v["jina_floor_usable"]
         and v["nli_blocks_adversarial_open"]
+        and v["nli_catches_contradiction"]
         and (v["rerank_prefers_benign"] or rr.get("model") is None)
     )
+    report["ok"] = bool(v["tier_b_ready"])
     parts = []
     if v["jina_floor_usable"]:
         parts.append("Job1 floor usable")

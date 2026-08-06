@@ -419,9 +419,9 @@ def main() -> int:
     print("htp runs/s", htp.get("runs_per_s"), "providers", htp.get("providers"))
     print("wrote", REPORT, flush=True)
     print(
-        "\nIf Performance→NPU still flat: open Task Manager *before* re-run; "
-        "some builds only label NPU under 'GPU' shared compute. "
-        "Providers list above is the hard proof of QNN HTP scheduling.",
+        "\nIf Performance→NPU still flat: Task Manager has no NPU counters here. "
+        "Hard proof = htp_profile HVX/HMX + accelerator cycles "
+        "(not the session providers list alone).",
         flush=True,
     )
     return 0 if report["ok"] else 1

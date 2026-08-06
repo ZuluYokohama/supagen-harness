@@ -276,15 +276,19 @@ def main() -> int:
         cells.append(c)
         print(f"  → {c['status']}", flush=True)
 
-    n_pass = sum(1 for c in cells if c["ok"])
-    n_fail = sum(1 for c in cells if not c["ok"])
-    n_crit = sum(1 for c in cells if c.get("critical") and not c["ok"])
+    n_pass = sum(1 for c in cells if c.get("status") == "PASS")
+    n_warn = sum(1 for c in cells if c.get("status") == "WARN")
+    # FAIL only — WARN is residual path, not n_fail
+    n_fail = sum(1 for c in cells if c.get("status") == "FAIL")
+    n_crit = sum(1 for c in cells if c.get("critical") and c.get("status") == "FAIL")
     report = {
         "ok": n_crit == 0,
         "go_no_go": "GO_MEASURE" if n_crit == 0 else "NO_GO",
         "n_pass": n_pass,
+        "n_warn": n_warn,
         "n_fail": n_fail,
         "n_critical_fail": n_crit,
+        "count_rule": "WARN does not increment n_fail",
         "seconds": round(time.time() - t0, 1),
         "cells": cells,
         "law": "aboutness must not promote OPEN; NLI owns agreement; residue never forced",
@@ -292,7 +296,23 @@ def main() -> int:
     out = STATE / "vv_push_domains.json"
     STATE.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
-    print(json.dumps({k: report[k] for k in ("ok", "go_no_go", "n_pass", "n_fail", "n_critical_fail", "seconds")}, indent=2))
+    print(
+        json.dumps(
+            {
+                k: report[k]
+                for k in (
+                    "ok",
+                    "go_no_go",
+                    "n_pass",
+                    "n_warn",
+                    "n_fail",
+                    "n_critical_fail",
+                    "seconds",
+                )
+            },
+            indent=2,
+        )
+    )
     for c in cells:
         print(f"  {c['status']:4} {c['id']}")
     print("wrote", out)

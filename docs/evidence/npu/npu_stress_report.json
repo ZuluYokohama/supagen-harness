@@ -7,7 +7,7 @@
       "QNNExecutionProvider",
       "CPUExecutionProvider"
     ],
-    "htp_dll": "C:\\Users\\Deving-1\\AppData\\Roaming\\Python\\Python314\\site-packages\\onnxruntime_qnn\\libs\\arm64ec\\QnnHtp.dll",
+    "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll",
     "dim": 512,
     "depth": 8,
     "seconds": 45.0,

@@ -305,14 +305,21 @@ def seamless_substrate(
             acts = list(freed.get("actions") or []) + extra_acts
             freed["actions"] = acts
             freed["n_unloaded"] = sum(1 for a in acts if a.get("ok"))
+            freed["n_failed"] = sum(1 for a in acts if not a.get("ok"))
             out["preserve_freed"] = freed
-            if any(not a.get("ok") for a in extra_acts):
-                out["errors"].append("preserve_unload_partial")
+            # Preserve must be frankenstein alone — any failed unload is substrate FAIL
+            if any(not a.get("ok") for a in acts):
+                out["errors"].append("preserve_unload_failed")
+                out["preserve_alone"] = False
+            else:
+                out["preserve_alone"] = True
         else:
             # scout: frankenstein is HEAVY — unload_heavies inside promote
-            pass
+            out["preserve_alone"] = None
     except Exception as e:
         out["errors"].append(f"mode_unload:{e}")
+        if mode == "preserve":
+            out["preserve_alone"] = False
 
     try:
         purpose = "chat" if mode == "scout" else "preserve"
@@ -335,9 +342,10 @@ def seamless_substrate(
     else:
         out["nomic"] = {"ok": True, "skipped": True, "reason": "jina_primary"}
 
-    out["ok"] = bool((out.get("jina") or {}).get("ok")) and bool(
-        (out.get("fiber") or {}).get("ok")
-    )
+    jina_ok = bool((out.get("jina") or {}).get("ok"))
+    fiber_ok = bool((out.get("fiber") or {}).get("ok"))
+    preserve_ok = mode != "preserve" or out.get("preserve_alone") is True
+    out["ok"] = jina_ok and fiber_ok and preserve_ok
     out["frankenstein_note"] = (
         "PRESERVE: frankenstein required alone"
         if mode == "preserve"

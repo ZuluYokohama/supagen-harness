@@ -267,13 +267,15 @@ def run_on_htp(qdq_path: str, *, disable_cpu_fallback: bool = False) -> dict:
         out = sess.run(None, {inp.name: x})
     elapsed = time.time() - t1
     y = out[0]
-    on_qnn = any("QNN" in p for p in providers_used)
+    qnn_ep_registered = any("QNN" in p for p in providers_used)
     return {
         "ok": True,
         "api": api,
         "providers_used": providers_used,
-        "on_qnn_ep": on_qnn,
+        "qnn_ep_registered": qnn_ep_registered,
+        "on_qnn_ep": qnn_ep_registered,  # legacy alias
         "htp_dll": htp,
+        "htp_exists": reg.get("htp_exists"),
         "input_shape": shape,
         "output_shape": list(y.shape),
         "runs": n,
@@ -282,8 +284,9 @@ def run_on_htp(qdq_path: str, *, disable_cpu_fallback: bool = False) -> dict:
         "session_create_s": round(t0 and (time.time() - t0 - elapsed), 3),
         "reg_devices": reg.get("n_qnn_devices"),
         "note": (
-            "QNN EP in providers list = graph scheduled on QNN stack (HTP=NPU). "
-            "Task Manager may still show system NPU as 'Shared' not a named process."
+            "qnn_ep_registered means QNN is in the session provider list — "
+            "not per-node HTP proof. Hard proof = htp_profile HVX/accelerator "
+            "cycles (npu_stress) or disable_cpu_fallback strict session."
         ),
     }
 
@@ -356,12 +359,22 @@ def main() -> int:
         except Exception as e:
             report["bench_result"] = {"ok": False, "error": str(e)}
 
-    report["ok"] = bool(run.get("ok") and run.get("on_qnn_ep"))
+    # NPU_PATH_LIVE requires QNN EP registered + HTP dll present.
+    # Per-node HTP proof remains npu_stress htp_profile (not providers list alone).
+    report["ok"] = bool(
+        run.get("ok")
+        and (run.get("qnn_ep_registered") or run.get("on_qnn_ep"))
+        and (run.get("htp_exists") or reg.get("htp_exists"))
+    )
     report["seconds"] = round(time.time() - t0, 1)
     report["verdict"] = (
         "NPU_PATH_LIVE"
         if report["ok"]
         else "NPU_PATH_FAIL"
+    )
+    report["proof_note"] = (
+        "qnn_ep_registered + htp_exists = path live; "
+        "HTP cycle proof = prime/state/npu/htp_profile.csv via npu_stress"
     )
     OUT.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     print("verdict", report["verdict"], "wrote", OUT, flush=True)

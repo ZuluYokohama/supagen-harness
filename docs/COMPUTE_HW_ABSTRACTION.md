@@ -268,8 +268,10 @@ Our dual-metric law needs something else: a **physically separate measure ALU** 
 ## 9. Immediate next actions
 
 1. **Fix** `npu_nli_qdq.py` calibration feeds to match actual ONNX inputs (token_type_ids / dropped inputs).  
-2. **Parity bench** HTP vs ORT CPU on bakeoff negation + adversarial pairs.  
-3. **Wire** `measure_fabric` into `glue_agreement` prefer order: `htp → ort → ce → lfm`.  
+2. **Parity bench** HTP vs ORT CPU on bakeoff negation + adversarial pairs (E3 gate).  
+3. **Wire** `measure_fabric` only **after** E3 label-parity PASS: prefer order  
+   `ort → ce → lfm` today; insert `htp` **only when** `nli_htp_parity_pass()` is true.  
+   Never `htp → ort` while parity is red (UINT8 collapse / UINT16 invert).  
 4. **Do not** claim product NPU until E3 green.  
 5. **Keep** Task Manager out of V&V — use `htp_profile.csv` only.
 

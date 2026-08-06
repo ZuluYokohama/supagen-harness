@@ -157,15 +157,23 @@ def _embed_one(text: str, role: str, family: str) -> dict:
         ensure_service=(family == "jina"),
     )
     pref = apply_prefix(text, task, family=family)  # type: ignore[arg-type]
+    actual_fam = (r.get("family") or family or "").lower()
+    # Reject silent cross-family fallback (e.g. nomic when jina bakeoff)
+    fam_ok = actual_fam == family.lower()
+    ok = bool(r.get("ok")) and fam_ok
+    err = r.get("error")
+    if r.get("ok") and not fam_ok:
+        err = f"family_mismatch: requested={family} got={actual_fam}"
     return {
-        "ok": bool(r.get("ok")),
-        "family": r.get("family") or family,
+        "ok": ok,
+        "family": actual_fam or family,
+        "requested_family": family,
         "model": r.get("model"),
         "task": task,
         "prefix_preview": pref[:48],
         "dim": r.get("dim"),
-        "embedding": r.get("embedding") if r.get("ok") else None,
-        "error": r.get("error"),
+        "embedding": r.get("embedding") if ok else None,
+        "error": err,
         "warning": r.get("warning"),
         "raw_envelope": text.strip().startswith("{"),
     }

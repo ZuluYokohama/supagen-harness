@@ -2,7 +2,9 @@
 
 **Verdict:** `GO_MEASURE`  
 **Seconds:** 28.7  
-**Pass/Fail:** 18 pass / 0 fail (0 critical fail)
+**Pass/Fail (matrix cells):** 18 pass / 0 fail (0 critical fail)  
+**Counting rule:** matrix cell **WARN** does **not** increment `n_fail`.  
+Push suite D17 reports `n_pass=5`, `n_warn=1` (P6 Hexagon historical/pre-plugin or path-only), `n_fail=0` under this rule. Older dumps that set `n_fail=1` for WARN are superseded.
 
 GO_MEASURE = instruments+law green for measured advertise of dual metric. Not production OPEN authority. Hexagon residual WARN allowed.
 
@@ -390,7 +392,9 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
 {
   "go_no_go": "GO_MEASURE",
   "n_pass": 5,
-  "n_fail": 1,
+  "n_warn": 1,
+  "n_fail": 0,
+  "count_rule": "WARN does not increment n_fail",
   "cells": [
     {
       "id": "P1_jina_v5_small",
@@ -398,7 +402,8 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
     },
     {
       "id": "P6_hexagon_qnn",
-      "status": "WARN"
+      "status": "WARN",
+      "note": "path/pre-plugin residual; HTP live under npu-htp-2026-08-06; Job2 parity residual"
     },
     {
       "id": "P5_ort_hot",

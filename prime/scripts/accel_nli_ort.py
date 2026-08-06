@@ -228,6 +228,21 @@ def predict(premise: str, hypothesis: str) -> dict[str, Any]:
         lab = "entailment"
     elif "neutral" in lab:
         lab = "neutral"
+
+    def _norm_key(raw: str) -> str:
+        s = str(raw).lower()
+        if "contrad" in s:
+            return "contradiction"
+        if "entail" in s:
+            return "entailment"
+        if "neutral" in s:
+            return "neutral"
+        return s
+
+    probs_norm: dict[str, float] = {}
+    for j in range(min(len(labels), len(probs))):
+        probs_norm[_norm_key(labels[j])] = round(float(probs[j]), 4)
+
     agrees = lab == "entailment" and conf >= 0.45
     gate = "PASS" if agrees else ("STOP" if lab == "contradiction" else "NEED_INFO")
     return {
@@ -238,10 +253,7 @@ def predict(premise: str, hypothesis: str) -> dict[str, Any]:
         "model": _META.get("model_id"),
         "label": lab,
         "confidence": round(conf, 4),
-        "probs": {
-            labels[j]: round(float(probs[j]), 4)
-            for j in range(min(len(labels), len(probs)))
-        },
+        "probs": probs_norm,
         "agrees": agrees,
         "gate": gate,
         "latency_ms": round((time.time() - t0) * 1000, 1),

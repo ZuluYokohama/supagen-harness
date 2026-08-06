@@ -92,6 +92,19 @@ def main() -> int:
             f"{jac:6.3f} {dic:6.3f} {tjac:6.3f}"
         )
 
+    out_path = SUM.parent / "bakeoff_adv_lexical.json"
+    if not rows:
+        out = {
+            "source": str(SUM),
+            "ok": False,
+            "n_pairs": 0,
+            "error": "all adversarial pairs skipped (None cos) — no aggregate",
+            "reading": "FAIL: no valid jina/nomic cosine pairs for lexical correlation",
+        }
+        out_path.write_text(json.dumps(out, indent=2), encoding="utf-8")
+        print("FAIL: all pairs skipped (None cos)", flush=True)
+        return 1
+
     cos = [r["jina_cos"] for r in rows]
     jac = [r["jaccard"] for r in rows]
     dic = [r["dice"] for r in rows]
@@ -125,6 +138,7 @@ def main() -> int:
 
     out = {
         "source": str(SUM),
+        "ok": True,
         "n_pairs": len(rows),
         "pearson": {
             "jina_cos_jaccard": round(pearson(cos, jac), 4),
@@ -137,7 +151,6 @@ def main() -> int:
         ),
         "pairs": rows,
     }
-    out_path = SUM.parent / "bakeoff_adv_lexical.json"
     out_path.write_text(json.dumps(out, indent=2), encoding="utf-8")
     print("\nwrote", out_path)
     return 0

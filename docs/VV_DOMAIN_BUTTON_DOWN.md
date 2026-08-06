@@ -28,10 +28,10 @@ This sheet buttons down every domain of relevance. Status = author measures + st
 | **D12 KB family/dim** | **PASS** | reembed jina dim 1024 |
 | **D13 Compute∶HW** | **PASS (doc)** | device-split; power ethics = **hypothesis**; E3 parity gate for HTP NLI |
 | **D14 Ops/secrets** | **PASS** | gguf/onnx gitignored; NPU evidence under `docs/evidence/npu/` |
-| **D15 Docs honesty** | **PASS w/ residual** | GO_MEASURE ≠ production OPEN; buddy L8 + NPU parity still open |
+| **D15 Docs honesty** | **PASS w/ residual** | GO_MEASURE ≠ production OPEN; buddy protocol `BUDDY_L8_SIGNOFF.md`; NPU parity explicit residual |
 
 **Aggregate for advertise of dual-metric instrument law:** **GO_MEASURE (provisional)** — full offline golden seal not on CI; buddy L8 unsigned.  
-**Aggregate for production OPEN marketing:** **NO-GO** until buddy L8 + NPU parity residual accepted or closed + CR re-review clean.
+**Aggregate for production OPEN marketing:** **NO-GO** until buddy L8 signed + NPU parity residual accepted/closed + CR clean on HEAD.
 
 ---
 
@@ -67,6 +67,20 @@ This sheet buttons down every domain of relevance. Status = author measures + st
 | Major | power ethics as fact | **Fixed** — labeled hypothesis |
 
 Follow-up also: atomic truth_plane JSON, accel 60s cache, jina live meta, npu register via devices.
+
+### HEAD re-review batch (post-7c5835c)
+
+| Theme | Action |
+|-------|--------|
+| empty adv-lexical rows crash | **Fixed** — fail artifact + nonzero |
+| preserve unload soft-ok | **Fixed** — any unload fail → substrate ok=False |
+| tier_b ok always True / miss contra gate | **Fixed** — ok=tier_b_ready; require nli_catches_contradiction |
+| providers list as HTP proof | **Fixed** — qnn_ep_registered + profile proof note |
+| nomic fallback in jina bakeoff | **Fixed** — family_mismatch rejects embedding |
+| ORT probs key case | **Fixed** — normalized labels |
+| D17 n_fail counts WARN | **Fixed** — n_warn separate; WARN ∉ n_fail |
+| htp→ort prefer before E3 | **Fixed** — docs order ort→ce→lfm until parity |
+| evidence user paths | **Fixed** — sanitized docs/evidence/npu/*.json |
 
 ## Hard residuals (do not paper over)
 

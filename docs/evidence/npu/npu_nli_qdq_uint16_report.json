@@ -69,7 +69,7 @@
     "hits": 0,
     "n": 3,
     "bench_ms_per": 32.06,
-    "htp_dll": "C:\\Users\\Deving-1\\AppData\\Roaming\\Python\\Python314\\site-packages\\onnxruntime_qnn\\libs\\arm64ec\\QnnHtp.dll"
+    "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll"
   },
   "ok": false,
   "verdict": "NPU_NLI_PARTIAL",

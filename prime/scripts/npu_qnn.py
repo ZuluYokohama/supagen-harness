@@ -99,6 +99,12 @@ def session_qdq(
     reg = register()
     if not reg.get("ok"):
         return {"ok": False, "error": reg.get("error") or "qnn register failed", "reg": reg}
+    if not reg.get("htp_exists"):
+        return {
+            "ok": False,
+            "error": "QnnHtp.dll missing — cannot claim Hexagon HTP backend",
+            "reg": reg,
+        }
 
     htp = qnn.get_qnn_htp_path()
     selected = [d for d in ort.get_ep_devices() if d.ep_name == "QNNExecutionProvider"]
@@ -129,11 +135,15 @@ def session_qdq(
             return {"ok": False, "error": f"{e} | {e2}", "reg": reg}
 
     prov = sess.get_providers()
+    # providers list = EP registered for session, NOT per-node HTP proof
+    qnn_ep_registered = any("QNN" in p for p in prov)
     return {
         "ok": True,
         "session": sess,
         "providers": prov,
-        "on_qnn": any("QNN" in p for p in prov),
+        "qnn_ep_registered": qnn_ep_registered,
+        "on_qnn": qnn_ep_registered,  # legacy alias; HTP cycles = hard proof
+        "htp_proof": "htp_profile_cycles_or_disable_cpu_fallback",
         "htp_dll": htp,
         "reg": reg,
     }
