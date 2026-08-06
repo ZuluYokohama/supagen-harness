@@ -41,6 +41,13 @@ def main() -> int:
         or '"job2_owns_open": false' in t("docs/VV_RUN_RESULTS.md"),
         "n_warn_count": "n_warn" in t("prime/scripts/vv_push_domains.py"),
         "family_mismatch": "family_mismatch" in t("prime/scripts/bakeoff_aboutness_30.py"),
+        "register_returns_copy": "return dict(_LAST)" in t("prime/scripts/npu_qnn.py"),
+        "adv_empty_guard": "all adversarial pairs skipped" in t(
+            "prime/scripts/bakeoff_adv_lexical.py"
+        ),
+        "nli_partial_not_live_alone": "NPU_NLI_PARTIAL" in t("prime/scripts/npu_nli_qdq.py")
+        and "hit_rate" in t("prime/scripts/npu_nli_qdq.py"),
+        "go_measure_seal": "GO_MEASURE" in t("docs/GO_MEASURE_SEAL.md"),
     }
     miss = [k for k, v in checks.items() if not v]
     print(f"disposition_ok={len(checks) - len(miss)}/{len(checks)}")

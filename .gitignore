@@ -41,6 +41,12 @@ prime/state/npu/
 prime/state/*.csv
 prime/state/*_qnn.log
 
+# Local isolation clones / ledgers (not product)
+_buddy_isolate/
+_buddy_wt/
+VALIDITY_LEDGER.md
+_cr_*.md
+
 # Nested repos / foreign trees (not part of supagen-harness product)
 123abc/
 123abc-grok/

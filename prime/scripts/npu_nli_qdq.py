@@ -395,14 +395,22 @@ def main() -> int:
     print(json.dumps(run, indent=2), flush=True)
 
     on_path = bool(run.get("qnn_ep_registered") or run.get("on_qnn"))
-    # LIVE only with label hits; path alone is PARTIAL (parity residual)
-    report["ok"] = bool(run.get("ok") and on_path and run.get("hits", 0) >= 2)
+    hits = int(run.get("hits") or 0)
+    n = int(run.get("n") or 0)
+    hit_rate = (hits / n) if n else 0.0
+    # LIVE only with calibrated label hits (≥2 and ≥90%); path alone is PARTIAL.
+    # Never claim product Job2 from session-ready QNN alone.
+    report["ok"] = bool(run.get("ok") and on_path and hits >= 2 and hit_rate >= 0.9)
     report["verdict"] = (
-        "NPU_NLI_LIVE"
+        "NPU_NLI_PARITY_PASS"
         if report["ok"]
         else ("NPU_NLI_PARTIAL" if on_path else "NPU_NLI_FAIL")
     )
-    report["law"] = "Job2 HTP never owns production OPEN; E3 parity required for product NLI"
+    report["hit_rate"] = round(hit_rate, 3)
+    report["law"] = (
+        "Job2 HTP never owns production OPEN; E3 parity required for product NLI; "
+        "NPU_NLI_PARTIAL ≠ calibrated agreement authority"
+    )
     report["job2_owns_open"] = False
     report["seconds"] = round(time.time() - t0, 1)
     REPORT.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")

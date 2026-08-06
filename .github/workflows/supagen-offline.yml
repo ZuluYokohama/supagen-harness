@@ -21,6 +21,11 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e ./supagen
           python -m supagen bootstrap
+      - name: CR disposition verifier (law gates present on tree)
+        env:
+          SUPAGEN_ROOT: ${{ github.workspace }}
+          PRIMEDEV_ROOT: ${{ github.workspace }}
+        run: python prime/scripts/verify_cr_disposition.py
       - name: Offline contract + smoke + golden schema-only
         env:
           SUPAGEN_ROOT: ${{ github.workspace }}

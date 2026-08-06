@@ -38,7 +38,7 @@ def register() -> dict[str, Any]:
             import onnxruntime_qnn as qnn
         except Exception as e:
             _LAST = {"ok": False, "error": f"import: {e}"}
-            return _LAST
+            return dict(_LAST)
 
         lib = qnn.get_library_path()
         htp = qnn.get_qnn_htp_path()
@@ -56,7 +56,7 @@ def register() -> dict[str, Any]:
                         "lib": lib,
                         "ort": ort.__version__,
                     }
-                    return _LAST
+                    return dict(_LAST)
             _REGISTERED = True
 
         devs = [{"ep_name": d.ep_name, "repr": str(d)} for d in ort.get_ep_devices()]
@@ -84,7 +84,8 @@ def register() -> dict[str, Any]:
                 "qnn_ep_registered ≠ HTP cycle proof — use htp_profile."
             ),
         }
-        return _LAST
+        # Always return a shallow copy so callers cannot mutate module cache
+        return dict(_LAST)
 
 
 def status() -> dict[str, Any]:
