@@ -437,20 +437,33 @@ def mutual_entailment(
 
 def nli_ort(premise: str, hypothesis: str) -> dict[str, Any]:
     """ONNX Runtime DeBERTa NLI (CPU ORT default; DML/QNN when EP works)."""
+    fail = {
+        "ok": False,
+        "job": "agreement_nli",
+        "engine": "ort_nli",
+        "error": None,
+        "label": "unknown",
+        "agrees": False,
+        "gate": "NEED_INFO",
+        "not_open_authority": True,
+        "job2_owns_open": False,
+    }
     try:
         from accel_nli_ort import predict
 
-        return predict(premise, hypothesis)
+        r = predict(premise, hypothesis)
+        if not r.get("ok"):
+            fail["error"] = str(r.get("error") or "ort_nli_failed")[:300]
+            return fail
+        # Success path — ensure law flags always present
+        out = dict(r)
+        out.setdefault("job", "agreement_nli")
+        out.setdefault("not_open_authority", True)
+        out["job2_owns_open"] = False
+        return out
     except Exception as e:
-        return {
-            "ok": False,
-            "job": "agreement_nli",
-            "engine": "ort_nli",
-            "error": str(e)[:300],
-            "label": "unknown",
-            "agrees": False,
-            "gate": "NEED_INFO",
-        }
+        fail["error"] = str(e)[:300]
+        return fail
 
 
 def glue_agreement(

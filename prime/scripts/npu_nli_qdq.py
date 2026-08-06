@@ -255,9 +255,16 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
         return {"ok": False, "error": "register failed", "reg": reg}
 
     t0 = time.time()
-    r = session_qdq(qdq_path, burst=True, allow_cpu_fallback=True)
+    # Strict QNN — no silent CPU fallback on the verdict path
+    r = session_qdq(qdq_path, burst=True, allow_cpu_fallback=False)
     if not r.get("ok"):
-        return r
+        # Second try with CPU fallback only as liveness probe (not parity PASS)
+        r_fb = session_qdq(qdq_path, burst=True, allow_cpu_fallback=True)
+        if not r_fb.get("ok"):
+            return r
+        r = r_fb
+        r["strict_qnn_failed"] = True
+        r["probe_only"] = True
     sess = r["session"]
     tok = AutoTokenizer.from_pretrained(HF_ID)
     meta = json.loads((OUT_DIR / "meta.json").read_text(encoding="utf-8"))
@@ -303,36 +310,79 @@ def run_htp(qdq_path: Path) -> dict[str, Any]:
             "ms": round(ms, 2),
         }
 
-    pairs_expect = [
-        (*CALIB_PAIRS[1], "contradiction"),
-        (*CALIB_PAIRS[2], "contradiction"),
-        (*CALIB_PAIRS[0], "entailment"),
+    # Held-out pairs (not in CALIB_PAIRS) for accuracy-style probe vs ORT CPU authority
+    HELD_OUT = [
+        (
+            "Aboutness must not promote OPEN; NLI owns agreement.",
+            "Cosine similarity alone may promote production OPEN.",
+            "contradiction",
+        ),
+        (
+            "Restrict then measure then audit before any OPEN decision.",
+            "Skip restrict and force OPEN without audit.",
+            "contradiction",
+        ),
+        (
+            "Jina embeddings score topical aboutness for retrieval only.",
+            "Jina embeddings are used only for retrieval aboutness, not agreement.",
+            "entailment",
+        ),
     ]
+    # ORT CPU labels as parity authority (not calib self-hit)
+    ort_predict = None
+    try:
+        from accel_nli_ort import predict as ort_predict  # type: ignore
+    except Exception:
+        ort_predict = None
+
     rows = []
-    for a, b, exp in pairs_expect:
+    for a, b, exp in HELD_OUT:
         p = predict(a, b)
         p["expect"] = exp
-        p["hit"] = p["label"] == exp
+        p["hit_expect"] = p["label"] == exp
+        if ort_predict is not None:
+            try:
+                o = ort_predict(a, b)
+                p["ort_label"] = o.get("label")
+                p["ort_ok"] = o.get("ok")
+                p["parity_with_ort"] = bool(o.get("ok") and o.get("label") == p["label"])
+            except Exception as e:
+                p["ort_error"] = str(e)[:120]
+                p["parity_with_ort"] = False
+        else:
+            p["parity_with_ort"] = None
+        # hit for legacy counter = expect match (honest probe)
+        p["hit"] = p["hit_expect"]
         rows.append(p)
+
+    n_parity = sum(1 for x in rows if x.get("parity_with_ort") is True)
+    n_parity_den = sum(1 for x in rows if x.get("parity_with_ort") is not None)
+    label_parity_rate = (n_parity / n_parity_den) if n_parity_den else 0.0
 
     # bench
     for _ in range(5):
-        predict(*CALIB_PAIRS[1])
+        predict(*HELD_OUT[0][:2])
     t_bench = time.time()
     n = 20
     for _ in range(n):
-        predict(*CALIB_PAIRS[1])
+        predict(*HELD_OUT[0][:2])
     bench_s = time.time() - t_bench
 
     return {
         "ok": True,
         "providers": r.get("providers"),
         "qnn_ep_registered": r.get("qnn_ep_registered", r.get("on_qnn")),
-        "on_qnn": r.get("on_qnn"),  # legacy alias
+        "on_qnn": r.get("on_qnn"),  # legacy alias — not HTP cycle proof
+        "probe_only": bool(r.get("probe_only")),
+        "strict_qnn_failed": bool(r.get("strict_qnn_failed")),
         "session_s": round(time.time() - t0, 2),
         "rows": rows,
         "hits": sum(1 for x in rows if x.get("hit")),
         "n": len(rows),
+        "label_parity_rate": round(label_parity_rate, 3),
+        "label_parity_n": n_parity,
+        "label_parity_den": n_parity_den,
+        "held_out": True,
         "bench_ms_per": round(bench_s * 1000 / n, 2),
         "htp_dll": "<QnnHtp.dll>",  # sanitized — no user path in reports
     }
@@ -395,21 +445,29 @@ def main() -> int:
     print(json.dumps(run, indent=2), flush=True)
 
     on_path = bool(run.get("qnn_ep_registered") or run.get("on_qnn"))
-    hits = int(run.get("hits") or 0)
-    n = int(run.get("n") or 0)
-    hit_rate = (hits / n) if n else 0.0
-    # LIVE only with calibrated label hits (≥2 and ≥90%); path alone is PARTIAL.
-    # Never claim product Job2 from session-ready QNN alone.
-    report["ok"] = bool(run.get("ok") and on_path and hits >= 2 and hit_rate >= 0.9)
-    report["verdict"] = (
-        "NPU_NLI_PARITY_PASS"
-        if report["ok"]
-        else ("NPU_NLI_PARTIAL" if on_path else "NPU_NLI_FAIL")
+    parity_rate = float(run.get("label_parity_rate") or 0.0)
+    probe_only = bool(run.get("probe_only") or run.get("strict_qnn_failed"))
+    # Parity PASS only: held-out vs ORT CPU ≥0.9 and not a CPU-fallback probe.
+    # Session registration alone is never enough (not HTP cycle proof either).
+    report["ok"] = bool(
+        run.get("ok")
+        and on_path
+        and not probe_only
+        and parity_rate >= 0.9
+        and int(run.get("label_parity_n") or 0) >= 2
     )
-    report["hit_rate"] = round(hit_rate, 3)
+    if report["ok"]:
+        report["verdict"] = "NPU_NLI_PARITY_PASS"
+    elif on_path:
+        report["verdict"] = "NPU_NLI_LIVENESS_PROBE"  # uncalibrated — not product
+    else:
+        report["verdict"] = "NPU_NLI_FAIL"
+    report["hit_rate"] = round(parity_rate, 3)
+    report["label_parity_rate"] = parity_rate
+    report["uncalibrated_probe"] = not report["ok"]
     report["law"] = (
-        "Job2 HTP never owns production OPEN; E3 parity required for product NLI; "
-        "NPU_NLI_PARTIAL ≠ calibrated agreement authority"
+        "Job2 HTP never owns production OPEN; E3 held-out ORT parity required; "
+        "LIVENESS_PROBE ≠ calibrated agreement authority"
     )
     report["job2_owns_open"] = False
     report["seconds"] = round(time.time() - t0, 1)

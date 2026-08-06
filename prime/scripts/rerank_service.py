@@ -24,6 +24,8 @@ from typing import Any
 
 _LOCK = threading.Lock()
 _ENGINE: dict[str, Any] | None = None
+_FAIL_TS: float = 0.0
+_FAIL_BACKOFF_S = float(os.environ.get("PRIME_RERANK_FAIL_BACKOFF_S", "60"))
 
 # Only allow trust_remote_code for these exact Hub IDs (pinned revision optional via env)
 TRUSTED_REMOTE = {
@@ -46,10 +48,20 @@ def _forced_model() -> str | None:
 
 def _load_engine() -> dict[str, Any]:
     """Lazy singleton. Returns {ok, kind, model, predict_fn, error?}."""
-    global _ENGINE
+    global _ENGINE, _FAIL_TS
     with _LOCK:
         if _ENGINE is not None:
             return _ENGINE
+        # Backoff after full-ladder failure — avoid reloading 3 models every request
+        if _FAIL_TS and (time.time() - _FAIL_TS) < _FAIL_BACKOFF_S:
+            return {
+                "ok": False,
+                "kind": None,
+                "model": None,
+                "predict": None,
+                "error": f"rerank_load_backoff ({_FAIL_BACKOFF_S:.0f}s)",
+                "backoff_s": _FAIL_BACKOFF_S,
+            }
 
         candidates = []
         forced = _forced_model()
@@ -82,11 +94,22 @@ def _load_engine() -> dict[str, Any]:
                     def _jina_predict(query: str, docs: list[str], _m=model):
                         # returns list of floats aligned to docs order
                         results = _m.rerank(query, docs, top_n=None)
-                        # results sorted by score — re-align
-                        by_idx = {
-                            int(r["index"]): float(r["relevance_score"]) for r in results
-                        }
-                        return [by_idx.get(i, 0.0) for i in range(len(docs))]
+                        # results sorted by score — re-align with exact index set
+                        by_idx: dict[int, float] = {}
+                        for r in results:
+                            i = int(r["index"])
+                            if i in by_idx:
+                                raise ValueError(f"duplicate rerank index {i}")
+                            by_idx[i] = float(r["relevance_score"])
+                        expected = set(range(len(docs)))
+                        got = set(by_idx.keys())
+                        if got != expected:
+                            missing = sorted(expected - got)
+                            extra = sorted(got - expected)
+                            raise ValueError(
+                                f"rerank index set mismatch missing={missing} extra={extra}"
+                            )
+                        return [by_idx[i] for i in range(len(docs))]
 
                     _ENGINE = {
                         "ok": True,
@@ -96,6 +119,7 @@ def _load_engine() -> dict[str, Any]:
                         "load_s": round(time.time() - t0, 1),
                         "revision": rev or "default",
                     }
+                    _FAIL_TS = 0.0
                     return _ENGINE
                 except Exception as e:
                     last_err = f"{mid}: {e}"
@@ -125,7 +149,7 @@ def _load_engine() -> dict[str, Any]:
                 last_err = f"{mid}: {e}"
                 continue
 
-        # Do not permanently cache failure — allow later retry after install/network recover
+        # Soft-fail with backoff — do not thrash HF loads on every request
         fail = {
             "ok": False,
             "kind": None,
@@ -134,6 +158,7 @@ def _load_engine() -> dict[str, Any]:
             "error": last_err or "no_reranker_loaded",
         }
         _ENGINE = None
+        _FAIL_TS = time.time()
         return fail
 
 

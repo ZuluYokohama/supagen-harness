@@ -45,8 +45,17 @@ def main() -> int:
         "adv_empty_guard": "all adversarial pairs skipped" in t(
             "prime/scripts/bakeoff_adv_lexical.py"
         ),
-        "nli_partial_not_live_alone": "NPU_NLI_PARTIAL" in t("prime/scripts/npu_nli_qdq.py")
-        and "hit_rate" in t("prime/scripts/npu_nli_qdq.py"),
+        "nli_partial_not_live_alone": (
+            "NPU_NLI_LIVENESS_PROBE" in t("prime/scripts/npu_nli_qdq.py")
+            or "NPU_NLI_PARTIAL" in t("prime/scripts/npu_nli_qdq.py")
+        )
+        and "label_parity_rate" in t("prime/scripts/npu_nli_qdq.py"),
+        "nli_ort_fail_envelope": 'gate": "NEED_INFO"' in t("prime/scripts/entailment_glue.py")
+        and "ort_nli_failed" in t("prime/scripts/entailment_glue.py"),
+        "rerank_backoff": "PRIME_RERANK_FAIL_BACKOFF" in t("prime/scripts/rerank_service.py")
+        or "_FAIL_BACKOFF" in t("prime/scripts/rerank_service.py"),
+        "held_out_npu": "HELD_OUT" in t("prime/scripts/npu_nli_qdq.py")
+        and "parity_with_ort" in t("prime/scripts/npu_nli_qdq.py"),
         "go_measure_seal": "GO_MEASURE" in t("docs/GO_MEASURE_SEAL.md"),
         "qnn_opt_in_only": 'pref in ("qnn", "npu")' in t("prime/scripts/accel_nli_ort.py")
         and 'pref in ("auto", "qnn", "npu")' not in t("prime/scripts/accel_nli_ort.py"),
