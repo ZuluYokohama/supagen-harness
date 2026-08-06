@@ -1,0 +1,15 @@
+{
+  "role": "author_offline_self",
+  "not_independent_buddy": true,
+  "protocol": "docs/BUDDY_L8_SIGNOFF.md",
+  "checks": {
+    "L8-01_offline_contract": true,
+    "L8-02_smoke": true,
+    "L8-03_harness": true,
+    "L8-04_golden_schema_only": true
+  },
+  "live_L8_05_08": "author kit prior session 21/21 + dual_enter NEED_INFO + NLI STOP",
+  "timestamp": "2026-08-06T13:10:20.798756Z",
+  "commit": "ca8b30d",
+  "note": "Independent buddy signature still required for D15 full close"
+}
