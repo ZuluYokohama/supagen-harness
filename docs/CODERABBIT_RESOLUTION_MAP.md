@@ -50,6 +50,14 @@
 | held-out missing neutral | **Fixed** | neutral fixture + `labels_covered` / complete gate |
 | red-cert disposition on green | **Fixed** | inject red for route check; live green no longer fails CI |
 | contract_live commit_hint only | **Fixed** | full `commit` + `tree` SHA on certificate |
+| soft_critical wrong names | **Fixed** (`de28339`) | set uses `fn.__name__` (d1_aboutness, d8_accel_npu, …) |
+| D15 no freshness | **Fixed** | `_artifact_fresh` required; stale → WARN |
+| D17 mixed count basis | **Fixed** | recompute pass/warn/fail from cells only |
+| ORT force_cpu drops cache | **Fixed** | reuse CPU session when EP class matches |
+| intent_self asymmetric | **Fixed** | same stalk both sides + expect_hit |
+| hexagon present hardcoded | **Fixed** | `present: null` until probe |
+| single-logit threshold | **Fixed** | coupled to ONEWAY_P |
+| --mode gap as open defect | **Documented closed** | VV_FINAL historical note |
 
 **Disposition verifier:** `python prime/scripts/verify_cr_disposition.py` → `CR_DISPOSITION_VERIFY_PASS`  
 Runtime CI checks: `runtime_held_out_disjoint`, `runtime_cert_structured`, `runtime_red_cert_no_htp_first` (+ D4 frankenstein-only + evidence archive note).
