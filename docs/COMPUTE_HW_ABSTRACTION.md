@@ -52,7 +52,7 @@ This is not a product pitch. It is a substrate map for *novel use* of the NPU in
 
 | Processor | Owns | Workloads | Product authority today |
 |-----------|------|-----------|-------------------------|
-| **Hexagon NPU** | **The Law (measure)** | QDQ DeBERTa NLI, QDQ rerank, HTP stress MatMul | **Job2 only after E3 parity green**; else refuse HTP |
+| **Hexagon NPU** | **Measure fabric** (not the gate) | HTP stress, experimental QDQ; never product OPEN\|STOP | **Permanent:** product Job2 stays CPU; E3 green would still be optional accel only after parity proves itself |
 | **Adreno GPU** | **The Scout (generate)** | LFM/Ministral decode via Vulkan/OpenCL llama.cpp when available | SCOUT drafting only — never OPEN authority |
 | **Oryon CPU** | **The Orchestrator** | Prime MCP, Python, sheaf/compute graph, jina `:8765`, dual_enter, cert_face | Always: control plane + **CPU ORT/CE agreement authority until E3** |
 

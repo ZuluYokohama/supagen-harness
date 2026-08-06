@@ -17,6 +17,9 @@ Slim copies of measured Hexagon HTP proofs. Full ONNX/QDQ weights and full `htp_
 | `npu_nli_qdq_cpu_ep_same_graph.json` | Isolation: same QDQ on **CPU EP** **1/4** + `qdq_sha256` / held-out digest |
 | `nli_htp_parity_cert.json` | E3 parity certificate consumed by `measure_fabric` (currently red) |
 | `../vv_push_domains_integrity.json` | Portable D17 integrity (count_ok, n_warn, cells) |
+| `nli_eval_qdq_vs_cpu.json` | **65-pair nli_eval_v1:** ORT fp32 con_high **0.952** vs QDQ CPU/HTP con_high **0.048** |
+
+**Design law (earned):** NPU is measure fabric; **the gate is CPU**. Verifier cannot be approximated by low-bit QDQ (con_high cliff).
 
 **E3 residual (accepted for GO_MEASURE):** label-parity **still FAIL** (must be ≥0.9 for green).  
 Progress: 0/3 invert → **1/4** after calib work; **CPU-EP on same QDQ matches HTP** when `qdq_sha256` matches → residual is **quant geometry**, not Hexagon routing.  

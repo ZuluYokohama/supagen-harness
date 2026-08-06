@@ -1,0 +1,166 @@
+{
+  "eval": "nli_eval_v1.jsonl",
+  "n_eval_file": 65,
+  "limit": null,
+  "law": "NPU is measure fabric; Job2 gate authority is CPU ORT/CE until E3 green. Design commitment \u2014 not temporary fallback.",
+  "qdq_path": "prime/state/ort_models/nli-deberta-v3-base-qdq/model.qdq.aui16_wui8.onnx",
+  "qdq_exists": true,
+  "diagnosis": {
+    "held_out_0_25_is_measured": true,
+    "held_out_note": "1/4 hits = 0.25 measured; code uses 0.0 if den empty, never 0.25 default",
+    "qdq_collapse": false,
+    "ort_con_high": 0.9523809523809523,
+    "qdq_cpu_con_high": 0.047619047619047616,
+    "qdq_htp_con_high": 0.047619047619047616,
+    "architectural_commitment": "NPU = measure fabric only; Job2 gate authority = CPU ORT/CE. Not a temporary fallback \u2014 verifier cannot be approximated by low-bit QDQ."
+  },
+  "arms": {
+    "ort_cpu_fp32": {
+      "arm": "ort_cpu_fp32",
+      "measured_hit_rate": 0.6923076923076923,
+      "measured_hits": 45,
+      "measured_n": 65,
+      "rate_is_defaulted": false,
+      "rate_source": "measured_hits/n",
+      "seconds": 21.67,
+      "n": 65,
+      "overall": 0.6923,
+      "con_high": 0.9523809523809523,
+      "ent_low": 0.16666666666666666,
+      "cell_acc": {
+        "con_high": 0.9524,
+        "con_low": 0.7143,
+        "ent_high": 0.6667,
+        "ent_low": 0.1667,
+        "neu_high": 0.8333,
+        "neu_low": 0.5
+      },
+      "pred_dist": {
+        "contradiction": 29,
+        "neutral": 28,
+        "entailment": 8
+      },
+      "gold_dist": {
+        "contradiction": 28,
+        "entailment": 21,
+        "neutral": 16
+      },
+      "confusion": {
+        "contradiction": {
+          "contradiction": 25,
+          "neutral": 3
+        },
+        "entailment": {
+          "entailment": 8,
+          "neutral": 13
+        },
+        "neutral": {
+          "neutral": 12,
+          "contradiction": 4
+        }
+      },
+      "collapse_single_label": false,
+      "collapse_label": null,
+      "pred_mode_share": 0.4462
+    },
+    "qdq_cpu_ep": {
+      "arm": "qdq_cpu_ep",
+      "measured_hit_rate": 0.3076923076923077,
+      "measured_hits": 20,
+      "measured_n": 65,
+      "rate_is_defaulted": false,
+      "rate_source": "measured_hits/n",
+      "seconds": 52.1,
+      "n": 65,
+      "overall": 0.3077,
+      "con_high": 0.047619047619047616,
+      "ent_low": 1.0,
+      "cell_acc": {
+        "con_high": 0.0476,
+        "con_low": 0.0,
+        "ent_high": 0.7778,
+        "ent_low": 1.0,
+        "neu_high": 0.0,
+        "neu_low": 0.0
+      },
+      "pred_dist": {
+        "entailment": 59,
+        "contradiction": 6
+      },
+      "gold_dist": {
+        "contradiction": 28,
+        "entailment": 21,
+        "neutral": 16
+      },
+      "confusion": {
+        "contradiction": {
+          "entailment": 27,
+          "contradiction": 1
+        },
+        "entailment": {
+          "entailment": 19,
+          "contradiction": 2
+        },
+        "neutral": {
+          "entailment": 13,
+          "contradiction": 3
+        }
+      },
+      "collapse_single_label": false,
+      "collapse_label": null,
+      "pred_mode_share": 0.9077
+    },
+    "qdq_htp": {
+      "arm": "qdq_htp",
+      "measured_hit_rate": 0.27692307692307694,
+      "measured_hits": 18,
+      "measured_n": 65,
+      "rate_is_defaulted": false,
+      "rate_source": "measured_hits/n",
+      "seconds": 2.2,
+      "n": 65,
+      "overall": 0.2769,
+      "con_high": 0.047619047619047616,
+      "ent_low": 0.8333333333333334,
+      "cell_acc": {
+        "con_high": 0.0476,
+        "con_low": 0.0,
+        "ent_high": 0.7778,
+        "ent_low": 0.8333,
+        "neu_high": 0.0,
+        "neu_low": 0.0
+      },
+      "pred_dist": {
+        "entailment": 58,
+        "contradiction": 7
+      },
+      "gold_dist": {
+        "contradiction": 28,
+        "entailment": 21,
+        "neutral": 16
+      },
+      "confusion": {
+        "contradiction": {
+          "entailment": 27,
+          "contradiction": 1
+        },
+        "entailment": {
+          "entailment": 17,
+          "contradiction": 4
+        },
+        "neutral": {
+          "entailment": 14,
+          "contradiction": 2
+        }
+      },
+      "collapse_single_label": false,
+      "collapse_label": null,
+      "pred_mode_share": 0.8923,
+      "providers": [
+        "QNNExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "active_provider": "QNNExecutionProvider"
+    }
+  }
+}

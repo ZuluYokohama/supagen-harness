@@ -1,9 +1,10 @@
 # Residual acceptance — E3 NPU Job2 label parity
 
 **Status:** **ACCEPTED RESIDUAL** for dual-metric **GO_MEASURE** advertise  
+**Architectural commitment:** **NPU = measure fabric only; Job2 gate = CPU ORT/CE** (design law, not temporary fallback)  
 **Not accepted for:** production OPEN marketing, product HTP Job2 agreement path  
 **Date:** 2026-08-06  
-**Run / evidence:** `docs/evidence/npu/npu_nli_qdq*.json` · host Snapdragon X Plus Hexagon
+**Run / evidence:** `docs/evidence/npu/nli_eval_qdq_vs_cpu.json` · held-out reports · host Snapdragon X Plus Hexagon
 
 ---
 
@@ -57,6 +58,6 @@ See: `prime/scripts/measure_fabric.py`, `entailment_glue.glue_agreement`.
 | Block GO_MEASURE for dual-metric instrument law? | **No** — CPU Job2 owns agreement measure |
 | Block production OPEN marketing? | **Yes** (already NO-GO for other reasons too) |
 | Claim product HTP NLI? | **No** until E3 parity cert green |
-| Next engineering | Residual is **quant geometry**, not HTP routing (CPU-EP QDQ same 1/4). Measure path defaults **act=uint16**; strict QNN session refuses silent CPU-first attach. Paths to green: QAI Hub / distill student. **Not** blocked on Adreno llama-server (GPU owns SCOUT). Do **not** force product Job2 onto HTP until parity ≥0.9. |
+| Next engineering | **Do not spend on QAI Hub/distill for product gate.** Full `nli_eval_v1` (65 pairs) proves QDQ destroys the discriminative faculty: **con_high 0.952 → 0.048**. Not single-label collapse (pred ~90% entailment, not 100%). Held-out **0.25 is measured (1/4)**, not a default. Optional: HTP stays measure fabric for latency experiments only. |
 
 **Signed residual (author measure):** accepted for GO_MEASURE instrument advertise on 2026-08-06.

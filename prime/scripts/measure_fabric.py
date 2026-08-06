@@ -94,17 +94,32 @@ def nli_htp_parity_pass(*, max_age_h: float = 168.0) -> dict[str, Any]:
 
 
 def route_job2() -> dict[str, Any]:
-    """Declare the agreement backend order for this host."""
+    """Declare the agreement backend order for this host.
+
+    Design commitment (not temporary fallback): product Job2 authority is
+    always CPU ORT → CE → LFM. HTP QDQ may appear only as an optional measure
+    fabric after green E3 parity — never as sole gate authority. Evidence:
+    nli_eval con_high 0.95 (fp32) vs ~0.05 (QDQ).
+    """
     parity = nli_htp_parity_pass()
+    # Authority order is always CPU-first for the gate
     order = ["ort_cpu", "cross_encoder", "lfm"]
+    measure_order = list(order)
     if parity.get("ok"):
-        order = ["htp_qdq"] + order
+        # Optional measure fabric only — does not displace gate authority
+        measure_order = ["htp_qdq"] + order
     return {
         "job": "agreement_nli",
         "order": order,
+        "gate_authority_order": order,
+        "measure_fabric_order": measure_order,
         "htp_parity": parity,
+        "htp_is_gate_authority": False,
         "job2_owns_open": False,
-        "law": "agreement measure only; production OPEN needs domain audit + cert_face",
+        "law": (
+            "NPU=measure fabric; Job2 gate=CPU ORT/CE; "
+            "agreement measure only; production OPEN needs domain audit + cert_face"
+        ),
     }
 
 
