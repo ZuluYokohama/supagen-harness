@@ -2,8 +2,9 @@
 
 **PR:** https://github.com/ZuluYokohama/supagen-harness/pull/1  
 **Branch:** `vv/dual-metric-npu-measure-fabric`  
-**CodeRabbit:** ASSERTIVE full review cycles; majors addressed in follow-up commits.  
-**CI:** `verify-offline` **SUCCESS** (golden **schema-only** on CI + full offline contract)
+**CodeRabbit:** ASSERTIVE cycles; majors + criticals addressed on HEAD; re-review queued.  
+**CI:** `verify-offline` green  
+**Author matrix (this kit):** `vv_full_matrix` → **GO_MEASURE · 18 pass / 0 fail / 0 critical fail** (regenerated `docs/VV_RUN_RESULTS.md`)
 
 This sheet buttons down every domain of relevance. Status = author measures + static review + CodeRabbit parse.
 
@@ -13,94 +14,33 @@ This sheet buttons down every domain of relevance. Status = author measures + st
 
 | Domain | Status | Evidence / residual |
 |--------|--------|---------------------|
-| **D0 Architecture** | **PASS** | Hybrid LMS chat + jina/DeBERTa/rerank/NPU off-LMS; `default_embed_base` jina isolation |
-| **D1 Job1 aboutness** | **PASS** | v5-small path, pooling=last, bakeoff floor≈0.08 range≈0.65; cos not OPEN; D1 fail-closed when range unevaluated |
-| **D2 Job1.5 rerank** | **PASS** | `rerank_service` + retrieve hook; aboutness_hybrid only; error envelopes |
-| **D3 Job2 NLI** | **PASS** | prefer=auto ORT→CE; mutual; layered_enter fixed to auto; contradiction STOP; CE per-model locks |
-| **D4 Fiber modes** | **PASS** | scout unloads frankenstein; preserve alone; `supagen ensure --mode scout\|preserve` wired |
-| **D5 cert_face / dual_enter** | **PASS** | high cos no NLI ≠ OPEN; truth_plane optional |
-| **D6 Identity holonomy** | **PASS** | LFM p=0.29 FAIL; frank p=0.875 PASS; gemma 0.38 FAIL (docs+votes) |
-| **D7 Package / contract** | **PASS (author live)** / **CI schema-only** | live 21/21 on author kit; CI = offline + golden schema-only (not full sandbox seal) |
-| **D8 NPU / Hexagon** | **PASS w/ residual** | HTP live + profile HVX (run `npu-htp-2026-08-06`); DeBERTa QDQ **label parity FAIL** — not product default |
-| **D9 Adversarial** | **PASS** | force-OPEN + cos 0.92 → STOP; lexical r≈0.85–0.93 |
-| **D10 Truth loop** | **PASS** | MEASURE only; residue/STOP elevate face; stable=None if &lt;2 rounds |
-| **D11 Field harness** | **PASS** | offline smoke OK; DRAFT STOP; multiplane OPEN when covered |
-| **D12 KB family/dim** | **PASS** | reembed jina dim 1024 |
-| **D13 Compute∶HW** | **PASS (doc)** | device-split; power ethics = **hypothesis**; E3 parity gate for HTP NLI |
-| **D14 Ops/secrets** | **PASS** | gguf/onnx gitignored; NPU evidence under `docs/evidence/npu/` |
-| **D15 Docs honesty** | **PASS (law text)** / **PENDING (buddy L8)** | GO_MEASURE ≠ production OPEN; independent buddy unsigned; NPU parity residual explicit |
+| **D0 Architecture** | **PASS** | Hybrid LMS + off-LMS instruments; `owns_agreement` / **not** `owns_open` |
+| **D1 Job1 aboutness** | **PASS** | jina floor/range; cos never OPEN; fail-closed if range unevaluated |
+| **D2 Job1.5 rerank** | **PASS** | aboutness_hybrid; error envelopes |
+| **D3 Job2 NLI** | **PASS** | prefer=auto ORT→CE; mutual; contra STOP; CE per-model locks |
+| **D4 Fiber modes** | **PASS** | scout/preserve; `ensure --mode`; preserve unload fail-closed |
+| **D5 cert_face / dual_enter** | **PASS** | high cos no NLI ≠ OPEN; force-OPEN → NEED_INFO/STOP |
+| **D6 Identity holonomy** | **PASS** | LFM FAIL / frankenstein PASS floors measured |
+| **D7 Package / contract** | **PASS** | offline + live author 21/21; CI golden schema-only |
+| **D8 NPU / Hexagon** | **PASS w/ residual** | HTP path live (`hexagon_path_live`); **Job2 QDQ label parity residual** |
+| **D9 Adversarial** | **PASS** | lexical correlation + force-OPEN blocked |
+| **D10 Truth loop** | **PASS** | MEASURE only; stable=None if &lt;2 rounds |
+| **D11 Field harness** | **PASS** | offline smoke; DRAFT STOP; multiplane OPEN when covered |
+| **D12 KB family/dim** | **PASS** | jina dim 1024 |
+| **D13 Compute∶HW** | **PASS (doc)** | CPU authority; HTP only after E3; power = hypothesis |
+| **D14 Ops/secrets** | **PASS** | evidence sanitized; no user-profile paths in tracked NPU JSON |
+| **D15 Docs honesty** | **PASS (law)** / **PENDING (independent buddy)** | GO_MEASURE ≠ production OPEN; buddy protocol unsigned externally |
 
-**Aggregate for advertise of dual-metric instrument law:** **GO_MEASURE (provisional)** — full offline golden seal not on CI; buddy L8 unsigned.  
-**Aggregate for production OPEN marketing:** **NO-GO** until independent buddy L8 signed + NPU parity residual accepted/closed + CR clean on HEAD.
+**Aggregate for advertise of dual-metric instrument law:** **GO_MEASURE**  
+**Aggregate for production OPEN marketing:** **NO-GO** until independent buddy L8 + NPU parity residual accepted or closed.
 
 ---
-
-## CodeRabbit response (parse)
-
-| Severity | Theme | Action |
-|----------|--------|--------|
-| Critical | `bakeoff_adv_lexical` crash on None cos | **Fixed** — skip None cos rows |
-| Major | bakeoff `ok` always True | **Fixed** — derive from n_ok + metrics |
-| Major | `attacks:` stopword never matched | **Fixed** — tokenize on punctuation |
-| Major | duplicate PRIME_RERANK gate | **Fixed** — single gate in rerank_service |
-| Major | fiber_mode env unreachable | **Fixed** — default `None` → env |
-| Major | preserve unload results discarded | **Fixed** — record extra_acts |
-| Major | truth_loop ignores explicit False | **Fixed** — explicit opt-out wins |
-| Major | operator_summary face stale | **Fixed** — refresh from cert_face |
-| Major | tier_b exit ≠ tier_b_ready | **Fixed** — exit on tier_b_ready |
-| Major | trust_remote_code loose | **Fixed** — TRUSTED_REMOTE allowlist |
-| Major | NPU evidence gitignored | **Fixed** — `docs/evidence/npu/` slim archive |
-| Major | stale state artifacts as PASS | **Fixed** — D1 freshness helper (72h) |
-| Major | HTP NLI without parity | **Documented** — not product default; E3 gate |
-| Major | V&V plan L1-04 red vs D4 green | **Fixed** — plan + CLI `--mode` |
-| Major | dim=768 stale | **Fixed** — L2-01 dim=1024 |
-| Major | golden soft-PASS without schema flag | **Fixed** — fail-closed incomplete |
-| Major | CE global lock | **Fixed** — per-model locks |
-| Major | rerank exceptions uncaught | **Fixed** — ok:False envelope |
-| Major | preserve env accepts scout key | **Fixed** — PRESERVE_KEYS filter |
-| Major | truth_loop stable=True under 2 rounds | **Fixed** — stable=None |
-| Major | D1 range None still critical PASS | **Fixed** — critical=False + applied_rule |
-| Major | QDQ partial write | **Fixed** — tmp + replace |
-| Major | npu smoke `--bench` orphan | **Fixed** — argparse + bench path |
-| Major | Job1 provenance mixed | **Fixed** — run IDs in HOLONOMY |
-| Major | QNN historical vs live | **Fixed** — run `npu-htp-2026-08-06` |
-| Major | power ethics as fact | **Fixed** — labeled hypothesis |
-
-Follow-up also: atomic truth_plane JSON, accel 60s cache, jina live meta, npu register via devices.
-
-### HEAD re-review batches (post-7c5835c → fb39f7f)
-
-| Theme | Action |
-|-------|--------|
-| empty adv-lexical rows crash | **Fixed** — fail artifact + nonzero |
-| preserve unload soft-ok | **Fixed** — any unload fail → substrate ok=False |
-| tier_b ok always True / miss contra gate | **Fixed** — ok=tier_b_ready; require nli_catches_contradiction |
-| providers list as HTP proof | **Fixed** — qnn_ep_registered + profile proof note |
-| nomic fallback in jina bakeoff | **Fixed** — family_mismatch rejects embedding |
-| ORT probs key case | **Fixed** — normalized labels |
-| D17 n_fail counts WARN | **Fixed** — n_warn separate; WARN ∉ n_fail |
-| htp→ort prefer before E3 | **Fixed** — docs order ort→ce→lfm until parity |
-| evidence user paths | **Fixed** — sanitized evidence + logical status IDs |
-| **Job2 owns OPEN (Critical)** | **Fixed** — `owns_open_gate=false`; D0 rejects true |
-| Job2 prefer NPU diagram | **Fixed** — CPU authority; HTP iff E3 |
-| smoke register duplicate | **Fixed** — delegates `npu_qnn.register` |
-| asymmetric glue strip | **Fixed** — both stalks cleaned |
 
 ## Hard residuals (do not paper over)
 
-1. **NPU Job2 label parity** — UINT8 QDQ collapses logits (~0.51); UINT16 uncollapses but **inverts labels** (0/3 hits). CPU ORT/CE remains authority. Evidence: `docs/evidence/npu/npu_nli_qdq*.json`.  
-2. **Buddy lab L8** — external clean install not signed yet. Protocol: `docs/BUDDY_L8_SIGNOFF.md`.  
-3. **CI golden** — schema-only by design; full sandbox seal is author/field only.
-
----
-
-## CodeRabbit parse protocol (when complete)
-
-1. Open PR #1 summary comment + review comments.  
-2. Map each finding → D0–D15 row.  
-3. Severity: Blocker / Major / Minor / Nit per brief.  
-4. Close domain only if: no open Blocker/Major **or** residual is explicitly documented (like NPU parity).  
-5. Update this file + `VV_RUN_RESULTS.md` with bot run ID.
+1. **NPU Job2 label parity** — UINT8 collapse / UINT16 invert. CPU ORT/CE = agreement authority.  
+2. **Independent buddy L8** — protocol `docs/BUDDY_L8_SIGNOFF.md`; author self-evidence only under `docs/evidence/buddy_l8_*.json`.  
+3. **CI golden** — schema-only by design (full sandbox seal is field-local).
 
 ---
 
@@ -110,10 +50,9 @@ Follow-up also: atomic truth_plane JSON, accel 60s cache, jina live meta, npu re
 cd C:\PRIMEdEV-1
 git checkout vv/dual-metric-npu-measure-fabric
 python -m pip install -e ./supagen
-python -m supagen verify   # offline (CI sets GOLDEN_SCHEMA_ONLY=1)
+$env:GOLDEN_SCHEMA_ONLY=1
+python -m supagen verify
 python prime/scripts/vv_full_matrix.py
-# NPU proof (optional hardware):
-python prime/scripts/npu_stress.py --seconds 20
 ```
 
 PR: https://github.com/ZuluYokohama/supagen-harness/pull/1

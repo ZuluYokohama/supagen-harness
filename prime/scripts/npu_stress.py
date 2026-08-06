@@ -201,9 +201,28 @@ def summarize_htp_profile(prof_csv: Path) -> dict:
     }
 
 
+def _qdq_looks_complete(path: Path, *, min_bytes: int = 10_000) -> bool:
+    """Reject partial/truncated QDQ left by interrupted quantize runs."""
+    if not path.is_file():
+        return False
+    try:
+        sz = path.stat().st_size
+        if sz < min_bytes:
+            return False
+        # ONNX protobuf files start with a small field tag; empty/truncated often 0 bytes
+        head = path.read_bytes()[:4]
+        return len(head) == 4
+    except OSError:
+        return False
+
+
 def stress_htp(seconds: float) -> dict:
     qdq = STATE / "heavy_chain.qdq.onnx"
-    if not qdq.is_file():
+    # Never reopen a partial QDQ from a crashed quantize (misreported as HTP reject)
+    if not _qdq_looks_complete(qdq):
+        if qdq.is_file():
+            print(f"rebuilding incomplete QDQ ({qdq.stat().st_size} bytes)…", flush=True)
+            qdq.unlink(missing_ok=True)
         print("building heavy QDQ chain…", flush=True)
         qdq = build_heavy_qdq()
         print("wrote", qdq, "mb", round(qdq.stat().st_size / 1e6, 2), flush=True)

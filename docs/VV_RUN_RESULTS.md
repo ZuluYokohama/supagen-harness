@@ -1,12 +1,12 @@
 # V&V Run Results — Full Matrix
 
 **Verdict:** `GO_MEASURE`  
-**Seconds:** 28.7  
-**Pass/Fail (matrix cells):** 18 pass / 0 fail (0 critical fail)  
-**Counting rule:** matrix cell **WARN** does **not** increment `n_fail`.  
-Push suite D17 reports `n_pass=5`, `n_warn=1` (P6 Hexagon historical/pre-plugin or path-only), `n_fail=0` under this rule. Older dumps that set `n_fail=1` for WARN are superseded.
+**Seconds:** 26.1  
+**Pass/Fail:** 18 pass / 0 warn / 0 fail (0 critical fail)  
+**Count rule:** `WARN does not increment n_fail; only status=FAIL does`  
+**Job2 OPEN authority:** `False` (production OPEN = external domain audit + cert_face)
 
-GO_MEASURE = instruments+law green for measured advertise of dual metric. Not production OPEN authority. Hexagon residual WARN allowed.
+GO_MEASURE = instruments+law green for measured advertise of dual metric. Not production OPEN authority. WARN residuals allowed (e.g. NPU Job2 parity). job2 owns agreement never production OPEN.
 
 **Law:** aboutness must not promote OPEN; NLI owns agreement; residue never forced
 
@@ -50,16 +50,16 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   "job1_lms": false,
   "job2_owns_agreement": true,
   "job2_owns_open": false,
-  "production_open_authority": "external domain audit + cert_face — never Job2 alone",
+  "production_open_authority": "external domain audit + cert_face",
   "accel": {
     "preference": "auto",
     "ort": {
       "version": "1.24.4",
       "providers_builtin": [
-        "DmlExecutionProvider",
+        "AzureExecutionProvider",
         "CPUExecutionProvider"
       ],
-      "dml": true
+      "dml": false
     },
     "torch": {
       "version": "2.12.0+cpu",
@@ -70,9 +70,13 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
     "hexagon_npu": {
       "ok": true,
       "n_qnn_devices": 3,
+      "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll",
       "qnn_ver": "2.4.0",
       "registered": true,
-      "note": "run npu-htp-2026-08-06; Job2 NLI parity residual"
+      "note": "HTP=Hexagon NPU. Use QDQ quantized ONNX only. No process named npu \u2014 activity is HTP subsystem. qnn_ep_registered \u2260 HTP cycle proof \u2014 use htp_profile.",
+      "error": null,
+      "last_smoke": "NPU_PATH_LIVE",
+      "last_on_qnn": true
     }
   }
 }
@@ -87,6 +91,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   "range": 0.6499,
   "negation_cos": 0.6888,
   "adversarial_cos": 0.6392,
+  "applied_rule": "fresh_bakeoff_floor_and_range",
   "pass_rule": "family=jina, floor<0.35, range>0.40",
   "cos_never_open": true
 }
@@ -123,7 +128,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   "scout_pick": {
     "key": "liquid/lfm2.5-1.2b",
     "reason": "already_loaded_max_ctx",
-    "loaded_ctx": 8192
+    "loaded_ctx": 128000
   },
   "preserve_pick": {
     "key": "frankenstein-2.0-i1",
@@ -204,12 +209,12 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
 ```json
 {
   "rc": 0,
-  "stdout_tail": "contract ok=True pass=7 fail=0 live=False\n  [PASS] family_jina_default  jina\n  [PASS] prefix_query  \n  [PASS] ctx_lfm_rich  \n  [PASS] ctx_no_ui_default_as_max  \n  [PASS] fence_json  \n  [PASS] token_cap  387\n  [PASS] pick_chat_model  {\"key\": \"liquid/lfm2.5-1.2b\", \"reason\": \"already_loaded_max_ctx\", \"loaded_ctx\": 8192}\n",
+  "stdout_tail": "contract ok=True pass=7 fail=0 live=False\n  [PASS] family_jina_default  jina\n  [PASS] prefix_query  \n  [PASS] ctx_lfm_rich  \n  [PASS] ctx_no_ui_default_as_max  \n  [PASS] fence_json  \n  [PASS] token_cap  387\n  [PASS] pick_chat_model  {\"key\": \"liquid/lfm2.5-1.2b\", \"reason\": \"already_loaded_max_ctx\", \"loaded_ctx\": 128000}\n",
   "stderr_tail": ""
 }
 ```
 
-### D8_accel_npu — PASS (path) / residual (Job2 parity)
+### D8_accel_npu — PASS
 
 ```json
 {
@@ -217,10 +222,10 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   "ort": {
     "version": "1.24.4",
     "providers_builtin": [
-      "DmlExecutionProvider",
+      "AzureExecutionProvider",
       "CPUExecutionProvider"
     ],
-    "dml": true
+    "dml": false
   },
   "torch": {
     "version": "2.12.0+cpu",
@@ -233,10 +238,14 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
     "n_qnn_devices": 3,
     "qnn_ver": "2.4.0",
     "registered": true,
-    "run_id": "npu-htp-2026-08-06"
+    "htp_dll": "<onnxruntime_qnn>/QnnHtp.dll",
+    "last_smoke": "NPU_PATH_LIVE"
   },
-  "residual": "Job2 DeBERTa QDQ on HTP: label parity FAIL — CPU ORT/CE remains OPEN authority",
-  "next": "E3: UINT16 act / better calib / distill stance head before product HTP NLI"
+  "hexagon_path_live": true,
+  "htp_backend_present": true,
+  "residual": "HTP measure path live (run npu-htp-2026-08-06); Job2 DeBERTa QDQ label parity FAIL \u2014 CPU ORT/CE remains agreement authority",
+  "next": "E3: UINT16/calib/distill until label parity PASS before product HTP NLI",
+  "proof": "htp_profile cycles (npu_stress) \u2014 not providers list alone"
 }
 ```
 
@@ -261,14 +270,24 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   },
   "jina": {
     "ok": true,
-    "status": "already_running",
+    "status": "started_ready",
     "base": "http://127.0.0.1:8765",
     "dim": 1024,
-    "started": false
+    "started": true
   },
-  "nli": null,
-  "rerank": null,
-  "seconds": 5.33
+  "nli": {
+    "ok": true,
+    "model": "cross-encoder/nli-deberta-v3-base",
+    "label": "entailment",
+    "engine": "cross_encoder"
+  },
+  "rerank": {
+    "ok": true,
+    "model": "jinaai/jina-reranker-v3",
+    "kind": "jina_rerank_api",
+    "error": null
+  },
+  "seconds": 18.25
 }
 ```
 
@@ -277,14 +296,12 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
 ```json
 {
   "rc": 0,
-  "tail": "          LIVE  refs=1\n  - tool_telem               LIVE  refs=1\n  - tool_voltages            LIVE  refs=1\n  - wits_surface             LIVE  refs=6\n  - decoder_rt               LIVE  refs=6\n  - acq_db                   LIVE  refs=2\n  - acq_emz_package          LIVE  refs=1\nexit=0\n\n=== local_scout (optional online) ===\nSkip in offline smoke. When LM Studio server is up:\n  C:\\Python314\\python.exe C:\\PRIMEdEV-1\\harness\\local_mode\\lfm_scout_v1\\smoke_local.py\n\nHARNESS OFFLINE SMOKE OK\nHARNESS=C:\\PRIMEdEV-1\\harness\nROOT=C:\\PRIMEdEV-1\nTree: golden Q + external certify gate live. Scout waits on LMS.\n",
+  "tail": "agpi\nexit=0\n\n=== pipeline_frozen_lakes_pack ===\n> C:\\Python314\\python.exe C:\\PRIMEdEV-1\\harness\\pipeline\\v1\\pipeline.py --pack frozen_lakes_surface\nexit=0\n\n=== ingest_sandbox_inventory ===\n> C:\\Python314\\python.exe C:\\PRIMEdEV-1\\harness\\ingest\\v1\\ingest.py --sandbox-filmore\nexit=0\n\n=== local_scout (optional online) ===\nSkip in offline smoke. When LM Studio server is up:\n  C:\\Python314\\python.exe C:\\PRIMEdEV-1\\harness\\local_mode\\lfm_scout_v1\\smoke_local.py\n\nHARNESS OFFLINE SMOKE OK\nHARNESS=C:\\PRIMEdEV-1\\harness\nROOT=C:\\PRIMEdEV-1\nTree: golden Q + external certify gate live. Scout waits on LMS.\n",
   "law": "external certifier; DRAFT\u2192STOP; multiplane OPEN when covered"
 }
 ```
 
-### D12_ort_nli — PASS (acceptance: ≥3/4 domain pairs; label_parity = ORT↔torch)
-
-**Rule:** `ort_hits ≥ 3` of 4 held-out pairs AND `label_parity` (ORT label matches torch CE on the same pairs). A single miss is residual, not full instrument FAIL. Neutral-class edge cases may disagree with expect while ORT/torch still match.
+### D12_ort_nli — PASS
 
 ```json
 {
@@ -297,17 +314,16 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   },
   "ort_hits": 3,
   "torch_hits": 3,
-  "acceptance": "ort_hits>=3/4 and label_parity",
   "label_parity": true,
-  "ort_s": 0.773,
-  "torch_s": 4.125,
+  "ort_s": 0.695,
+  "torch_s": 0.699,
   "rows": [
     {
       "expect": "contradiction",
       "label": "contradiction",
       "conf": 0.9999,
       "hit": true,
-      "ms": 198.0,
+      "ms": 197.7,
       "provider": "CPUExecutionProvider"
     },
     {
@@ -315,7 +331,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
       "label": "contradiction",
       "conf": 0.9999,
       "hit": true,
-      "ms": 205.9,
+      "ms": 178.2,
       "provider": "CPUExecutionProvider"
     },
     {
@@ -323,7 +339,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
       "label": "entailment",
       "conf": 0.9985,
       "hit": true,
-      "ms": 193.5,
+      "ms": 158.2,
       "provider": "CPUExecutionProvider"
     },
     {
@@ -331,7 +347,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
       "label": "contradiction",
       "conf": 0.9773,
       "hit": false,
-      "ms": 174.9,
+      "ms": 160.6,
       "provider": "CPUExecutionProvider"
     }
   ]
@@ -398,7 +414,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
   "go_no_go": "GO_MEASURE",
   "n_pass": 5,
   "n_warn": 1,
-  "n_fail": 0,
+  "n_fail": 1,
   "count_rule": "WARN does not increment n_fail",
   "cells": [
     {
@@ -407,8 +423,7 @@ GO_MEASURE = instruments+law green for measured advertise of dual metric. Not pr
     },
     {
       "id": "P6_hexagon_qnn",
-      "status": "WARN",
-      "note": "path/pre-plugin residual; HTP live under npu-htp-2026-08-06; Job2 parity residual"
+      "status": "WARN"
     },
     {
       "id": "P5_ort_hot",

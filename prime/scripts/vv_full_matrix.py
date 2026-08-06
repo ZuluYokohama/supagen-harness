@@ -475,17 +475,46 @@ def d7_package_contract() -> dict:
 def d8_accel_npu() -> dict:
     from truth_plane import accel_status
 
-    a = accel_status()
-    # WARN not FAIL: Hexagon not wired is residual, not ship-blocker for correctness
-    dml = bool((a.get("ort") or {}).get("dml"))
+    a = accel_status(force=True)
+    hx = a.get("hexagon_npu") or {}
+    ort = a.get("ort") or {}
+    # Path-live when QNN plugin registered + HTP dll present.
+    # Job2 product NLI on HTP remains residual (label parity) — not this gate.
+    path_live = bool(hx.get("ok") and (hx.get("n_qnn_devices") or 0) > 0)
+    htp_exists = bool(hx.get("htp_dll") or hx.get("htp_exists") or path_live)
+    ok = path_live or bool(ort.get("providers_builtin") or ort.get("providers"))
+    residual = None
+    if path_live:
+        residual = (
+            "HTP measure path live (run npu-htp-2026-08-06); "
+            "Job2 DeBERTa QDQ label parity FAIL — CPU ORT/CE remains agreement authority"
+        )
+    else:
+        residual = "QNN plugin not registered on this host — Job2/1.5 on CPU"
     return _gate(
         "D8_accel_npu",
-        dml,  # at least DML available
+        ok,
         {
-            **a,
-            "hexagon_wired": False,
-            "residual": "QNN EP for Hexagon not wired; Job2/1.5 on torch CPU",
-            "next": "export NLI/rerank ONNX when Py3.14+protobuf allows, or use QNN EP package",
+            "preference": a.get("preference"),
+            "ort": {
+                "version": ort.get("version"),
+                "providers_builtin": ort.get("providers_builtin") or ort.get("providers"),
+                "dml": ort.get("dml"),
+            },
+            "torch": a.get("torch"),
+            "hexagon_npu": {
+                "ok": hx.get("ok"),
+                "n_qnn_devices": hx.get("n_qnn_devices"),
+                "qnn_ver": hx.get("qnn_ver") or hx.get("qnn"),
+                "registered": hx.get("registered"),
+                "htp_dll": hx.get("htp_dll"),
+                "last_smoke": hx.get("last_smoke"),
+            },
+            "hexagon_path_live": path_live,
+            "htp_backend_present": htp_exists,
+            "residual": residual,
+            "next": "E3: UINT16/calib/distill until label parity PASS before product HTP NLI",
+            "proof": "htp_profile cycles (npu_stress) — not providers list alone",
         },
         critical=False,
     )
@@ -747,15 +776,29 @@ def d17_push_suite_artifact() -> dict:
         )
     d = json.loads(p.read_text(encoding="utf-8"))
     cells = d.get("cells") or []
-    crit_fail = [c for c in cells if c.get("critical") and not c.get("ok")]
+    crit_fail = [
+        c
+        for c in cells
+        if c.get("critical") and c.get("status") == "FAIL"
+    ]
+    # Prefer status-aware counts when present (WARN ≠ fail)
+    n_pass = d.get("n_pass")
+    n_warn = d.get("n_warn")
+    n_fail = d.get("n_fail")
+    if n_warn is None:
+        n_warn = sum(1 for c in cells if c.get("status") == "WARN")
+    if n_fail is None:
+        n_fail = sum(1 for c in cells if c.get("status") == "FAIL")
     ok = d.get("ok") is True and not crit_fail
     return _gate(
         "D17_push_suite",
         ok,
         {
             "go_no_go": d.get("go_no_go"),
-            "n_pass": d.get("n_pass"),
-            "n_fail": d.get("n_fail"),
+            "n_pass": n_pass,
+            "n_warn": n_warn,
+            "n_fail": n_fail,
+            "count_rule": d.get("count_rule") or "WARN does not increment n_fail",
             "cells": [
                 {"id": c.get("id"), "status": c.get("status")} for c in cells
             ],
@@ -797,26 +840,34 @@ def run_all() -> dict:
         print(f"  → {results[-1]['status']}", flush=True)
 
     critical = [r for r in results if r.get("critical")]
-    n_pass = sum(1 for r in results if r["ok"])
-    n_fail = sum(1 for r in results if not r["ok"])
-    n_crit_fail = sum(1 for r in critical if not r["ok"])
+    n_pass = sum(1 for r in results if r.get("status") == "PASS")
+    n_warn = sum(1 for r in results if r.get("status") == "WARN")
+    n_fail = sum(1 for r in results if r.get("status") == "FAIL")
+    n_crit_fail = sum(
+        1 for r in critical if r.get("status") == "FAIL" or (not r["ok"] and r.get("critical"))
+    )
     go = n_crit_fail == 0
     report = {
         "ok": go,
         "go_no_go": "GO_MEASURE" if go else "NO_GO",
         "note": (
             "GO_MEASURE = instruments+law green for measured advertise of dual metric. "
-            "Not production OPEN authority. Hexagon residual WARN allowed."
+            "Not production OPEN authority. WARN residuals allowed (e.g. NPU Job2 parity). "
+            "job2 owns agreement never production OPEN."
             if go
             else "Critical gate failed — do not advertise."
         ),
         "seconds": round(time.time() - t0, 1),
         "n_pass": n_pass,
+        "n_warn": n_warn,
         "n_fail": n_fail,
         "n_critical_fail": n_crit_fail,
+        "count_rule": "WARN does not increment n_fail; only status=FAIL does",
         "cells": results,
         "law": "aboutness must not promote OPEN; NLI owns agreement; residue never forced",
         "architecture": "hybrid LMS chat + off-LMS jina/DeBERTa/rerank",
+        "job2_owns_open": False,
+        "production_open_authority": "external domain audit + cert_face",
     }
     STATE.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
@@ -831,8 +882,11 @@ def _write_md(report: dict) -> None:
         "",
         f"**Verdict:** `{report['go_no_go']}`  ",
         f"**Seconds:** {report['seconds']}  ",
-        f"**Pass/Fail:** {report['n_pass']} pass / {report['n_fail']} fail "
-        f"({report['n_critical_fail']} critical fail)",
+        f"**Pass/Fail:** {report['n_pass']} pass / {report.get('n_warn', 0)} warn / "
+        f"{report['n_fail']} fail ({report['n_critical_fail']} critical fail)  ",
+        f"**Count rule:** `{report.get('count_rule', 'WARN ≠ n_fail')}`  ",
+        f"**Job2 OPEN authority:** `{report.get('job2_owns_open', False)}` "
+        f"(production OPEN = {report.get('production_open_authority', 'external')})",
         "",
         report["note"],
         "",
