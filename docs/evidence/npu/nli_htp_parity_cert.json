@@ -1,0 +1,15 @@
+{
+  "ok": false,
+  "hits": 0,
+  "n": 3,
+  "hit_rate": 0.0,
+  "recipe": {
+    "act": "uint16",
+    "weight": "uint8"
+  },
+  "verdict": "NPU_NLI_PARTIAL",
+  "qnn_ep_registered": true,
+  "job2_owns_open": false,
+  "source_report": "prime\\state\\npu_nli_qdq_report.json",
+  "law": "parity cert is measure-only; never production OPEN authority"
+}

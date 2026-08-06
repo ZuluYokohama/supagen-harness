@@ -22,7 +22,7 @@ This sheet buttons down every domain of relevance. Status = author measures + st
 | **D5 cert_face / dual_enter** | **PASS** | high cos no NLI ≠ OPEN; force-OPEN → NEED_INFO/STOP |
 | **D6 Identity holonomy** | **PASS** | LFM FAIL / frankenstein PASS floors measured |
 | **D7 Package / contract** | **PASS** | offline + live author 21/21; CI golden schema-only |
-| **D8 NPU / Hexagon** | **PASS w/ residual** | HTP path live (`hexagon_path_live`); **Job2 QDQ label parity residual** |
+| **D8 NPU / Hexagon** | **PASS w/ residual** | HTP path live; Job2 QDQ **accepted residual** (`RESIDUAL_ACCEPTANCE_E3.md`); product path refuses HTP without parity cert |
 | **D9 Adversarial** | **PASS** | lexical correlation + force-OPEN blocked |
 | **D10 Truth loop** | **PASS** | MEASURE only; stable=None if &lt;2 rounds |
 | **D11 Field harness** | **PASS** | offline smoke; DRAFT STOP; multiplane OPEN when covered |
@@ -36,10 +36,10 @@ This sheet buttons down every domain of relevance. Status = author measures + st
 
 ---
 
-## Hard residuals (do not paper over)
+## Hard residuals
 
-1. **NPU Job2 label parity** — UINT8 collapse / UINT16 invert. CPU ORT/CE = agreement authority.  
-2. **Independent buddy L8** — protocol `docs/BUDDY_L8_SIGNOFF.md`; author self-evidence only under `docs/evidence/buddy_l8_*.json`.  
+1. **NPU Job2 label parity** — **ACCEPTED RESIDUAL** for GO_MEASURE (not product HTP). Logit-proven invert vs ORT CPU 3/3. Code: `measure_fabric` + `prefer=htp` refuse until green cert. See `RESIDUAL_ACCEPTANCE_E3.md`.  
+2. **Independent buddy L8** — still **external pending**. Protocol + author offline/live self-evidence only.  
 3. **CI golden** — schema-only by design (full sandbox seal is field-local).
 
 ---

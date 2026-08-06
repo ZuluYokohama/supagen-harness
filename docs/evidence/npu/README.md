@@ -13,7 +13,9 @@ Slim copies of measured Hexagon HTP proofs. Full ONNX/QDQ weights and full `htp_
 | `npu_nli_qdq_report.json` | DeBERTa QDQ **UINT8** on HTP: session OK, logits collapse ~neutral 0.51 |
 | `npu_nli_qdq_uint16_report.json` | DeBERTa QDQ **act=UINT16 w=UINT8**: session OK ~32ms; logits uncollapsed but **labels inverted** (0/3 hits) |
 
-**E3 residual:** both recipes **label-parity FAIL**. CPU ORT/CE remains OPEN authority. Next: better calib / distill stance head / QAI Hub.
+**E3 residual (accepted for GO_MEASURE):** both recipes **label-parity FAIL**.  
+ORT CPU on same pairs: **3/3 PASS**. Product path: `measure_fabric` + red `nli_htp_parity_cert.json` → HTP refused.  
+See `docs/RESIDUAL_ACCEPTANCE_E3.md`. Next engineering: better calib / distill / QAI Hub.
 
 **Retention:** keep slim JSON/CSV heads in-repo; regenerate from local state when re-measuring. Full profile: `prime/state/npu/htp_profile.csv` (ignored).
 

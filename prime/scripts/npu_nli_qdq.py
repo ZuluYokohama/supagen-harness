@@ -403,8 +403,18 @@ def main() -> int:
         else ("NPU_NLI_PARTIAL" if on_path else "NPU_NLI_FAIL")
     )
     report["law"] = "Job2 HTP never owns production OPEN; E3 parity required for product NLI"
+    report["job2_owns_open"] = False
     report["seconds"] = round(time.time() - t0, 1)
     REPORT.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    # Always refresh parity cert (red until hits pass) — measure_fabric reads this
+    try:
+        from measure_fabric import write_parity_cert_from_report
+
+        cert = write_parity_cert_from_report(REPORT)
+        report["parity_cert"] = cert
+        print("parity_cert ok=", cert.get("ok"), "hits", cert.get("hits"), "/", cert.get("n"), flush=True)
+    except Exception as e:
+        report["parity_cert_error"] = str(e)
     print("verdict", report["verdict"], "wrote", REPORT, flush=True)
     return 0 if report["ok"] else 1
 

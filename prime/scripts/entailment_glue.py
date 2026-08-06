@@ -425,7 +425,11 @@ def glue_agreement(
 ) -> dict[str, Any]:
     """
     Job 2 entry: does domain stalk *agree* with human intent (entailment).
-    prefer: auto (ORT→DeBERTa CE→LFM) | ort | cross_encoder | lfm | mutual
+    prefer: auto (ORT→DeBERTa CE→LFM) | ort | cross_encoder | lfm | mutual | htp
+
+    HTP is never first on auto. prefer=htp only runs when measure_fabric
+    nli_htp_parity_pass() is green; otherwise falls through to ORT/CE.
+    Never authorizes production OPEN.
     """
     from metric_text import strip_envelope, strip_prompt_chrome
 
@@ -440,8 +444,35 @@ def glue_agreement(
     domain = _clean(domain)
     if prefer == "mutual":
         return mutual_entailment(human, domain)
+
+    # Explicit HTP only after E3 parity cert (session-ready QDQ is not enough)
+    if prefer in ("htp", "hexagon", "npu"):
+        try:
+            from measure_fabric import nli_htp_parity_pass
+
+            gate = nli_htp_parity_pass()
+        except Exception as e:
+            gate = {"ok": False, "reason": str(e)}
+        if not gate.get("ok"):
+            # refuse HTP — fall through to CPU authority
+            prefer = "auto"
+            # annotate path taken after CPU result
+            _htp_refused = gate
+        else:
+            _htp_refused = None
+            # Product HTP path not implemented until E3 green; still refuse force-OPEN
+            # by falling through to ORT (measure fabric documents order only).
+            prefer = "auto"
+    else:
+        _htp_refused = None
+
     if prefer == "ort":
-        return nli_ort(human, domain)
+        r = nli_ort(human, domain)
+        if _htp_refused is not None:
+            r = dict(r)
+            r["htp_refused"] = _htp_refused
+            r["job2_owns_open"] = False
+        return r
     if prefer in ("cross_encoder", "auto"):
         # Prefer ORT when model exported (faster warm path); fall back CE
         if prefer == "auto" and _os.environ.get("PRIME_NLI_ORT", "1").strip() not in (
@@ -451,11 +482,24 @@ def glue_agreement(
         ):
             r_ort = nli_ort(human, domain)
             if r_ort.get("ok"):
+                if _htp_refused is not None:
+                    r_ort = dict(r_ort)
+                    r_ort["htp_refused"] = _htp_refused
+                    r_ort["job2_owns_open"] = False
                 return r_ort
         r = nli_cross_encoder(human, domain)
         if r.get("ok") or prefer == "cross_encoder":
+            if _htp_refused is not None:
+                r = dict(r)
+                r["htp_refused"] = _htp_refused
+                r["job2_owns_open"] = False
             return r
-    return nli_lfm(human, domain, base=base)
+    r = nli_lfm(human, domain, base=base)
+    if _htp_refused is not None and isinstance(r, dict):
+        r = dict(r)
+        r["htp_refused"] = _htp_refused
+        r["job2_owns_open"] = False
+    return r
 
 
 def interface_jaccard(a: str, b: str, symbols: list[str] | None = None) -> dict[str, Any]:
