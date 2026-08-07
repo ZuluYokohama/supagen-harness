@@ -2,7 +2,7 @@
   "artifact": "DOMAIN_COMPLETION_CERTIFICATE",
   "pr": "1",
   "branch": "main",
-  "timestamp": "2026-08-07T00:23:59.226612Z",
+  "timestamp": "2026-08-07T00:24:50.286535Z",
   "seal": "GO_MEASURE",
   "production_open": "NO-GO",
   "matrix": {
@@ -29,7 +29,7 @@
   "disposition_verifier": {
     "status": "PASS",
     "command": "python prime/scripts/verify_cr_disposition.py",
-    "checks": "84/84"
+    "checks": "85/85"
   },
   "job2_auto_ep": "CPUExecutionProvider",
   "htp_refuse": true,
@@ -50,8 +50,8 @@
   "merge_commit": "2de430129db22878b14084dc4be4b122ac7ab9c0",
   "seal_note": "contract_live.commit is PR content seal e884b7c (pre-squash); merge is squash 2de4301 on main",
   "status": "MERGED",
-  "main_tip": "fc5eb635c501a8e1ea63030d186ff57df62745a0",
-  "main_tree": "abfda21a6f7ec3d954b1ddaaaf671910a22b534d",
+  "main_tip": "2a215f15ea9abe1c781cf9c1bfa79c3bbd834ea5",
+  "main_tree": "21dd653ea267ff35d09eeaed122be128cf0eb977",
   "measured_revision": "e884b7cc19f14f3982823e5dd331c9abd4e1074e",
   "content_seal": "e884b7cc19f14f3982823e5dd331c9abd4e1074e",
   "review_brief_superseded": {
