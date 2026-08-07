@@ -191,28 +191,79 @@ def load_session(*, force_cpu: bool = False) -> dict[str, Any]:
     }
 
 
-def predict(
-    premise: str,
-    hypothesis: str,
+def _norm_nli_label(raw: str) -> str:
+    s = str(raw).lower()
+    if "contrad" in s:
+        return "contradiction"
+    if "entail" in s:
+        return "entailment"
+    if "neutral" in s:
+        return "neutral"
+    return s
+
+
+def _row_from_logits(
+    logits_1d,
     *,
-    force_cpu: bool = True,
+    labels: list[str],
+    providers: list[str],
+    model_id: str | None,
+    latency_ms: float,
+    force_cpu: bool,
+    batch_index: int | None = None,
 ) -> dict[str, Any]:
-    """
-    Product Job2 default: force_cpu=True → CPUExecutionProvider only.
-    Explicit non-CPU EPs require force_cpu=False and PRIME_ACCEL=qnn|npu|dml.
-    """
     import numpy as np
 
-    # Product default is always CPU-only. Only explicit PRIME_ACCEL may open other EPs.
+    logits = np.asarray(logits_1d, dtype=np.float64)
+    ex = np.exp(logits - logits.max())
+    probs = ex / ex.sum()
+    i = int(probs.argmax())
+    label = labels[i] if i < len(labels) else LABELS[i]
+    conf = float(probs[i])
+    lab = _norm_nli_label(label)
+    probs_norm: dict[str, float] = {}
+    for j in range(min(len(labels), len(probs))):
+        probs_norm[_norm_nli_label(labels[j])] = round(float(probs[j]), 4)
+    agrees = lab == "entailment" and conf >= ONEWAY_P
+    gate = "PASS" if agrees else ("STOP" if lab == "contradiction" else "NEED_INFO")
+    on_qnn = any("QNN" in (p or "") for p in providers)
+    out: dict[str, Any] = {
+        "ok": True,
+        "job": "agreement_nli",
+        "engine": "ort_nli",
+        "provider": providers[0] if providers else None,
+        "providers": providers,
+        "model": model_id,
+        "label": lab,
+        "confidence": round(conf, 4),
+        "probs": probs_norm,
+        "agrees": agrees,
+        "gate": gate,
+        "oneway_p": ONEWAY_P,
+        "latency_ms": latency_ms,
+        "not_open_authority": True,
+        "job2_owns_open": False,
+        "force_cpu": force_cpu,
+        "qnn_in_providers": on_qnn,
+        "note": (
+            "QNN present but E3 parity residual — prefer CPU authority"
+            if on_qnn
+            else None
+        ),
+    }
+    if batch_index is not None:
+        out["batch_index"] = batch_index
+    return out
+
+
+def _ensure_product_session(*, force_cpu: bool) -> dict[str, Any]:
+    """Load/reuse session; enforce product force_cpu law."""
     pref = (os.environ.get("PRIME_ACCEL") or "auto").lower()
     if force_cpu or pref in ("auto", "cpu", ""):
         force_cpu = True
     st = load_session(force_cpu=force_cpu)
     if not st.get("ok"):
-        return {"ok": False, "error": st.get("error"), "engine": "ort_nli"}
-    global _SESSION, _META, _TOK
-    assert _SESSION and _META and _TOK
-    # Hard reject: product path must never land on QNN without force_cpu=False + explicit pref
+        return {"ok": False, "error": st.get("error"), "engine": "ort_nli", "force_cpu": force_cpu}
     active = (st.get("active_provider") or "")
     if force_cpu and "QNN" in str(active):
         return {
@@ -222,92 +273,147 @@ def predict(
             "label": "unknown",
             "agrees": False,
             "gate": "NEED_INFO",
+            "force_cpu": force_cpu,
         }
-    t0 = time.time()
+    st["force_cpu"] = force_cpu
+    return st
+
+
+def predict(
+    premise: str,
+    hypothesis: str,
+    *,
+    force_cpu: bool = True,
+) -> dict[str, Any]:
+    """
+    Product Job2 default: force_cpu=True → CPUExecutionProvider only.
+    Explicit non-CPU EPs require force_cpu=False and PRIME_ACCEL=qnn|npu|dml.
+    Session is a process singleton (load_session cache).
+    """
+    rows = predict_batch([(premise, hypothesis)], force_cpu=force_cpu)
+    return rows[0] if rows else {"ok": False, "error": "empty_batch", "engine": "ort_nli"}
+
+
+def predict_batch(
+    pairs: list[tuple[str, str]],
+    *,
+    force_cpu: bool = True,
+    max_batch: int = 16,
+) -> list[dict[str, Any]]:
+    """
+    Batched Job2 ORT NLI (B×L). Same law as predict: force_cpu product default.
+    Chunks to max_batch to bound peak memory. never owns OPEN.
+    """
+    import numpy as np
+
+    if not pairs:
+        return []
+    st = _ensure_product_session(force_cpu=force_cpu)
+    if not st.get("ok"):
+        return [
+            {
+                "ok": False,
+                "error": st.get("error"),
+                "engine": "ort_nli",
+                "label": "unknown",
+                "agrees": False,
+                "gate": "NEED_INFO",
+                "batch_index": i,
+                "not_open_authority": True,
+                "job2_owns_open": False,
+            }
+            for i in range(len(pairs))
+        ]
+    global _SESSION, _META, _TOK
+    assert _SESSION and _META and _TOK
+    force_cpu = bool(st.get("force_cpu", True))
     max_len = int(_META.get("max_length") or 256)
-    enc = _TOK(
-        (premise or "")[:1500],
-        (hypothesis or "")[:500],
-        return_tensors="np",
-        padding="max_length",
-        truncation=True,
-        max_length=max_len,
-    )
-    feeds = {}
-    for name in _META.get("input_names") or ["input_ids", "attention_mask"]:
-        if name in enc:
-            feeds[name] = enc[name].astype(np.int64)
-    try:
-        logits = _SESSION.run(None, feeds)[0][0]
-    except Exception as e:
-        # DML runtime failure → rebuild CPU session once
-        if "Dml" in str(e) or "80070057" in str(e) or "Reshape" in str(e):
-            st2 = load_session(force_cpu=True)
-            if not st2.get("ok"):
-                return {"ok": False, "error": str(e)[:300], "engine": "ort_nli"}
-            # clear cached session was replaced
-            try:
-                logits = _SESSION.run(None, feeds)[0][0]
-            except Exception as e2:
-                return {"ok": False, "error": str(e2)[:300], "engine": "ort_nli"}
-        else:
-            return {"ok": False, "error": str(e)[:300], "engine": "ort_nli"}
-    ex = np.exp(logits - logits.max())
-    probs = ex / ex.sum()
-    labels = _META.get("labels") or LABELS
-    i = int(probs.argmax())
-    label = labels[i] if i < len(labels) else LABELS[i]
-    conf = float(probs[i])
-    lab = label.lower()
-    if "contrad" in lab:
-        lab = "contradiction"
-    elif "entail" in lab:
-        lab = "entailment"
-    elif "neutral" in lab:
-        lab = "neutral"
-
-    def _norm_key(raw: str) -> str:
-        s = str(raw).lower()
-        if "contrad" in s:
-            return "contradiction"
-        if "entail" in s:
-            return "entailment"
-        if "neutral" in s:
-            return "neutral"
-        return s
-
-    probs_norm: dict[str, float] = {}
-    for j in range(min(len(labels), len(probs))):
-        probs_norm[_norm_key(labels[j])] = round(float(probs[j]), 4)
-
-    agrees = lab == "entailment" and conf >= ONEWAY_P
-    gate = "PASS" if agrees else ("STOP" if lab == "contradiction" else "NEED_INFO")
+    labels = list(_META.get("labels") or LABELS)
     providers = list(_SESSION.get_providers() or [])
-    # Soft-warn if QNN slipped into product path without E3 (should not under auto)
-    on_qnn = any("QNN" in (p or "") for p in providers)
-    return {
-        "ok": True,
-        "job": "agreement_nli",
-        "engine": "ort_nli",
-        "provider": providers[0] if providers else None,
-        "providers": providers,
-        "model": _META.get("model_id"),
-        "label": lab,
-        "confidence": round(conf, 4),
-        "probs": probs_norm,
-        "agrees": agrees,
-        "gate": gate,
-        "oneway_p": ONEWAY_P,
-        "latency_ms": round((time.time() - t0) * 1000, 1),
-        "not_open_authority": True,
-        "job2_owns_open": False,
-        "qnn_in_providers": on_qnn,
-        "note": (
-            "QNN present but E3 parity residual — prefer CPU authority"
-            if on_qnn
-            else None
-        ),
-    }
+    model_id = _META.get("model_id")
+    input_names = list(_META.get("input_names") or ["input_ids", "attention_mask"])
+    out: list[dict[str, Any]] = []
+    max_batch = max(1, min(int(max_batch), 64))
+
+    for base in range(0, len(pairs), max_batch):
+        chunk = pairs[base : base + max_batch]
+        prems = [(p or "")[:1500] for p, _h in chunk]
+        hyps = [(h or "")[:500] for _p, h in chunk]
+        t0 = time.time()
+        enc = _TOK(
+            prems,
+            hyps,
+            return_tensors="np",
+            padding="max_length",
+            truncation=True,
+            max_length=max_len,
+        )
+        feeds = {}
+        for name in input_names:
+            if name in enc:
+                feeds[name] = enc[name].astype(np.int64)
+        try:
+            logits = _SESSION.run(None, feeds)[0]
+        except Exception as e:
+            if "Dml" in str(e) or "80070057" in str(e) or "Reshape" in str(e):
+                st2 = load_session(force_cpu=True)
+                if not st2.get("ok"):
+                    for j in range(len(chunk)):
+                        out.append(
+                            {
+                                "ok": False,
+                                "error": str(e)[:300],
+                                "engine": "ort_nli",
+                                "batch_index": base + j,
+                                "not_open_authority": True,
+                                "job2_owns_open": False,
+                            }
+                        )
+                    continue
+                try:
+                    logits = _SESSION.run(None, feeds)[0]
+                    providers = list(_SESSION.get_providers() or [])
+                except Exception as e2:
+                    for j in range(len(chunk)):
+                        out.append(
+                            {
+                                "ok": False,
+                                "error": str(e2)[:300],
+                                "engine": "ort_nli",
+                                "batch_index": base + j,
+                                "not_open_authority": True,
+                                "job2_owns_open": False,
+                            }
+                        )
+                    continue
+            else:
+                for j in range(len(chunk)):
+                    out.append(
+                        {
+                            "ok": False,
+                            "error": str(e)[:300],
+                            "engine": "ort_nli",
+                            "batch_index": base + j,
+                            "not_open_authority": True,
+                            "job2_owns_open": False,
+                        }
+                    )
+                continue
+        ms = round((time.time() - t0) * 1000, 1)
+        per = ms / max(len(chunk), 1)
+        for j in range(len(chunk)):
+            out.append(
+                _row_from_logits(
+                    logits[j],
+                    labels=labels,
+                    providers=providers,
+                    model_id=model_id,
+                    latency_ms=per,
+                    force_cpu=force_cpu,
+                    batch_index=base + j,
+                )
+            )
+    return out
 
 
 def bench() -> dict[str, Any]:

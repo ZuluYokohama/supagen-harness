@@ -139,15 +139,33 @@ def build_kb_index(
     max_chunks_per_file: int = 12,
     max_total_chunks: int = 96,
     query_probe: str = "",
+    target_dim: int | None = None,
+    quantize: str | None = None,
 ) -> dict[str, Any]:
-    """Scan roots → per-file chunk/embed → merged index with source provenance."""
+    """Scan roots → per-file chunk/embed → merged index with source provenance.
+
+    target_dim: optional Matryoshka-style prefix truncate (e.g. 512, 256) when
+    the embed family supports ordered dimensions (jina-v5). Callers must record
+    dim on the index and match query vectors to the same width.
+    quantize: None | "sq8" — scalar int8 storage for embeds (aboutness only).
+    """
     files = scan_files(roots, max_files=max_files)
     all_chunks: list[dict[str, Any]] = []
     sources: list[dict[str, Any]] = []
     dim = 0
     t0 = time.time()
+    td = int(target_dim) if target_dim else None
+    if td is not None and td < 32:
+        td = None
+    qmode = (quantize or "").strip().lower() or None
+    if qmode and qmode not in ("sq8",):
+        qmode = None
 
-    print(f"kb_index: {len(files)} files → embed={embed} max_total={max_total_chunks}", flush=True)
+    print(
+        f"kb_index: {len(files)} files → embed={embed} max_total={max_total_chunks}"
+        f" target_dim={td} quantize={qmode}",
+        flush=True,
+    )
     for i, fp in enumerate(files, 1):
         print(f"  [{i}/{len(files)}] {fp.name} …", flush=True)
         try:
@@ -169,10 +187,24 @@ def build_kb_index(
             c["id"] = f"{fhash}_{c.get('id')}"
             c["source"] = str(fp)
             c["source_sha12"] = fhash
+            emb = c.get("embed")
+            if emb and isinstance(emb, (list, tuple)):
+                vec = list(emb)
+                if td is not None and len(vec) > td:
+                    vec = vec[:td]
+                if qmode == "sq8" and vec:
+                    # scalar min-max → int8; store scale for dequant on retrieve
+                    lo = min(float(x) for x in vec)
+                    hi = max(float(x) for x in vec)
+                    scale = (hi - lo) / 255.0 if hi > lo else 1.0
+                    c["embed"] = [int(round((float(x) - lo) / scale)) for x in vec]
+                    c["embed_sq8"] = {"lo": lo, "scale": scale}
+                    c["embed_dtype"] = "sq8"
+                else:
+                    c["embed"] = vec
+                dim = max(dim, len(c["embed"]))
             all_chunks.append(c)
             n += 1
-            if c.get("embed"):
-                dim = max(dim, len(c["embed"]))
         sources.append({
             "path": str(fp),
             "ok": True,
@@ -190,6 +222,8 @@ def build_kb_index(
         "n_chunks": len(all_chunks),
         "embedded": sum(1 for c in all_chunks if c.get("embed")),
         "dim": dim,
+        "target_dim": td,
+        "quantize": qmode,
         "chunks": all_chunks,
         "sources": sources,
         "roots": [str(r) for r in roots],
@@ -241,18 +275,48 @@ def build_kb_index(
     }
 
 
+def _dequant_index_embeds(index: dict[str, Any]) -> dict[str, Any]:
+    """Materialize float embeds when index stored sq8 (aboutness-only)."""
+    if index.get("quantize") != "sq8":
+        return index
+    out = dict(index)
+    chunks = []
+    for c in index.get("chunks") or []:
+        c = dict(c)
+        emb = c.get("embed")
+        meta = c.get("embed_sq8") or {}
+        if emb and meta and c.get("embed_dtype") == "sq8":
+            lo = float(meta.get("lo") or 0.0)
+            scale = float(meta.get("scale") or 1.0) or 1.0
+            c["embed"] = [lo + int(x) * scale for x in emb]
+            c["embed_dtype"] = "float32_dequant"
+        chunks.append(c)
+    out["chunks"] = chunks
+    return out
+
+
 def query_kb(
     index_path: Path,
     query: str,
     k: int = 5,
 ) -> dict[str, Any]:
-    index = load_index(index_path)
+    index = _dequant_index_embeds(load_index(index_path))
+    # Match Matryoshka width on query path when index truncated
     hits = retrieve(index, query, k=k)
+    td = index.get("target_dim") or index.get("dim")
+    if td and hits:
+        for h in hits:
+            emb = h.get("embed")
+            if emb and len(emb) > int(td):
+                h["embed"] = emb[: int(td)]
     return {
         "ok": True,
         "query": query,
         "n_chunks_index": index.get("n_chunks"),
         "embedded": index.get("embedded"),
+        "dim": index.get("dim"),
+        "target_dim": index.get("target_dim"),
+        "quantize": index.get("quantize"),
         "hits": hits,
         "lfm_pack": pack_for_lfm(query, hits),
         "grok_pack": pack_for_grok(index, hits, query),
@@ -278,6 +342,17 @@ def main() -> None:
     ap.add_argument("--no-embed", action="store_true")
     ap.add_argument("--query", default="")
     ap.add_argument("--k", type=int, default=5)
+    ap.add_argument(
+        "--target-dim",
+        type=int,
+        default=0,
+        help="Matryoshka prefix truncate (e.g. 512); 0=full width",
+    )
+    ap.add_argument(
+        "--quantize",
+        default="",
+        help="optional storage quant: sq8 (aboutness only; not agreement)",
+    )
     args = ap.parse_args()
 
     roots = [Path(r) for r in args.root] if args.root else _default_roots()
@@ -303,6 +378,8 @@ def main() -> None:
         embed=not args.no_embed,
         max_files=args.max_files,
         max_chunks_per_file=args.max_chunks_per_file,
+        target_dim=args.target_dim or None,
+        quantize=args.quantize or None,
         max_total_chunks=args.max_total,
         query_probe=args.query
         or "geometry manifold LFM nomic OPEN STOP prime residual never forced",

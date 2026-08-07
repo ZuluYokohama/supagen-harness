@@ -13,8 +13,23 @@ if str(SCRIPTS) not in sys.path:
 
 
 def main() -> int:
+    # mtime+size content cache — avoid re-reading unchanged sources in rapid CI loops
+    _text_cache: dict[str, tuple[int, int, str]] = {}
+
     def t(rel: str) -> str:
-        return (ROOT / rel).read_text(encoding="utf-8", errors="replace")
+        p = ROOT / rel
+        try:
+            st = p.stat()
+            key = str(p)
+            sig = (int(st.st_mtime_ns), int(st.st_size))
+            hit = _text_cache.get(key)
+            if hit and hit[0] == sig[0] and hit[1] == sig[1]:
+                return hit[2]
+            text = p.read_text(encoding="utf-8", errors="replace")
+            _text_cache[key] = (sig[0], sig[1], text)
+            return text
+        except Exception:
+            return (ROOT / rel).read_text(encoding="utf-8", errors="replace")
 
     checks = {
         "owns_open_false": 'owns_open_gate": False' in t("prime/scripts/truth_plane.py"),
@@ -181,6 +196,12 @@ def main() -> int:
         )
         and "nomic 768-d" not in t("prime/scripts/mcp_server.py")
         and "nomic stalks" not in t("prime/scripts/mcp_server.py"),
+        "ort_predict_batch": "def predict_batch" in t("prime/scripts/accel_nli_ort.py"),
+        "glue_agreement_batch": "def glue_agreement_batch" in t(
+            "prime/scripts/entailment_glue.py"
+        ),
+        "mutual_ort_batched": "predict_batch" in t("prime/scripts/entailment_glue.py")
+        and "batched" in t("prime/scripts/entailment_glue.py"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---

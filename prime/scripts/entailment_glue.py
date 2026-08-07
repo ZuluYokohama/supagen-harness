@@ -404,21 +404,13 @@ def _nli_one_way(
     return nli_cross_encoder(premise, hypothesis, model_name=model_name)
 
 
-def mutual_entailment(
-    a: str,
-    b: str,
-    model_name: str | None = None,
-    p_floor: float | None = None,
-    prefer: str = "auto",
+def _mutual_from_ab_ba(
+    ab: dict[str, Any],
+    ba: dict[str, Any],
+    *,
+    p_floor: float,
+    batched: bool = False,
 ) -> dict[str, Any]:
-    """
-    Bidirectional entailment: both a→b and b→a must be entailment with conf ≥ p_floor.
-    Uses the same engine selection as glue_agreement (ORT→CE under auto).
-    Never OPEN authority alone.
-    """
-    p_floor = MUTUAL_P if p_floor is None else p_floor
-    ab = _nli_one_way(a, b, prefer=prefer, model_name=model_name)
-    ba = _nli_one_way(b, a, prefer=prefer, model_name=model_name)
     if not ab.get("ok") or not ba.get("ok"):
         return {
             "ok": False,
@@ -429,6 +421,7 @@ def mutual_entailment(
             "agrees": False,
             "gate": "NEED_INFO",
             "not_open_authority": True,
+            "batched": batched,
         }
     ab_e = ab.get("label") == "entailment" and float(ab.get("confidence") or 0) >= p_floor
     ba_e = ba.get("label") == "entailment" and float(ba.get("confidence") or 0) >= p_floor
@@ -465,8 +458,49 @@ def mutual_entailment(
             3,
         ),
         "not_open_authority": True,
+        "batched": batched,
         "note": "Mutual entailment owns agreement; aboutness must not promote OPEN.",
     }
+
+
+def mutual_entailment(
+    a: str,
+    b: str,
+    model_name: str | None = None,
+    p_floor: float | None = None,
+    prefer: str = "auto",
+) -> dict[str, Any]:
+    """
+    Bidirectional entailment: both a→b and b→a must be entailment with conf ≥ p_floor.
+    ORT auto path batches both directions in one session run when possible.
+    Never OPEN authority alone.
+    """
+    p_floor = MUTUAL_P if p_floor is None else p_floor
+    prefer = (prefer or "auto").strip().lower()
+    # Batched ORT: one encode/run for (a→b, b→a)
+    if prefer in ("ort", "auto") and _os.environ.get("PRIME_NLI_ORT", "1").strip() not in (
+        "0",
+        "false",
+        "no",
+    ):
+        try:
+            from accel_nli_ort import predict_batch
+
+            rows = predict_batch([(a, b), (b, a)], force_cpu=True)
+            if len(rows) == 2 and all(r.get("ok") for r in rows):
+                return _mutual_from_ab_ba(rows[0], rows[1], p_floor=p_floor, batched=True)
+            if prefer == "ort":
+                ab = rows[0] if rows else {"ok": False, "error": "batch_empty"}
+                ba = rows[1] if len(rows) > 1 else {"ok": False, "error": "batch_empty"}
+                return _mutual_from_ab_ba(ab, ba, p_floor=p_floor, batched=True)
+        except Exception:
+            if prefer == "ort":
+                ab = _nli_one_way(a, b, prefer="ort", model_name=model_name)
+                ba = _nli_one_way(b, a, prefer="ort", model_name=model_name)
+                return _mutual_from_ab_ba(ab, ba, p_floor=p_floor, batched=False)
+    ab = _nli_one_way(a, b, prefer=prefer, model_name=model_name)
+    ba = _nli_one_way(b, a, prefer=prefer, model_name=model_name)
+    return _mutual_from_ab_ba(ab, ba, p_floor=p_floor, batched=False)
 
 
 def nli_ort(
@@ -644,6 +678,92 @@ def glue_agreement(
             }
         )
     return _annotate(nli_lfm(human, domain, base=base))
+
+
+def glue_agreement_batch(
+    pairs: list[tuple[str, str]],
+    *,
+    prefer: str = "auto",
+    p_floor: float | None = None,
+    mutual: bool = False,
+) -> dict[str, Any]:
+    """
+    Batch Job2 agreement over many (human, domain) pairs.
+
+    Default: one-way ORT batch (force_cpu). mutual=True runs batched
+    bidirectional pairs (2×N ORT rows). Never OPEN authority.
+    """
+    from metric_text import strip_envelope, strip_prompt_chrome
+
+    def _clean(s: str) -> str:
+        s = s or ""
+        if s.strip().startswith("{"):
+            s = strip_envelope(s)
+        return strip_prompt_chrome(s)
+
+    cleaned: list[tuple[str, str]] = [(_clean(a), _clean(b)) for a, b in pairs]
+    prefer = (prefer or "auto").strip().lower()
+    if mutual:
+        rows = [
+            mutual_entailment(a, b, prefer=prefer, p_floor=p_floor) for a, b in cleaned
+        ]
+        # mutual_entailment already ORT-batches each ab/ba; list comprehension is N pairs
+        return {
+            "ok": all(r.get("ok") for r in rows) if rows else True,
+            "job": "agreement_nli_batch_mutual",
+            "n": len(rows),
+            "rows": rows,
+            "n_agrees": sum(1 for r in rows if r.get("agrees")),
+            "not_open_authority": True,
+            "job2_owns_open": False,
+        }
+
+    # One-way batch via ORT when allowed
+    if prefer in ("ort", "auto") and _os.environ.get("PRIME_NLI_ORT", "1").strip() not in (
+        "0",
+        "false",
+        "no",
+    ):
+        try:
+            from accel_nli_ort import predict_batch
+
+            rows = predict_batch(cleaned, force_cpu=True)
+            for r in rows:
+                r["job2_owns_open"] = False
+                r.setdefault("not_open_authority", True)
+            return {
+                "ok": all(r.get("ok") for r in rows) if rows else True,
+                "job": "agreement_nli_batch",
+                "engine": "ort_nli_batch",
+                "n": len(rows),
+                "rows": rows,
+                "n_agrees": sum(1 for r in rows if r.get("agrees")),
+                "not_open_authority": True,
+                "job2_owns_open": False,
+                "force_cpu": True,
+            }
+        except Exception as e:
+            if prefer == "ort":
+                return {
+                    "ok": False,
+                    "job": "agreement_nli_batch",
+                    "error": str(e)[:300],
+                    "not_open_authority": True,
+                    "job2_owns_open": False,
+                }
+
+    # Fallback: sequential glue_agreement
+    rows = [glue_agreement(a, b, prefer=prefer) for a, b in cleaned]
+    return {
+        "ok": all(r.get("ok") for r in rows) if rows else True,
+        "job": "agreement_nli_batch",
+        "engine": "sequential_fallback",
+        "n": len(rows),
+        "rows": rows,
+        "n_agrees": sum(1 for r in rows if r.get("agrees")),
+        "not_open_authority": True,
+        "job2_owns_open": False,
+    }
 
 
 def interface_jaccard(a: str, b: str, symbols: list[str] | None = None) -> dict[str, Any]:
