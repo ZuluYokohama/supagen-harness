@@ -1,0 +1,64 @@
+{
+  "artifact": "nli_batch_bench",
+  "ok": true,
+  "n": 24,
+  "reps": 2,
+  "best": {
+    "ok": true,
+    "n_pairs": 24,
+    "force_cpu": true,
+    "job2_owns_open": false,
+    "not_open_authority": true,
+    "session": {
+      "cached": true,
+      "active_provider": "CPUExecutionProvider",
+      "providers": [
+        "CPUExecutionProvider"
+      ]
+    },
+    "sequential_oneway": {
+      "seconds": 4.4358,
+      "ms_per_pair": 184.824,
+      "n_ok": 24
+    },
+    "batch_oneway": {
+      "seconds": 3.9577,
+      "ms_per_pair": 164.904,
+      "n_ok": 24
+    },
+    "speedup_seq_over_batch": 1.121,
+    "label_parity_seq_vs_batch": true,
+    "mutual_sample": {
+      "n_pairs": 8,
+      "nli_directions": 16,
+      "seconds": 3.3725,
+      "ms_per_mutual_pair": 421.56,
+      "n_ok": 8,
+      "n_batched_flag": 8
+    },
+    "law": "measure only; GO_MEASURE; production OPEN NO-GO",
+    "rep": 1
+  },
+  "reps_detail": [
+    {
+      "rep": 0,
+      "ok": true,
+      "speedup_seq_over_batch": 0.912,
+      "seq_ms": 165.895,
+      "batch_ms": 181.952,
+      "label_parity": true,
+      "error": null
+    },
+    {
+      "rep": 1,
+      "ok": true,
+      "speedup_seq_over_batch": 1.121,
+      "seq_ms": 184.824,
+      "batch_ms": 164.904,
+      "label_parity": true,
+      "error": null
+    }
+  ],
+  "claim_note": "Speedup is measured ms/pair on this host for this n; not a certified 3\u20135\u00d7 guarantee. Production OPEN remains NO-GO.",
+  "out": "docs/evidence/nli_batch_bench.json"
+}

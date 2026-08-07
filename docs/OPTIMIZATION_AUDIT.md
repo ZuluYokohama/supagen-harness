@@ -60,4 +60,21 @@ python prime/scripts/verify_cr_disposition.py
 python prime/scripts/kb_index.py build --target-dim 512 --quantize sq8
 ```
 
-**Priority after this land:** re-measure ORT sequential vs batch on the author kit (truth_loop claim counts), then only then consider CE batch or SQ8 integer kernels.
+## Measured bench (author kit, post-land)
+
+Script: `prime/scripts/bench_nli_batch.py`  
+Artifact: `docs/evidence/nli_batch_bench.json`
+
+| Arm | Result (n=24 one-way pairs, force_cpu, CPU EP) |
+|-----|-----------------------------------------------|
+| Sequential | ~165–185 ms/pair (varies by rep) |
+| Batch | ~165–182 ms/pair |
+| **Speedup seq/batch** | **~0.91–1.12×** across reps (best ~1.12×) |
+| Label parity seq vs batch | **True** |
+| Mutual sample | 8 pairs `batched=True`; ~400 ms/mutual pair |
+
+**Honest takeaway:** the marketing **3–5×** band is **not** observed on this DeBERTa ORT CPU path at n=24. Batching is correct and **label-parity safe**; wall-clock gains are modest/noisy (tokenizer + max_length padding dominate). Do **not** certificate a 3–5× claim.
+
+```powershell
+python prime/scripts/bench_nli_batch.py --n 24 --reps 2
+```

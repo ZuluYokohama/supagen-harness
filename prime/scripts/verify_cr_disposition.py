@@ -202,6 +202,10 @@ def main() -> int:
         ),
         "mutual_ort_batched": "predict_batch" in t("prime/scripts/entailment_glue.py")
         and "batched" in t("prime/scripts/entailment_glue.py"),
+        "nli_batch_bench_script": (ROOT / "prime/scripts/bench_nli_batch.py").is_file(),
+        "nli_batch_bench_evidence": (ROOT / "docs/evidence/nli_batch_bench.json").is_file()
+        and "speedup_seq_over_batch"
+        in t("docs/evidence/nli_batch_bench.json"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---
