@@ -206,6 +206,15 @@ def main() -> int:
         "nli_batch_bench_evidence": (ROOT / "docs/evidence/nli_batch_bench.json").is_file()
         and "speedup_seq_over_batch"
         in t("docs/evidence/nli_batch_bench.json"),
+        "nli_batch_unit_tests": (ROOT / "prime/tests/test_nli_batch_law.py").is_file()
+        and "TestProvidersAutoNeverQnn"
+        in t("prime/tests/test_nli_batch_law.py")
+        and "htp_is_gate_authority"
+        in t("prime/tests/test_nli_batch_law.py"),
+        "auto_providers_cpu_only": 'pref in ("qnn", "npu")'
+        in t("prime/scripts/accel_nli_ort.py")
+        and 'pref in ("auto", "qnn", "npu")'
+        not in t("prime/scripts/accel_nli_ort.py"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---

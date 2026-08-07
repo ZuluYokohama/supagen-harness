@@ -77,4 +77,27 @@ Artifact: `docs/evidence/nli_batch_bench.json`
 
 ```powershell
 python prime/scripts/bench_nli_batch.py --n 24 --reps 2
+python -m unittest discover -s prime/tests -v
 ```
+
+---
+
+## NPU gate isolation (product law)
+
+| Knob | Product behavior |
+|------|------------------|
+| `PRIME_ACCEL=auto` (default) | `_providers()` → **CPU only**; QNN never listed |
+| `PRIME_ACCEL=qnn\|npu` | QNN may load on measure/session path — still not OPEN authority |
+| `predict` / `predict_batch` default | `force_cpu=True` pins CPU even if env was non-auto |
+| `prefer=htp` in glue | Requires green `nli_htp_parity_pass()`; else `htp_refused` and CPU path |
+| `route_job2()` | `htp_is_gate_authority=false` always; gate order ort_cpu→CE→lfm |
+
+Unit coverage: `prime/tests/test_nli_batch_law.py` (CI step on offline workflow).
+
+## Sheaf ALU boundary
+
+| Module | Role |
+|--------|------|
+| `prime/scripts/compute_graph.py` | RPL-C **process DAG** only — no `eigsh` / VR |
+| `prime/scripts/accel_nli_ort.py` / `entailment_glue.py` | Job2 agreement — no sheaf Laplacian |
+| `123abc/rplc_sheaf.py` (+ sparse backend) | Sheaf λ₁ / ALU home — **not** dual-metric Job1/2 |

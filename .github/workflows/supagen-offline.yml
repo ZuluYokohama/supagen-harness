@@ -29,6 +29,12 @@ jobs:
           SUPAGEN_ROOT: ${{ github.workspace }}
           PRIMEDEV_ROOT: ${{ github.workspace }}
         run: python prime/scripts/verify_cr_disposition.py
+      - name: NLI batch + NPU gate unit tests (GO_MEASURE law)
+        env:
+          SUPAGEN_ROOT: ${{ github.workspace }}
+          PRIMEDEV_ROOT: ${{ github.workspace }}
+          PRIME_ACCEL: auto
+        run: python -m unittest discover -s prime/tests -v
       - name: Offline contract + smoke + golden schema-only
         env:
           SUPAGEN_ROOT: ${{ github.workspace }}
