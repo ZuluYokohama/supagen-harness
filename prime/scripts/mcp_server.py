@@ -765,7 +765,9 @@ def tool_kb_build(
     query: str = "",
 ) -> dict:
     """
-    Multi-file KB manifold: past corpus → nomic stalks → present retrieve.
+    Multi-file KB manifold: past corpus → embed stalks → present retrieve.
+    Default Job1 family is jina-v5 (dim=1024) when jina :8765 is up; nomic is
+    fallback. Callers must honor returned embed_family and dim (never hardcode 768).
     Default roots: prime docs + deep state (gated, not whole drive thrash).
     """
     from kb_index import DEFAULT_ROOTS, build_kb_index, default_out
@@ -1093,7 +1095,11 @@ TOOLS: dict[str, dict[str, Any]] = {
     },
     "lm_embed": {
         "fn": tool_lm_embed,
-        "description": "OpenAI-compat embeddings — metric on language stalks (nomic 768-d).",
+        "description": (
+            "OpenAI-compat embeddings — Job1 aboutness metric on language stalks. "
+            "Default: jina-v5-small (dim=1024) via :8765; nomic is fallback. "
+            "Parse returned embed_family and dim; never assume 768."
+        ),
         "schema": {
             "type": "object",
             "properties": {"text": {"type": "string"}},
@@ -1232,7 +1238,8 @@ TOOLS: dict[str, dict[str, Any]] = {
     "kb_build": {
         "fn": tool_kb_build,
         "description": (
-            "Build multi-file KB manifold index (nomic 768-d). "
+            "Build multi-file KB manifold index (default jina dim=1024; nomic fallback). "
+            "Honor embed_family/dim in the response. "
             "Time-travel: past corpus → present retrieval. roots=semicolon paths."
         ),
         "schema": {

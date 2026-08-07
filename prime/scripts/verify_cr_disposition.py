@@ -174,6 +174,13 @@ def main() -> int:
         in t("docs/evidence/npu/nli_eval_qdq_vs_cpu.json")
         and '"qdq_sha256"' in t("docs/evidence/npu/nli_eval_qdq_vs_cpu.json"),
         "no_qai_hub_next": "QAI Hub" not in t("docs/evidence/npu/README.md"),
+        "mcp_jina_default_contract": (
+            "jina-v5" in t("prime/scripts/mcp_server.py")
+            or "jina dim=1024" in t("prime/scripts/mcp_server.py")
+            or "dim=1024" in t("prime/scripts/mcp_server.py")
+        )
+        and "nomic 768-d" not in t("prime/scripts/mcp_server.py")
+        and "nomic stalks" not in t("prime/scripts/mcp_server.py"),
     }
 
     # --- Executable routing / bank integrity (not string-only) ---

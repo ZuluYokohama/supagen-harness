@@ -2,7 +2,7 @@
   "artifact": "DOMAIN_COMPLETION_CERTIFICATE",
   "pr": "1",
   "branch": "main",
-  "timestamp": "2026-08-06T23:38:29.359332Z",
+  "timestamp": "2026-08-07T00:23:59.226612Z",
   "seal": "GO_MEASURE",
   "production_open": "NO-GO",
   "matrix": {
@@ -46,10 +46,17 @@
   ],
   "head": "e884b7cc19f14f3982823e5dd331c9abd4e1074e",
   "d17_integrity": "docs/evidence/vv_push_domains_integrity.json",
-  "merged_pr": "https://github.com/ZuluYokohama/supagen-harness/pull/1",
+  "merged_pr": "1",
   "merge_commit": "2de430129db22878b14084dc4be4b122ac7ab9c0",
   "seal_note": "contract_live.commit is PR content seal e884b7c (pre-squash); merge is squash 2de4301 on main",
   "status": "MERGED",
   "main_tip": "fc5eb635c501a8e1ea63030d186ff57df62745a0",
-  "main_tree": "abfda21a6f7ec3d954b1ddaaaf671910a22b534d"
+  "main_tree": "abfda21a6f7ec3d954b1ddaaaf671910a22b534d",
+  "measured_revision": "e884b7cc19f14f3982823e5dd331c9abd4e1074e",
+  "content_seal": "e884b7cc19f14f3982823e5dd331c9abd4e1074e",
+  "review_brief_superseded": {
+    "stale_review_head": "39f392ef0ad0030a41c7f29688146d92b0c63ac5",
+    "stale_measured_source": "b41b1d513905e5bd161e78961ae307c691495707",
+    "note": "PR #1 review brief was pre-merge; findings D17/D12/D14/prefer burned before merge; residual MCP nomic-768 fixed on main"
+  }
 }

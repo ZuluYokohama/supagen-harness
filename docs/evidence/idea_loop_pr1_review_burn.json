@@ -1,0 +1,82 @@
+{
+  "artifact": "idea_loop_certificate",
+  "intent": "Burn stale PR #1 review brief findings against merged main under RPL-C",
+  "workspace": "supagen-harness monorepo root (PRIMEdEV-1)",
+  "timestamp": "2026-08-07T00:24:48.017371Z",
+  "restrict": {
+    "goal": "Falsify review findings vs current main; CODE only residual OPEN defects; no force-OPEN production",
+    "non_goals": [
+      "reopen PR",
+      "production OPEN",
+      "HTP as Job2 gate"
+    ],
+    "success": [
+      "disposition PASS",
+      "no nomic 768-d MCP strings",
+      "stale findings marked Fixed/Superseded"
+    ]
+  },
+  "measure": {
+    "base_rev": "24b9c41f6ac8ff9bf925d5a1432fc2e0b13957a2",
+    "findings": [
+      {
+        "id": "D17_stale_n_fail",
+        "review_status": "FAIL",
+        "actual": "Fixed",
+        "evidence": "VV_RUN_RESULTS n_fail:0 n_cells count_ok"
+      },
+      {
+        "id": "D12_criticality",
+        "review_status": "FAIL",
+        "actual": "Fixed",
+        "evidence": "D12 session_load critical=True"
+      },
+      {
+        "id": "D17_portable_parse",
+        "review_status": "FAIL",
+        "actual": "Fixed",
+        "evidence": "verify_cr_disposition runtime_d17_*"
+      },
+      {
+        "id": "prefer_validation",
+        "review_status": "FAIL",
+        "actual": "Fixed",
+        "evidence": "entailment_glue unknown prefer NEED_INFO"
+      },
+      {
+        "id": "D14_host_paths",
+        "review_status": "WARN",
+        "actual": "Fixed",
+        "evidence": "scrub still_host_paths NONE"
+      },
+      {
+        "id": "D15_cert_39f392e",
+        "review_status": "FAIL",
+        "actual": "Superseded/MERGED",
+        "evidence": "DOMAIN cert status MERGED main_tip"
+      },
+      {
+        "id": "MCP_nomic_768",
+        "review_status": "WARN/Major",
+        "actual": "Fixed_this_loop",
+        "evidence": "mcp_jina_default_contract disposition gate"
+      }
+    ]
+  },
+  "audit": {
+    "disposition": "85/85",
+    "production_open": "NO-GO",
+    "seal": "GO_MEASURE",
+    "verdict": "OPEN",
+    "verdict_scope": "review residual burn on main only \u2014 not production OPEN"
+  },
+  "residue": [
+    "Independent human buddy L8 dual-sign optional",
+    "E3 HTP label parity accepted residual (quant geometry)"
+  ],
+  "controls": {
+    "tautology": false,
+    "force_open": false,
+    "stale_review_not_reapplied_as_truth": true
+  }
+}

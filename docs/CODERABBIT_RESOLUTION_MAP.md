@@ -30,6 +30,8 @@
 | Jina GGUF basename match | **Fixed** | samefile / size+mtime identity |
 | Smoke QDQ direct write | **Fixed** | temp + os.replace atomic |
 | D17 header vs cells | **Fixed** | header_counts_match required; published MD match |
+| MCP nomic-768 tool contract | **Fixed** | jina-v5 dim=1024 default; nomic fallback; parse embed_family/dim |
+| Review brief at 39f392e/b41b1d5 | **Superseded** | PR #1 MERGED; main tip post-rectify; disposition 84+ |
 | nomic fallback in jina bakeoff | **Fixed** | family_mismatch reject |
 | ORT probs key case | **Fixed** | normalized |
 | smoke --bench orphan | **Fixed** | argparse + bench |
