@@ -37,6 +37,21 @@ Holdout of 263 wells, never trained on (deterministic hash split, `data.split_we
 - beats hold on **69.2%** of wells; beats the per-well oracle constant on **28.5%**
 - captures **34.5%** of the hold → oracle-constant headroom
 
+### Stronger estimate: full-corpus cross-validation
+
+The table above uses one 263-well holdout with 510 training wells. Repeating it as
+4-fold grouped CV over **all 773 wells** — each predicted exactly once by a model
+that never saw it, ~3x the evaluation data, shrinkage calibrated inside each fold —
+gives a better-supported figure for the same model:
+
+| method | median | mean | p90 |
+|---|---:|---:|---:|
+| **policy model** | **8.81** | **10.96** | **18.78** |
+| hold last TVT | 10.66 | 12.81 | 22.97 |
+| oracle constant *(uses labels)* | 6.92 | 7.86 | 13.11 |
+
+Beats hold on **71.0%** of wells. Reproduce with `scratchpad/confirm.py`.
+
 On the three shipped test wells specifically (model retrained with them excluded,
 scored against their labelled copies in `train/`): model 9.84 vs hold 10.21 mean,
 winning on 2 of 3. **n=3 — treat the actual score as close to a coin flip.**
@@ -83,6 +98,7 @@ Each was implemented, measured on the same holdout, and dropped:
 | quantile-0.5 objective | significantly *worse* — the metric is RMSE, minimised by the conditional mean |
 | heteroscedastic shrinkage | spread correlates +0.32 with error but per-bin shrinks are non-monotonic |
 | learned sequence encoder (dilated CNN) | 10.21 median; overfits past epoch 50 on 510 wells |
+| survey geometry (DLS, build/turn rate, azimuth) | promising on one holdout (+0.31 median), **refuted** by 773-well CV: better on 49.9% of wells, Wilcoxon p=0.71 |
 
 ## Learning curve — more data will NOT help this model
 
@@ -107,6 +123,11 @@ The learned sequence encoder was still improving when it overfit at 510 wells,
 so its curve may saturate later — but since the feature-based model plateaus at
 300 of 773 available wells, any further gain has to come from **different
 information**, not more of the same. Everything cheap has been tried.
+
+A note on method, learned the hard way: survey-geometry features looked like a +0.31 ft
+median gain on the single holdout with P(helps)=68%. Full-corpus CV showed the effect
+was noise — better on 49.9% of wells, p=0.71. **A ~2/3 posterior on one split is not a
+result.** Confirm on full CV before changing a shipped model; it costs ~10 minutes.
 
 ## Layout
 
