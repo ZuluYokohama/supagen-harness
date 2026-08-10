@@ -100,34 +100,47 @@ Each was implemented, measured on the same holdout, and dropped:
 | learned sequence encoder (dilated CNN) | 10.21 median; overfits past epoch 50 on 510 wells |
 | survey geometry (DLS, build/turn rate, azimuth) | promising on one holdout (+0.31 median), **refuted** by 773-well CV: better on 49.9% of wells, Wilcoxon p=0.71 |
 
-## Learning curve — more data will NOT help this model
+## Learning curve — still improving at 580 wells
 
-Trained on random subsets of the dev split, scored on the same 263-well holdout
-(fixed shrink 0.80 so only data volume varies):
+Measured **inside each of the 4 CV folds**, so both the training subset and the
+evaluation set vary (shrinkage held fixed at 0.85 so only data volume differs).
+Mean ± sd across folds:
 
-| wells | points | median | mean | beats hold |
-|---:|---:|---:|---:|---:|
-| 60 | 37,890 | 11.11 | 13.27 | 53.2% |
-| 120 | 75,081 | 10.32 | 11.99 | 64.6% |
-| 200 | 124,722 | 9.75 | 11.83 | 66.9% |
-| 300 | 187,603 | 9.25 | 11.60 | 67.3% |
-| 400 | 247,679 | 9.37 | 11.49 | 68.1% |
-| 510 | 313,255 | 9.23 | 11.50 | 70.3% |
+| wells | median | mean | beats hold |
+|---:|---:|---:|---:|
+| 60 | 10.60 ± 0.77 | 12.89 ± 1.12 | 54.8% |
+| 120 | 10.07 ± 0.39 | 12.48 ± 0.13 | 58.2% |
+| 200 | 9.50 ± 0.29 | 11.96 ± 0.37 | 62.7% |
+| 300 | 9.25 ± 0.54 | 11.41 ± 0.58 | 66.5% |
+| 400 | 9.14 ± 0.44 | 11.15 ± 0.33 | 67.4% |
+| 580 | 8.78 ± 0.50 | 10.89 ± 0.57 | 72.5% |
 
-**Saturated at ~300 wells** — going 300 → 510 buys 0.02 ft of median. The
-information in these features is exhausted, and adding wells will not change
-that. (An earlier version of this README claimed more wells were the way
-forward; the curve above refutes it.)
+**The curve is still descending at 580 wells.** Going 300 → 580 improves the
+median by **+0.60 ft** (per fold: 0.45, 0.31, 1.03), against a fold-to-fold sd of
+0.38 — so the gain clears the noise, and every size step is monotone in both
+median and beats-hold (54.8% → 72.5%).
 
-The learned sequence encoder was still improving when it overfit at 510 wells,
-so its curve may saturate later — but since the feature-based model plateaus at
-300 of 773 available wells, any further gain has to come from **different
-information**, not more of the same. Everything cheap has been tried.
+More wells should therefore help, and the learned sequence encoder — which was
+still improving when it overfit at 510 — becomes the more interesting revisit.
 
-A note on method, learned the hard way: survey-geometry features looked like a +0.31 ft
-median gain on the single holdout with P(helps)=68%. Full-corpus CV showed the effect
-was noise — better on 49.9% of wells, p=0.71. **A ~2/3 posterior on one split is not a
-result.** Confirm on full CV before changing a shipped model; it costs ~10 minutes.
+> **This section previously claimed the opposite.** An earlier curve used one dev
+> split against one fixed holdout, single run per size, and read 300 → 510 as flat
+> (9.25 → 9.23). Repeating it across folds shows that was noise: the 400-well point
+> had bounced *up* to 9.37 on that split, flattening a curve that is actually
+> monotone. Reproduce with `scratchpad/curve_cv.py`.
+
+## A note on method, learned twice
+
+Single-split results misled this project in **both** directions:
+
+- survey-geometry features looked like a +0.31 ft median gain with P(helps)=68%;
+  full-corpus CV showed noise (better on 49.9% of wells, p=0.71) — an over-claim;
+- the learning curve looked saturated at ~300 wells; repeating it across folds
+  showed steady improvement to 580 — an under-claim that nearly closed off the
+  most promising direction.
+
+One split is one sample. Repeat across folds before believing a difference in
+either direction; it costs ~10 minutes and both errors above were caught that way.
 
 ## Layout
 
