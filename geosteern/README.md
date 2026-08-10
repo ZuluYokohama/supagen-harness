@@ -52,6 +52,12 @@ gives a better-supported figure for the same model:
 
 Beats hold on **71.0%** of wells. Reproduce with `scratchpad/confirm.py`.
 
+**Treat this as ~8.8–9.0 median, not 8.81.** Re-running the same model with a
+finer evaluation stride and different fold construction gives 8.97 / 10.93 /
+19.13. That 0.16 ft wobble is pure protocol sensitivity — worth knowing, because
+it is larger than several candidate improvements that have been tested, and any
+effect below it is unmeasurable here.
+
 On the three shipped test wells specifically (model retrained with them excluded,
 scored against their labelled copies in `train/`): model 9.84 vs hold 10.21 mean,
 winning on 2 of 3. **n=3 — treat the actual score as close to a coin flip.**
@@ -99,6 +105,7 @@ Each was implemented, measured on the same holdout, and dropped:
 | heteroscedastic shrinkage | spread correlates +0.32 with error but per-bin shrinks are non-monotonic |
 | learned sequence encoder (dilated CNN) | 10.21 median; overfits past epoch 50 on 510 wells |
 | survey geometry (DLS, build/turn rate, azimuth) | promising on one holdout (+0.31 median), **refuted** by 773-well CV: better on 49.9% of wells, Wilcoxon p=0.71 |
+| split-point augmentation (3 prefix cuts/well, 3x training rows) | screened well (mean 11.44 → 11.05), **not confirmed**: CV mean +0.096 ft CI [-0.151, +0.354], better on 49.9% of wells, Wilcoxon p=0.86. Does improve calibration — optimal shrink rises 0.85 → ~1.0 — but not accuracy |
 
 ## Learning curve — still improving at 580 wells
 
@@ -141,6 +148,13 @@ Single-split results misled this project in **both** directions:
 
 One split is one sample. Repeat across folds before believing a difference in
 either direction; it costs ~10 minutes and both errors above were caught that way.
+
+There is also a floor on what can be measured at all. The same model scores 8.81
+or 8.97 median depending only on evaluation stride and fold construction, so
+**effects below ~0.2 ft are not resolvable on 773 wells** by any of these
+protocols. Two candidates (geometry +0.05, augmentation +0.11) sat under that
+floor and both showed a ~50% per-well win rate — the giveaway that a positive
+point estimate is noise.
 
 ## Layout
 
