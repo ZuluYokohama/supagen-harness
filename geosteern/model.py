@@ -10,7 +10,7 @@ in-sample predictions look more reliable than they are.
 """
 from __future__ import annotations
 
-import pickle
+import json
 
 import lightgbm as lgb
 import numpy as np
@@ -68,11 +68,34 @@ def per_well_rmse(pred: np.ndarray, y: np.ndarray, wells: np.ndarray) -> pd.Seri
             .groupby("w")["e"].mean().pow(0.5).sort_index())
 
 
+FORMAT = "geosteern-tvt/1"
+
+
 def save(bundle: dict, path: str) -> None:
-    with open(path, "wb") as fh:
-        pickle.dump(bundle, fh)
+    """Serialise to JSON with the booster as LightGBM's own text format.
+
+    Deliberately not pickle: loading a pickle executes arbitrary code, so a
+    model file from an untrusted source would be a remote-code-execution vector.
+    The booster text format carries no code, and the result is diffable.
+    """
+    payload = {
+        "format": FORMAT,
+        "booster": bundle["model"].booster_.model_to_string(),
+        "shrink": float(bundle["shrink"]),
+        "columns": list(bundle["columns"]),
+        "oof_r2": float(bundle["oof_r2"]),
+        "n_points": int(bundle["n_points"]),
+        "n_wells": int(bundle["n_wells"]),
+    }
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh)
 
 
 def load(path: str) -> dict:
-    with open(path, "rb") as fh:
-        return pickle.load(fh)
+    with open(path, encoding="utf-8") as fh:
+        payload = json.load(fh)
+    fmt = payload.get("format")
+    if fmt != FORMAT:
+        raise ValueError(f"{path}: expected format {FORMAT!r}, got {fmt!r}")
+    payload["model"] = lgb.Booster(model_str=payload.pop("booster"))
+    return payload

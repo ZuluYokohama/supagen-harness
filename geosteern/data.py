@@ -47,8 +47,17 @@ def load_well(horizontal_csv: str) -> dict | None:
     if len(tw) < 50:
         return None
 
+    # The logged section must be one contiguous prefix. If an observed value
+    # appeared after a gap, features.py would take t_last from *after* that gap
+    # and leak a future TVT into a row it is supposed to predict. No well in the
+    # current corpus violates this (checked over all 776), so this is a guard.
+    known = df["TVT_input"].notna().to_numpy()
+    first_tail = np.flatnonzero(~known)
+    if first_tail.size and known[first_tail[0]:].any():
+        return None
+
     # pandas>=3 returns read-only arrays from .to_numpy(); copy before mutating
-    known = df["TVT_input"].notna().to_numpy().copy()
+    known = known.copy()
     tail = ~known
     geom_ok = df[["MD", "X", "Y", "Z"]].notna().all(axis=1).to_numpy()
     known &= geom_ok

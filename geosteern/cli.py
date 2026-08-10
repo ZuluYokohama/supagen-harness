@@ -1,8 +1,11 @@
 """Command line entry points.
 
-    python -m geosteern.cli evaluate --data-dir <dir>
-    python -m geosteern.cli train    --data-dir <dir> --out model.pkl
-    python -m geosteern.cli predict  --data-dir <dir> --model model.pkl --out submission.csv
+`--data-dir` is a root-level option, so argparse requires it BEFORE the
+subcommand. It defaults to $GEOSTEERN_DATA and may be omitted entirely.
+
+    python -m geosteern.cli --data-dir <dir> evaluate
+    python -m geosteern.cli --data-dir <dir> train   --out model.json
+    python -m geosteern.cli --data-dir <dir> predict --model model.json --out submission.csv
 """
 from __future__ import annotations
 
@@ -82,16 +85,22 @@ def cmd_predict(a):
     sub = pd.read_csv(sub_path)
     wells = sub["id"].str.rsplit("_", n=1).str[0]
     rows = sub["id"].str.rsplit("_", n=1).str[1].astype(int)
-    out, missing = [], 0
+    out, missing = [], []
     for wid, r in zip(wells, rows):
         v = preds.get(wid, {}).get(r)
         if v is None:
-            missing += 1
-            v = 0.0
+            missing.append(f"{wid}_{r}")
         out.append(v)
+    # Writing 0.0 for an unmatched row would silently produce an incomplete
+    # submission that still looks well-formed, and score those rows as garbage.
+    if missing:
+        raise RuntimeError(
+            f"cannot write submission: {len(missing)} of {len(sub):,} rows have "
+            f"no prediction (e.g. {', '.join(missing[:5])})"
+        )
     sub["tvt"] = out
     sub.to_csv(a.out, index=False)
-    print(f"\nwrote {a.out}  ({len(sub):,} rows, {missing} unmatched)")
+    print(f"\nwrote {a.out}  ({len(sub):,} rows)")
 
 
 def main():
@@ -99,10 +108,11 @@ def main():
     p.add_argument("--data-dir", default=DEFAULT_DATA)
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("evaluate").set_defaults(fn=cmd_evaluate)
-    t = sub.add_parser("train"); t.add_argument("--out", default="tvt_model.pkl")
+    t = sub.add_parser("train")
+    t.add_argument("--out", default="tvt_model.json")
     t.set_defaults(fn=cmd_train)
     q = sub.add_parser("predict")
-    q.add_argument("--model", default="tvt_model.pkl")
+    q.add_argument("--model", default="tvt_model.json")
     q.add_argument("--out", default="submission.csv")
     q.set_defaults(fn=cmd_predict)
     a = p.parse_args()

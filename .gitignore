@@ -76,4 +76,6 @@ desktop.ini
 
 # geosteern trained model artifacts (regenerate with: python -m geosteern.cli train)
 geosteern/*.pkl
+geosteern/*.json
 tvt_model.pkl
+tvt_model.json

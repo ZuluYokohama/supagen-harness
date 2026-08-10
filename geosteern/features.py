@@ -12,6 +12,8 @@ were redundant with these and did not improve holdout error.
 """
 from __future__ import annotations
 
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -127,22 +129,48 @@ def point_frame(w: dict, stride: int = 1) -> tuple[pd.DataFrame, np.ndarray, np.
     return X, idx, y
 
 
-def build_dataset(files, loader, stride: int):
-    """Stack per-point frames across wells. Skips unusable wells silently."""
+def build_dataset(files, loader, stride: int, report: bool = True):
+    """Stack per-point frames across wells.
+
+    Excluded wells are recorded with a reason and reported, rather than dropped
+    silently -- a well vanishing from training and from the evaluation
+    denominator without explanation is how a metric quietly stops meaning what
+    it says. The prediction path (cli.predict) never reaches here and fails
+    loudly instead, so no well is skipped without notice anywhere.
+    """
     Xs, ys, ws = [], [], []
+    skipped: dict[str, list[str]] = {}
+
+    def note(reason: str, name: str) -> None:
+        skipped.setdefault(reason, []).append(name)
+
     for f in files:
+        name = os.path.basename(f)
         w = loader(f)
-        if w is None or w["truth"] is None:
+        if w is None:
+            note("unloadable (schema/typewell/contiguity/too-short)", name)
+            continue
+        if w["truth"] is None:
+            note("no TVT labels", name)
             continue
         try:
             X, _, y = point_frame(w, stride)
-        except Exception:
+        except Exception as exc:
+            note(f"feature error: {type(exc).__name__}", name)
             continue
         if y is None or not np.isfinite(y).all():
+            note("non-finite target", name)
             continue
         Xs.append(X)
         ys.append(y)
         ws.append(np.full(len(X), w["well"]))
+
+    if report and skipped:
+        total = sum(len(v) for v in skipped.values())
+        print(f"  excluded {total} of {len(files)} wells:")
+        for reason, names in sorted(skipped.items()):
+            shown = ", ".join(names[:5]) + (" ..." if len(names) > 5 else "")
+            print(f"    {len(names):>4}  {reason}  [{shown}]")
     if not Xs:
         raise RuntimeError("no usable wells")
     return pd.concat(Xs, ignore_index=True), np.concatenate(ys), np.concatenate(ws)

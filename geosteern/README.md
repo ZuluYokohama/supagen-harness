@@ -44,9 +44,12 @@ winning on 2 of 3. **n=3 — treat the actual score as close to a coin flip.**
 ## Usage
 
 ```bash
-python -m geosteern.cli evaluate                                  # reproduce the table above
-python -m geosteern.cli train   --out tvt_model.pkl               # fit on all labelled wells
-python -m geosteern.cli predict --model tvt_model.pkl --out submission.csv
+python -m geosteern.cli evaluate                       # reproduce the table above
+python -m geosteern.cli train   --out tvt_model.json   # fit on all labelled wells
+python -m geosteern.cli predict --model tvt_model.json --out submission.csv
+
+# --data-dir is a root-level option, so it goes BEFORE the subcommand:
+python -m geosteern.cli --data-dir /path/to/data evaluate
 ```
 
 `--data-dir` defaults to `$GEOSTEERN_DATA`, else `C:/PRIMEdEV-1/GeoSteerN-Codex`.
