@@ -81,9 +81,29 @@ Each was implemented, measured on the same holdout, and dropped:
 | heteroscedastic shrinkage | spread correlates +0.32 with error but per-bin shrinks are non-monotonic |
 | learned sequence encoder (dilated CNN) | 10.21 median; overfits past epoch 50 on 510 wells |
 
-The sequence encoder is the one worth revisiting: it lost by ~1 ft while starved
-of data. Feature engineering and objective changes have both plateaued, so
-further gains most likely need **more wells**, not more modelling.
+## Learning curve — more data will NOT help this model
+
+Trained on random subsets of the dev split, scored on the same 263-well holdout
+(fixed shrink 0.80 so only data volume varies):
+
+| wells | points | median | mean | beats hold |
+|---:|---:|---:|---:|---:|
+| 60 | 37,890 | 11.11 | 13.27 | 53.2% |
+| 120 | 75,081 | 10.32 | 11.99 | 64.6% |
+| 200 | 124,722 | 9.75 | 11.83 | 66.9% |
+| 300 | 187,603 | 9.25 | 11.60 | 67.3% |
+| 400 | 247,679 | 9.37 | 11.49 | 68.1% |
+| 510 | 313,255 | 9.23 | 11.50 | 70.3% |
+
+**Saturated at ~300 wells** — going 300 → 510 buys 0.02 ft of median. The
+information in these features is exhausted, and adding wells will not change
+that. (An earlier version of this README claimed more wells were the way
+forward; the curve above refutes it.)
+
+The learned sequence encoder was still improving when it overfit at 510 wells,
+so its curve may saturate later — but since the feature-based model plateaus at
+300 of 773 available wells, any further gain has to come from **different
+information**, not more of the same. Everything cheap has been tried.
 
 ## Layout
 
