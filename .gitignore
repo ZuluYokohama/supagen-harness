@@ -73,3 +73,7 @@ primed-topology/
 topology-sees-sequence/
 desktop.ini
 
+
+# geosteern trained model artifacts (regenerate with: python -m geosteern.cli train)
+geosteern/*.pkl
+tvt_model.pkl
