@@ -16,6 +16,7 @@ from research.survey_primitives import (
     COORD_QUANTUM_FT,
     DEFAULT_WINDOW_FT,
     MIN_WINDOW_FT,
+    OPERATING_BAND_FT,
     SurveyPrimitiveError,
     azimuth_error_multiplier,
     derive_section_azimuth,
@@ -144,6 +145,23 @@ def test_artifact_floor_matches_the_rounding_that_produces_it():
 # --------------------------------------------------------------------------
 # derived quantities
 # --------------------------------------------------------------------------
+
+def test_default_window_sits_at_the_operating_band_floor():
+    """The default is the swept floor, not a guess, and the band is ordered."""
+    low, high = OPERATING_BAND_FT
+    assert low < high
+    assert DEFAULT_WINDOW_FT == low
+    assert low > MIN_WINDOW_FT
+
+
+@pytest.mark.parametrize("window", list(range(96, 129, 16)))
+def test_every_window_in_the_band_produces_a_usable_survey(window):
+    md, x, y, z = _straight((0, np.cos(np.radians(1.0)), np.sin(np.radians(1.0))), n=800)
+    s = windowed_survey(md, x, y, z, window_ft=window)
+    assert len(s.inclination_deg) > 0
+    assert np.all(s.inclination_deg > 90.0)          # toe-up survives at every window
+    assert s.artifact_floor_deg_per_100ft < 1.0      # band clears the artifact
+
 
 def test_unwrap_azimuth_removes_the_wrap_discontinuity():
     wrapped = np.array([358.0, 359.0, 0.0, 1.0, 2.0])

@@ -31,6 +31,22 @@ COORD_QUANTUM_FT = 0.01
 MIN_WINDOW_FT = 30
 DEFAULT_WINDOW_FT = 96
 
+#: Usable window range, from a rolling sweep over 40 wells (lateral only),
+#: bounded on both sides rather than chosen:
+#:
+#:   lower -- per-foot jitter must clear the coordinate-rounding artifact by
+#:            2x. At 32 ft the ratio is 0.97, i.e. the jitter *is* the rounding;
+#:            at 64 ft it is still only 1.54. 96 ft is the first window to clear.
+#:   upper -- keep >=95% of the p5-p95 signal range. 128 ft holds 97.1% of
+#:            inclination and 95.7% of azimuth; 160 ft drops azimuth to 92%.
+#:
+#: The band floor coincides with the measured survey course (95-96 ft from
+#: arc-fit phase contrast), which is the expected result: below the course there
+#: is nothing real to resolve, above it genuine steering changes get averaged.
+#: Maximising signal-to-jitter alone is degenerate -- it is optimised by
+#: smoothing the signal away, and picks 512 ft.
+OPERATING_BAND_FT = (96, 128)
+
 
 class SurveyPrimitiveError(ValueError):
     """Raised when inputs cannot support a trustworthy directional estimate."""
