@@ -53,9 +53,69 @@ The identity is exact and unusable.
 All 14,151 submission rows are recoverable by index lookup, which makes the
 public test set useless as a scoreboard.
 
+**8. The entire continuous steering channel is absent.**
+A representative MWD frame definition allocates its bandwidth like this:
+
+| channel | per frame | bits | share |
+|---|---:|---:|---:|
+| `aTFA` toolface | 17 | 6 | **42.1%** |
+| `gama` | 11 | 8 | 36.4% |
+| `CInc` continuous inclination | 2 | 11 | 9.1% |
+| `CAzm` continuous azimuth | 2 | 11 | 9.1% |
+
+Toolface is the single most-transmitted quantity in the string — the tool is
+built to report steering, not to log. **None of `aTFA`, `CInc` or `CAzm` is in
+the corpus.** The trajectory was rebuilt from static surveys alone, which is
+why it measures as pure minimum-curvature interpolation between ~96 ft
+stations. Continuous inclination and azimuth exist at the tool and were
+discarded somewhere between it and the dataset.
+
+**9. GR is real but its depth resolution is not 1 ft, and its scale is
+per-well.** Values are exact integer multiples of a per-well constant
+(lattice residual ~2e-8); 80 of 80 wells have a *distinct* quantum spanning
+0.0048–0.938 API/count, a ~200× range. That is a counting detector with an
+API conversion calibrated per BHA. But the high-frequency power is ~10× below
+what raw 1 ft Poisson statistics would produce while the lattice stays exact —
+consistent with counts being **accumulated in-tool over a window** and the
+integer total transmitted. So GR is a genuine measurement whose effective
+depth resolution is the accumulation window, not the 1 ft it is presented on.
+Real-time gamma is also only 8-bit (`gama:8`), i.e. ~110× coarser than the
+stored values.
+
 ---
 
 ## Tier 1 — changes the model class
+
+### 1.0 Decoded MWD telemetry channels — **the highest-value item**
+`aTFA`, `CInc`, `CAzm`, raw `gama`, and ideally the raw sensor components
+`Ax/Ay/Az` (13-bit) and `Mx/My/Mz` (12-bit) from the static survey frame.
+
+*Unlocks, in one file:* the steering actions at 42%-of-bandwidth density; a
+continuous trajectory needing no minimum-curvature interpolation; the gamma
+the geosteerer actually steered on; and enough raw sensor data to recompute
+inclination and azimuth independently with magnetic-interference diagnostics.
+
+This supersedes an earlier assumption that steering behaviour could only be
+recovered from a driller's slide sheet. It cannot be recovered from surveys —
+real stations are ~90–100 ft, so they average over the whole slide/rotate
+cycle, and a motor-vs-RSS discriminator is provably washed out at that scale
+(course-scale dogleg across 150 wells is unimodal, sd 0.11 in log10). Toolface
+is telemetered continuously and is the only channel that resolves it.
+
+### 1.0b BHA sensor offsets, per section
+Bit-to-directional-sensor and bit-to-gamma-sensor distances. These are
+**different from each other**, and both vary by well and by section: non-mag
+spacing increases for sections planned past ~45° inclination to keep
+magnetometers clear of steel.
+
+*Why it is Tier 1:* the offsets are tens of feet — comparable to the ~96 ft
+survey course, not a rounding concern. If the corpus did not correct for them,
+GR and trajectory are systematically misregistered by a well-specific,
+section-specific, unknown amount, and every GR × geometry feature is built on
+a variable unknown lag. This is not estimable from the delivered data: a
+GR-vs-TVT lag scan over 80 wells returns a flat, noise-dominated correlation
+surface whose argmax piles up at the search boundary, because a horizontal
+well stays inside one bed and TVT barely modulates GR.
 
 ### 1.1 Directional plan per well
 The Proposal Geodetic Report equivalent. Specifically the **control-point table**,
@@ -117,17 +177,20 @@ plus `Leaseline` and `330'x200' HL`).
 
 *Unlocks:* a valid retest of neighbour-well features, previously rejected at
 median 9.21 → 9.55 but built blind to pad membership and lease constraints.
-Also explains the observed heading concentration — 75% of corpus wells fall in
-a ~26° window, which drives the azimuth Gram condition (median 87).
+Also explains the observed heading structure. Corpus wells are **multi-modal**,
+not concentrated: two pad orientations about 20° apart (peaks near 138–140° and
+158–162°) plus a genuine N–S population of roughly 130 wells. An earlier
+reading of this as "75% within a ~26° window" was wrap-confounded — folding
+East-referenced angles mod 180 split the N–S group across both ends of the
+range and hid it.
 
 ### 3.2 Formation tops for test wells, or an explicit statement they are withheld
 Current asymmetry is silently exploitable.
 
-### 3.3 Steering records, if they exist
-Slide/rotate intervals, toolface, motor yield, bit depth vs hole depth.
-
-*Unlocks:* the literal control input alongside the control output. This is the
-highest-value item in the entire request if it exists.
+### 3.3 Steering records
+Slide/rotate intervals, motor yield, bit depth vs hole depth. Toolface itself
+is covered by §1.0, which is the better route — it is telemetered rather than
+hand-recorded.
 
 ---
 
@@ -154,6 +217,35 @@ Run these on arrival. Each corresponds to a defect found in the current corpus:
    Compare against `degrees(quantum / baseline) × 100` — if observed tracks
    that, you are looking at rounding.
 6. **Plan and as-drilled resolve to the same well** and share a north reference.
+7. **Sensor offsets are stated per section**, and bit-to-gamma differs from
+   bit-to-directional. A single well-level offset, or one shared across
+   sections, has been assumed rather than measured — treat it as absent.
+8. **Telemetry channels are present, not just surveys.** If `aTFA`, `CInc` and
+   `CAzm` are missing, the delivery is static surveys again and none of §1.0
+   is unlocked, whatever the file is called.
+9. **GR carries its calibration.** The per-well API-per-count factor should be
+   stated, not left to be recovered from the value lattice.
+
+## Already derivable from the current corpus — do not ask for these
+
+Recoverable without any new delivery, and already implemented in
+`research/survey_primitives.py`:
+
+- **Survey course length** (~95–96 ft) by arc-fit phase contrast, 0.65 against
+  a 0.02 no-station null.
+- **Signed inclination, azimuth, dogleg** over a windowed baseline, with the
+  usable window band (96–128 ft) bounded below by the rounding artifact and
+  above by signal retention.
+- **Per-well vertical-section azimuth**, from the landed principal axis. Needed
+  per well: one shared azimuth mis-projects by p90 37.6°, which is 3,050 ft of
+  VSEC error over a 5,000 ft lateral.
+- **Azimuth trust weight** `sin(I)·sin(A_mag)` — corpus median 0.688, with
+  ~130 wells near N–S where azimuth is reliable. Use that subset to validate
+  any geometry-dependent feature before trusting it corpus-wide.
+- **Per-well GR tool fingerprint** — the calibration quantum is distinct for
+  all 80 wells sampled and proxies MWD configuration, hence vendor, crew and
+  period. For a target that is a *human* control output, a fingerprint for who
+  was steering with what is a legitimate covariate and costs nothing.
 
 ## Not worth requesting
 
