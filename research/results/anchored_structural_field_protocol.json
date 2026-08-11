@@ -1,0 +1,888 @@
+{
+  "benchmark_work_proxy": {
+    "definition": {
+      "columns": [
+        "MD",
+        "X",
+        "Y",
+        "Z",
+        "TVT_input"
+      ],
+      "derivative_observation_multiplier": 37,
+      "inducing_node_multiplier": "20 times sum of full-training node upper bounds over h, plus max(h) for the selected final refit upper bound",
+      "inducing_node_proxy_weight": 100,
+      "selection": "maximum proxy_units with frozen deterministic tie break",
+      "strict_base_full_path_multiplier": 4,
+      "strict_base_static_multiplier": 6,
+      "support_query_multiplier": "24 strict inner proposals per training target plus 5 final/jackknife proposals per validation target",
+      "support_query_proxy_weight": 4096
+    },
+    "folds": [
+      {
+        "base_full_path_row_work": 16188080,
+        "base_static_row_work": 3036876,
+        "derivative_observations": 34810,
+        "embargo_wells": 0,
+        "fold": 0,
+        "inducing_node_upper_by_h": {
+          "15000": 149,
+          "30000": 53,
+          "5000": 769
+        },
+        "mode": "exact",
+        "proxy_units": 4659457778,
+        "repeat": 0,
+        "support_query_count": 1132062,
+        "training_wells": 617,
+        "validation_wells": 153
+      },
+      {
+        "base_full_path_row_work": 16113240,
+        "base_static_row_work": 3022788,
+        "derivative_observations": 34733,
+        "embargo_wells": 0,
+        "fold": 1,
+        "inducing_node_upper_by_h": {
+          "15000": 150,
+          "30000": 54,
+          "5000": 762
+        },
+        "mode": "exact",
+        "proxy_units": 4642778789,
+        "repeat": 0,
+        "support_query_count": 1128015,
+        "training_wells": 609,
+        "validation_wells": 161
+      },
+      {
+        "base_full_path_row_work": 16284924,
+        "base_static_row_work": 3054990,
+        "derivative_observations": 35038,
+        "embargo_wells": 0,
+        "fold": 2,
+        "inducing_node_upper_by_h": {
+          "15000": 151,
+          "30000": 53,
+          "5000": 782
+        },
+        "mode": "exact",
+        "proxy_units": 4676111160,
+        "repeat": 0,
+        "support_query_count": 1136090,
+        "training_wells": 617,
+        "validation_wells": 153
+      },
+      {
+        "base_full_path_row_work": 16204004,
+        "base_static_row_work": 3039852,
+        "derivative_observations": 34831,
+        "embargo_wells": 0,
+        "fold": 3,
+        "inducing_node_upper_by_h": {
+          "15000": 151,
+          "30000": 53,
+          "5000": 772
+        },
+        "mode": "exact",
+        "proxy_units": 4659254283,
+        "repeat": 0,
+        "support_query_count": 1132005,
+        "training_wells": 617,
+        "validation_wells": 153
+      },
+      {
+        "base_full_path_row_work": 16378296,
+        "base_static_row_work": 3072558,
+        "derivative_observations": 35224,
+        "embargo_wells": 0,
+        "fold": 4,
+        "inducing_node_upper_by_h": {
+          "15000": 148,
+          "30000": 52,
+          "5000": 776
+        },
+        "mode": "exact",
+        "proxy_units": 4693251838,
+        "repeat": 0,
+        "support_query_count": 1140251,
+        "training_wells": 620,
+        "validation_wells": 150
+      },
+      {
+        "base_full_path_row_work": 16310936,
+        "base_static_row_work": 3059892,
+        "derivative_observations": 35102,
+        "embargo_wells": 0,
+        "fold": 0,
+        "inducing_node_upper_by_h": {
+          "15000": 151,
+          "30000": 53,
+          "5000": 771
+        },
+        "mode": "exact",
+        "proxy_units": 4684215038,
+        "repeat": 1,
+        "support_query_count": 1138066,
+        "training_wells": 619,
+        "validation_wells": 151
+      },
+      {
+        "base_full_path_row_work": 16376688,
+        "base_static_row_work": 3072228,
+        "derivative_observations": 35266,
+        "embargo_wells": 0,
+        "fold": 1,
+        "inducing_node_upper_by_h": {
+          "15000": 151,
+          "30000": 53,
+          "5000": 771
+        },
+        "mode": "exact",
+        "proxy_units": 4693560250,
+        "repeat": 1,
+        "support_query_count": 1140327,
+        "training_wells": 619,
+        "validation_wells": 151
+      },
+      {
+        "base_full_path_row_work": 15998020,
+        "base_static_row_work": 3001236,
+        "derivative_observations": 34382,
+        "embargo_wells": 0,
+        "fold": 2,
+        "inducing_node_upper_by_h": {
+          "15000": 150,
+          "30000": 54,
+          "5000": 782
+        },
+        "mode": "exact",
+        "proxy_units": 4613409206,
+        "repeat": 1,
+        "support_query_count": 1120871,
+        "training_wells": 608,
+        "validation_wells": 162
+      },
+      {
+        "base_full_path_row_work": 16239672,
+        "base_static_row_work": 3046494,
+        "derivative_observations": 34944,
+        "embargo_wells": 0,
+        "fold": 3,
+        "inducing_node_upper_by_h": {
+          "15000": 149,
+          "30000": 51,
+          "5000": 777
+        },
+        "mode": "exact",
+        "proxy_units": 4668719978,
+        "repeat": 1,
+        "support_query_count": 1134304,
+        "training_wells": 616,
+        "validation_wells": 154
+      },
+      {
+        "base_full_path_row_work": 16243228,
+        "base_static_row_work": 3047214,
+        "derivative_observations": 34942,
+        "embargo_wells": 0,
+        "fold": 4,
+        "inducing_node_upper_by_h": {
+          "15000": 147,
+          "30000": 54,
+          "5000": 757
+        },
+        "mode": "exact",
+        "proxy_units": 4670941076,
+        "repeat": 1,
+        "support_query_count": 1134855,
+        "training_wells": 618,
+        "validation_wells": 152
+      },
+      {
+        "base_full_path_row_work": 14842572,
+        "base_static_row_work": 2784468,
+        "derivative_observations": 31807,
+        "embargo_wells": 13,
+        "fold": 0,
+        "inducing_node_upper_by_h": {
+          "15000": 112,
+          "30000": 39,
+          "5000": 623
+        },
+        "mode": "region",
+        "proxy_units": 4349501175,
+        "repeat": 0,
+        "support_query_count": 1056906,
+        "training_wells": 572,
+        "validation_wells": 185
+      },
+      {
+        "base_full_path_row_work": 17485960,
+        "base_static_row_work": 3280344,
+        "derivative_observations": 37705,
+        "embargo_wells": 15,
+        "fold": 1,
+        "inducing_node_upper_by_h": {
+          "15000": 124,
+          "30000": 46,
+          "5000": 685
+        },
+        "mode": "region",
+        "proxy_units": 4910893873,
+        "repeat": 0,
+        "support_query_count": 1193104,
+        "training_wells": 654,
+        "validation_wells": 101
+      },
+      {
+        "base_full_path_row_work": 16736664,
+        "base_static_row_work": 3139764,
+        "derivative_observations": 36025,
+        "embargo_wells": 17,
+        "fold": 2,
+        "inducing_node_upper_by_h": {
+          "15000": 122,
+          "30000": 45,
+          "5000": 618
+        },
+        "mode": "region",
+        "proxy_units": 4753508161,
+        "repeat": 0,
+        "support_query_count": 1154948,
+        "training_wells": 637,
+        "validation_wells": 116
+      },
+      {
+        "base_full_path_row_work": 13676988,
+        "base_static_row_work": 2565762,
+        "derivative_observations": 29430,
+        "embargo_wells": 39,
+        "fold": 3,
+        "inducing_node_upper_by_h": {
+          "15000": 125,
+          "30000": 47,
+          "5000": 613
+        },
+        "mode": "region",
+        "proxy_units": 4047850000,
+        "repeat": 0,
+        "support_query_count": 983615,
+        "training_wells": 514,
+        "validation_wells": 217
+      },
+      {
+        "base_full_path_row_work": 15075564,
+        "base_static_row_work": 2828100,
+        "derivative_observations": 32531,
+        "embargo_wells": 53,
+        "fold": 4,
+        "inducing_node_upper_by_h": {
+          "15000": 127,
+          "30000": 47,
+          "5000": 630
+        },
+        "mode": "region",
+        "proxy_units": 4341050695,
+        "repeat": 0,
+        "support_query_count": 1054754,
+        "training_wells": 566,
+        "validation_wells": 151
+      }
+    ],
+    "maximizing_identity": {
+      "fold": 1,
+      "mode": "region",
+      "repeat": 0
+    },
+    "proxy_sha256": "00d1ab825adaff98eeb55168750bb7f46ecf76193cc0bea75a29a826c5e192d7"
+  },
+  "created_at_utc": "2026-08-11T08:25:57.428605+00:00",
+  "evaluation": {
+    "bootstrap": {
+      "exact": {
+        "draws": 4000,
+        "interval": "two-sided percentile 95%",
+        "repeat_coupling": "one sampled group multiplicity is applied to all wells in both repeats; each draw averages repeat-wise pooled RMSE gains",
+        "seed": 20260811,
+        "unit": "exact typewell profile group"
+      },
+      "region": {
+        "draws": 3125,
+        "interval": "two-sided percentile 95%",
+        "method": "exhaustive ordered resampling of five folds with replacement",
+        "unit": "sealed region fold"
+      }
+    },
+    "candidate_formula": "sealed_joint + final_core_confidence*jackknife_confidence*(theta_field*field_delta_without_prefix_bias + theta_bias*prefix_bias_delta)",
+    "descriptive_non_gate_diagnostics": {
+      "supported_fraction_by_region": true,
+      "supported_fraction_overall": true
+    },
+    "exact_primary_gates": {
+      "both_repeat_gains_positive": true,
+      "exact_group_bootstrap_ci95_low_positive": true,
+      "mean_repeat_pooled_gain_ft_at_least": 1.0,
+      "p90_one_sided_ci_worsening_ft_below": 0.5,
+      "p90_point_worsening_ft_at_most": 0.2,
+      "paired_median_well_gain_ft_at_least": 0.5,
+      "top10_positive_sse_removal_gain_positive": true
+    },
+    "field_fit_target": "fitting-role labeled TRUE TVT+Z derivatives; cross-fitted base is used only as the heldout/target prediction policy",
+    "grid": [
+      {
+        "h_ft": 5000.0,
+        "laplacian": 3.0
+      },
+      {
+        "h_ft": 5000.0,
+        "laplacian": 0.3
+      },
+      {
+        "h_ft": 15000.0,
+        "laplacian": 3.0
+      },
+      {
+        "h_ft": 15000.0,
+        "laplacian": 0.3
+      },
+      {
+        "h_ft": 30000.0,
+        "laplacian": 3.0
+      },
+      {
+        "h_ft": 30000.0,
+        "laplacian": 0.3
+      }
+    ],
+    "inner_folds": 4,
+    "inner_group": "exact typewell profile equality",
+    "inner_incumbent": "strict ten-model base cross-fit: four leave-one-fold-out models generate each heldout path, while six leave-two-fold-out models generate calibration-fold paths excluding both heldout j and calibration fold k; for each j, base shrink and all path-dependent typewell/ordered/joint calibrators use only those j-excluding calibration predictions before application to j",
+    "inner_jackknife_confidence": "For heldout inner fold j, the primary proposal is the leave-j field model and the other three derivative-dispersion proposals are leave-{j,k} models for each k!=j. All four exclude j labels. The unordered leave-two model is shared only for its identical exclusion pair. Sigma is the leave-j model derivative residual scale. Thus theta/grid selection uses core*cJ under the same formula.",
+    "interval_coefficient": 1.0,
+    "jackknife_confidence": "At each target raw suffix row, each of the four winning-cell inner models contributes the central numpy.gradient(delta0, MD, edge_order=1) derivative of field_delta_without_prefix_bias_tvt only where its persistent support_mask and both finite-difference neighbors are supported (one-sided endpoints use their two points). With at least three values, tau=1.4826*median(abs(v-median(v))); otherwise cJ=0. Sigma is the final all-outer-train selected model derivative_residual_scale floored at 1e-8. cJ=1/(1+(tau/sigma)^2), and final c=final core confidence*cJ. Prefix-bias derivative is excluded.",
+    "outer_incumbent": "already sealed fold-local incumbent joint artifact",
+    "p90_definition": {
+      "one_sided_bound": "95th percentile of bootstrap point-worsening values using the same mode-specific resampling multiplicities",
+      "point_worsening": "candidate well-RMSE p90 minus sealed-joint well-RMSE p90",
+      "quantile": "numpy.quantile(q=0.9, method='linear')",
+      "unit": "well",
+      "well_value": "full-suffix row RMSE"
+    },
+    "prediction_barrier": "every required JSON/NPZ shard must pass byte, logical, membership, and schema audit before aggregate opens any validation suffix TVT",
+    "region_primary_gates": {
+      "each_region_p90_worsening_ft_at_most": 1.0,
+      "exhaustive_cluster_bootstrap_ci95_low_positive": true,
+      "minimum_fold_gain_ft_at_least": 0.2,
+      "p90_one_sided_ci_worsening_ft_below": 0.5,
+      "p90_point_worsening_ft_at_most": 0.2,
+      "pooled_gain_ft_at_least": 0.75,
+      "top10_positive_sse_removal_gain_positive": true
+    },
+    "runtime_acceptance": {
+      "caps_solver_or_coarsening": "forbidden; inducing coarsening is STOP",
+      "extrapolated_two_worker_fifteen_fold_seconds_at_most": 28800.0,
+      "extrapolation": "largest measured fold wall time multiplied by ceil(15/2)",
+      "field_peak_rss_gib_at_most": 8.0,
+      "field_wall_seconds_at_most": 1800.0,
+      "total_peak_rss_gib_at_most": 12.0,
+      "total_wall_seconds_at_most": 3600.0
+    },
+    "status_ceiling": "MEASURE_ONLY",
+    "theta_constraints": "0 <= theta_bias <= theta_field <= 1",
+    "tie_break": "shorter h, then stronger Laplacian"
+  },
+  "field_config_contract": {
+    "circulation_strength": 0.1,
+    "coarsening": "STOP",
+    "discontinuity_mad_threshold": 4.0,
+    "graph_max_edge": "1.5*h",
+    "graph_neighbors": 6,
+    "huber_delta": 1.5,
+    "inducing_cell": "h/2",
+    "interpolation_neighbors": 6,
+    "max_distinct_support_wells": 16,
+    "max_support_neighbors": 4096,
+    "min_directional_observability": 0.05,
+    "min_effective_wells": 1.5,
+    "resample_step_md": 100.0,
+    "ridge_strength": 1e-06,
+    "support_length": "h"
+  },
+  "incumbent_pretruth_inventory": {
+    "exact": {
+      "manifest": {
+        "byte_sha256": "df6d5ff89ce08fd19c20ec4d359d4c10dad217e06c1a2917ae2f8a7a267694ed",
+        "logical_sha256": "df6d5ff89ce08fd19c20ec4d359d4c10dad217e06c1a2917ae2f8a7a267694ed",
+        "name": "equal_ordered_joint_outer_protocol_fold_manifest.csv",
+        "scope": "results",
+        "size_bytes": 468231
+      },
+      "protocol": {
+        "byte_sha256": "09352f21895584767893094e4d804981b5bba53fcad7a89b472a1c4bf8b87077",
+        "logical_sha256": null,
+        "name": "equal_ordered_joint_outer_protocol.json",
+        "scope": "results",
+        "size_bytes": 6573
+      },
+      "protocol_sidecar": {
+        "byte_sha256": "0f9ccb1a97852e1f04129d2c219c0df3f2cf880f4625f199585859ef5d652243",
+        "logical_sha256": null,
+        "name": "equal_ordered_joint_outer_protocol.json.sha256",
+        "scope": "results",
+        "size_bytes": 106
+      },
+      "shards": [
+        {
+          "fold": 0,
+          "metadata": {
+            "byte_sha256": "fc07f8bd2b3e173da9878b50edd0a3eba5525de3de549d99d1909f1e0b8f7b42",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_0.json",
+            "scope": "exact_shards",
+            "size_bytes": 73089
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "41f586e93c564b7bc4e3cd5c8676d96e2881f8262f2f686eeafa06038c1387fc",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_0.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "4f1f0950a8e3653d6895916795b7268da775eca2be41eaae5d8b1acf9232c6cf",
+            "logical_sha256": "c13ba88da211eebfe44b58644b925a75142ea4818dfd799115cf8459bb1efe96",
+            "name": "repeat_0_fold_0.npz",
+            "scope": "exact_shards",
+            "size_bytes": 9261303
+          },
+          "repeat": 0
+        },
+        {
+          "fold": 1,
+          "metadata": {
+            "byte_sha256": "ed4542352ab95b613d28e954b91eabbdf7f5e3e393548751a319567fc1699877",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_1.json",
+            "scope": "exact_shards",
+            "size_bytes": 76829
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "7fac827c9f7463581231b6a854a3c45593581c4553980c7ce0275cb839fa0ead",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_1.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "7d224141dccf0162772ca2d68fb4cf01997426d416231e93b1c0c70a02943a7c",
+            "logical_sha256": "7632faf1a05480504d3bdb4d681fcb6178a104c5cbf855a2bab2aecbd1f301da",
+            "name": "repeat_0_fold_1.npz",
+            "scope": "exact_shards",
+            "size_bytes": 8965357
+          },
+          "repeat": 0
+        },
+        {
+          "fold": 2,
+          "metadata": {
+            "byte_sha256": "a23eeaae6492d82c713ca3d776ec21cdb9d715f6b3ae5153c100f00e2370fa72",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_2.json",
+            "scope": "exact_shards",
+            "size_bytes": 73040
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "629fc057e5c91225cf2f37bd932e96bb9f8eecfd8393d5fc3417877c84c2ce9c",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_2.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "fc9fa6dc68ae9e261e4c2e6148902662e0b1ccefd0cd12b22b0dc2e0cf6c21d1",
+            "logical_sha256": "2f540e79e6ab0926c23e63183f14245261c2e062def2feb18f38ca62e5d4c7da",
+            "name": "repeat_0_fold_2.npz",
+            "scope": "exact_shards",
+            "size_bytes": 8182284
+          },
+          "repeat": 0
+        },
+        {
+          "fold": 3,
+          "metadata": {
+            "byte_sha256": "ac23237741da6780953bddf2f450581f39270cf40ed774be9c960b0b8e851c26",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_3.json",
+            "scope": "exact_shards",
+            "size_bytes": 73075
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "59dea6ed05edc841535c46093acc03ba636c5731f196701fac41aa809de7307d",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_3.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "001cb80d82c43976fccc5dfb920645accaf0b902baee101f3cf9e6f03a67f58e",
+            "logical_sha256": "ffa5bf5a115066b1a8b8eeb10ccc0e8c3007b7a7f79a7d305207d872df4b2c52",
+            "name": "repeat_0_fold_3.npz",
+            "scope": "exact_shards",
+            "size_bytes": 9975752
+          },
+          "repeat": 0
+        },
+        {
+          "fold": 4,
+          "metadata": {
+            "byte_sha256": "f154fc1de98c6a99fd26ab7f39894a35584e6a947f75aa502cc0b13a385087d0",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_4.json",
+            "scope": "exact_shards",
+            "size_bytes": 71677
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "7acd12aa373a59c82f4bcf643291e70298991dc0f1576c2bef63c0f10afed646",
+            "logical_sha256": null,
+            "name": "repeat_0_fold_4.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "dca7eddffde872e009ef95798e92411a8b264377194b638f1aee3830ddb0667b",
+            "logical_sha256": "ea0f893337fd293b2dfbcbeda4cc6b16e1184f67f1920d31a2429e566f63dfcf",
+            "name": "repeat_0_fold_4.npz",
+            "scope": "exact_shards",
+            "size_bytes": 8829748
+          },
+          "repeat": 0
+        },
+        {
+          "fold": 0,
+          "metadata": {
+            "byte_sha256": "1806e0c86992ee8b3613c362f9202a0a214ef61b86f693f3ea47c8493b47471c",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_0.json",
+            "scope": "exact_shards",
+            "size_bytes": 72155
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "a8233846ce629672ad313d87d94acf8381bc1172db598674f7cdb752e9651195",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_0.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "21b04abcdb3d1817897ea2c5e7d457f8ad379caa17e1b119715abfc8eefd157d",
+            "logical_sha256": "5206986a7b8110199da8438374726962313c3fe26cc47712c2ba2fa5cdc30f9d",
+            "name": "repeat_1_fold_0.npz",
+            "scope": "exact_shards",
+            "size_bytes": 8941585
+          },
+          "repeat": 1
+        },
+        {
+          "fold": 1,
+          "metadata": {
+            "byte_sha256": "b3911de68fa0b022c58d5532b319cdede17db9720731504c9af819290d9085fa",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_1.json",
+            "scope": "exact_shards",
+            "size_bytes": 72103
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "642efc7f16116a9225ed00f4423c1c0ab8b924f0ba6d445d95d76454ba338197",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_1.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "7832f2262b573fdb5955b9f6608ab4da2a3432d4316af2835fc8a2bb01308b25",
+            "logical_sha256": "fb22e39ba1ada6be30a12bf2dc00c1a016044ccf018e307d34ad7127437bb1fd",
+            "name": "repeat_1_fold_1.npz",
+            "scope": "exact_shards",
+            "size_bytes": 8816401
+          },
+          "repeat": 1
+        },
+        {
+          "fold": 2,
+          "metadata": {
+            "byte_sha256": "1ec0c439e063fb0c054f0a01078ba97f9299c88504352f92249306f9bb42ccb5",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_2.json",
+            "scope": "exact_shards",
+            "size_bytes": 77294
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "de2d95b2972f13c2446f25588f607360938c11abd60adc6912d56536fadee973",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_2.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "c9669de90d9ca5ada022bca22bc7390cf683d5b86c2d5ed54b33b4ee57b9b3cb",
+            "logical_sha256": "e8f5624d1c43506e557d97787b3cee98948203efb7e634b53897f9b215b545dc",
+            "name": "repeat_1_fold_2.npz",
+            "scope": "exact_shards",
+            "size_bytes": 9936975
+          },
+          "repeat": 1
+        },
+        {
+          "fold": 3,
+          "metadata": {
+            "byte_sha256": "365c10df1ff4293ae388176cf9ada92ba49376cdd2783141f016f8bb0061ccef",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_3.json",
+            "scope": "exact_shards",
+            "size_bytes": 73534
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "257730da52a461de043851cccf3c50ab246272a11a4e9f02f45597fa445a6bf3",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_3.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "9454899c1a5491e7233d7d0630ee06ad0050e244a23c793e3296a5d59d7a24d4",
+            "logical_sha256": "0b9e67c30de5585e243ab6cd3432672f595dfd1fcb9b219ab56fd21944c28608",
+            "name": "repeat_1_fold_3.npz",
+            "scope": "exact_shards",
+            "size_bytes": 9136767
+          },
+          "repeat": 1
+        },
+        {
+          "fold": 4,
+          "metadata": {
+            "byte_sha256": "725102e60c3458b573ba2c5984fe99b742e2b7414fca0a1b3880541e6e9c2e06",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_4.json",
+            "scope": "exact_shards",
+            "size_bytes": 72614
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "5e6e5bbc17b9761aef9d7c592de11c2c1b4dde6d02c650574389a1e357d3a448",
+            "logical_sha256": null,
+            "name": "repeat_1_fold_4.json.sha256",
+            "scope": "exact_shards",
+            "size_bytes": 87
+          },
+          "prediction": {
+            "byte_sha256": "dadcc4dc9a2f6cf92c5236386a754eff20ac99403f5db9e983bdb1462cf8a8d6",
+            "logical_sha256": "59f67be06767de71dbcaecdb401ddffeb0ce0b8c355da60e386a10594d0abc1b",
+            "name": "repeat_1_fold_4.npz",
+            "scope": "exact_shards",
+            "size_bytes": 9141807
+          },
+          "repeat": 1
+        }
+      ]
+    },
+    "inventory_sha256": "6e968ff5837a8c866d1f3dcd46a5990ac3b36e8877a3e6364c6b23b4ae70e560",
+    "region": {
+      "data_inventory": {
+        "byte_sha256": "b76066cd50269133daf5e926e8b3ddfda96f14dbbe4762c083ce19d0210e3169",
+        "logical_sha256": null,
+        "name": "equal_ordered_joint_spatial_protocol_data_inventory.csv",
+        "scope": "results",
+        "size_bytes": 224163
+      },
+      "manifest": {
+        "byte_sha256": "af0160c67397c18d4e6cb70da18ba5ea76429973b5b0c8d2a9d4b1f0752ac5df",
+        "logical_sha256": "70af52ed2ca2ed3e77e218471836869ea74771e08eacfbd4e7f93c9067bda622",
+        "name": "region_out.json",
+        "scope": "spatial_manifests",
+        "size_bytes": 507438
+      },
+      "pad_manifest": {
+        "byte_sha256": "c9a80bbdf5acb28d34f542381ddba53a1f50c7b243dee234183a3f01cb5d82e6",
+        "logical_sha256": "f17ec3ec67b1490b7efab6250f7c674b24a7de080e563310dfc8b5ef9a3c4b8c",
+        "name": "pad_out.json",
+        "scope": "spatial_manifests",
+        "size_bytes": 533866
+      },
+      "protocol": {
+        "byte_sha256": "0454bb539aaf8584bcb485fe2a2ba8429fa2beaa4db0bc5226f410765bba377b",
+        "logical_sha256": null,
+        "name": "equal_ordered_joint_spatial_protocol.json",
+        "scope": "results",
+        "size_bytes": 12041
+      },
+      "protocol_sidecar": {
+        "byte_sha256": "e6bb7a2f8d5b835a06b9df3cdd9fe6359ad5c05f8fbb00c874a30d4745683e14",
+        "logical_sha256": null,
+        "name": "equal_ordered_joint_spatial_protocol.json.sha256",
+        "scope": "results",
+        "size_bytes": 108
+      },
+      "shards": [
+        {
+          "fold": 0,
+          "metadata": {
+            "byte_sha256": "f8e5103889144cbb8547ffec78acdec5bba1cc0147cd687058cec58ac11715e4",
+            "logical_sha256": null,
+            "name": "region_out_fold_0.json",
+            "scope": "spatial_shards",
+            "size_bytes": 106106
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "cd2332706fa17533bb16c3c7e93e205156ad4f4759664aa00260d6c3be153792",
+            "logical_sha256": null,
+            "name": "region_out_fold_0.json.sha256",
+            "scope": "spatial_shards",
+            "size_bytes": 89
+          },
+          "prediction": {
+            "byte_sha256": "86cf80cc5270a73d9969583508809ca99b790bd8ed032bf60513b5fe8a6e2d70",
+            "logical_sha256": "dc4dc72fb34716888207dfb5f14849e226c827acd7aee2c796281dba8900d1fd",
+            "name": "region_out_fold_0.npz",
+            "scope": "spatial_shards",
+            "size_bytes": 12833890
+          }
+        },
+        {
+          "fold": 1,
+          "metadata": {
+            "byte_sha256": "410a1137d3ffee69b3eabbbfb618bbc1bab232e5309fce9ad6301758113dfc7e",
+            "logical_sha256": null,
+            "name": "region_out_fold_1.json",
+            "scope": "spatial_shards",
+            "size_bytes": 58901
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "f5764daaeb5a2cf3ff99e3de20236838dc65f9b0bb7f3c301ad8f7507813e71f",
+            "logical_sha256": null,
+            "name": "region_out_fold_1.json.sha256",
+            "scope": "spatial_shards",
+            "size_bytes": 89
+          },
+          "prediction": {
+            "byte_sha256": "6186a1e1141dcd0252587d99ecbaf39ecc00ebaf3d5425a8dd268ea92f0d2315",
+            "logical_sha256": "2f533c8685e13de1555e500b7510f71d2252394bf609c821818d5c63c6a0dffd",
+            "name": "region_out_fold_1.npz",
+            "scope": "spatial_shards",
+            "size_bytes": 5350103
+          }
+        },
+        {
+          "fold": 2,
+          "metadata": {
+            "byte_sha256": "9b436c01b0163e9d3d93ce179c4a05b64f462cfe2271008c08174e388b113aae",
+            "logical_sha256": null,
+            "name": "region_out_fold_2.json",
+            "scope": "spatial_shards",
+            "size_bytes": 67315
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "be1fcd9f3e97b3139b7afd327f19f4816b0cd666a41f79c0a61ceb216f3110f7",
+            "logical_sha256": null,
+            "name": "region_out_fold_2.json.sha256",
+            "scope": "spatial_shards",
+            "size_bytes": 89
+          },
+          "prediction": {
+            "byte_sha256": "f92e09f9016c4eb4c7f4eac75ef551cda03ffc740c9c7eacf0bc8839384b8d19",
+            "logical_sha256": "80e31f1b8eb98688eb05007c3e0a1208221ba1d5214f820ceb391347f2f29d2d",
+            "name": "region_out_fold_2.npz",
+            "scope": "spatial_shards",
+            "size_bytes": 7260599
+          }
+        },
+        {
+          "fold": 3,
+          "metadata": {
+            "byte_sha256": "75224ddad0c4a7a22159ccd74cc8e76e1babbf302ac3df45cc2dc61a611eaef1",
+            "logical_sha256": null,
+            "name": "region_out_fold_3.json",
+            "scope": "spatial_shards",
+            "size_bytes": 124113
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "702191fba6b5b71c528b43a57457603d0c959605d88f782d532f511f50433c1a",
+            "logical_sha256": null,
+            "name": "region_out_fold_3.json.sha256",
+            "scope": "spatial_shards",
+            "size_bytes": 89
+          },
+          "prediction": {
+            "byte_sha256": "9bb6045a033b3397875b9d38441beef6b3fc0168f971084988680fa55832ba26",
+            "logical_sha256": "06509b695f3c67622d3429af214dfc1b3b51c2debc360f53caf004cd84cb67b9",
+            "name": "region_out_fold_3.npz",
+            "scope": "spatial_shards",
+            "size_bytes": 14579573
+          }
+        },
+        {
+          "fold": 4,
+          "metadata": {
+            "byte_sha256": "e73373f36b223aee492b824d033a92ce3c1b8c224a768cd6164ec85477c3888f",
+            "logical_sha256": null,
+            "name": "region_out_fold_4.json",
+            "scope": "spatial_shards",
+            "size_bytes": 87009
+          },
+          "metadata_sidecar": {
+            "byte_sha256": "c89564ec088ea81c1a0ab1f3c37f91e59ceb0ef2343d95fa83aed26e0d5a947c",
+            "logical_sha256": null,
+            "name": "region_out_fold_4.json.sha256",
+            "scope": "spatial_shards",
+            "size_bytes": 89
+          },
+          "prediction": {
+            "byte_sha256": "b3ef24a526207fbf1c7dc3601da7405c1380688f0790c3fd9c3470ca6d127fb3",
+            "logical_sha256": "d160ef8d8343aaec8e723d0b075283a552a912ef0a1e598d735e7418e5333909",
+            "name": "region_out_fold_4.npz",
+            "scope": "spatial_shards",
+            "size_bytes": 8261998
+          }
+        }
+      ]
+    }
+  },
+  "method": "anchored_differential_field_over_sealed_joint_v1",
+  "notes": [
+    "Freeze and run validation reads use MD/X/Y/Z/TVT_input only.",
+    "Training TVT may be opened only for an active outer-training role.",
+    "Formation surfaces, geology labels, and images are never inputs.",
+    "Artifact entries bind verified basenames under declared roots, not stale paths.",
+    "No external confirmation is present; production OPEN is impossible here."
+  ],
+  "packages": {
+    "lightgbm": "4.7.0",
+    "numpy": "2.5.1",
+    "pandas": "3.0.1",
+    "psutil": "5.9.8",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.17.1"
+  },
+  "protocol_version": "geosteern-anchored-structural-field-gate/1",
+  "roots": {
+    "data_dir": "C:\\PRIMEdEV-1\\GeoSteerN-Codex",
+    "manifest_dir": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\spatial_gate_manifests",
+    "results_dir": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results"
+  },
+  "source_sha256": {
+    "geosteern/data.py": "b3acb742b1939d6eabbcd832b18a67d218ae3ebd79443336cc83030bc645a6ab",
+    "geosteern/features.py": "08f22021083c50617cc2e06f153e3165322af4dd0d33eaa130e80a4efcb94be2",
+    "geosteern/model.py": "7c694ef58fd659df427dd0b786d98020b1ce51aebe76e042a9d5a2d23e109593",
+    "research/interval_gate.py": "066646a725045cb65a40d5d2f70505a010b580e036d1cd327e295bb4eae2ca2d",
+    "research/ordered_transport.py": "5cc7d9a0dba36b0bacd7a3899c5eb5f4e7141ae3bb580b334159b3359f8e6bbd",
+    "research/repeated_group_gate.py": "238248219db92246bd300575d06c32333781b1396cac9eddcfee3607c20e0bf9",
+    "research/spatial_score_gate.py": "e7c03ac1ac702b68efae849a33ec1c78c77a95ee2fa2a906b20b38b20d9f1135",
+    "research/spatial_split.py": "91fd0b48b10bf8c579e77ba242e3f8c889b6ae159cedf271f8a9b014438b6b86",
+    "research/structural_field.py": "a4dc6f6058f8839ae97ff87b417022874385a3dbfe9c09b4569b69cdefbeb4ab",
+    "research/structural_field_gate.py": "5652ec1bc0eaa9279836901853a10c2f7331b8293a06b3c50ccbdcd4565a764b",
+    "research/structural_field_score.py": "6f5ea31f13181c63306e818764a7281aa04ae194a4a71b052ae5d59fcc8ed640",
+    "research/test_structural_field.py": "1bc5c3d4338ab99680d2d119b55e386ff6ebae87be85d8df299f6dd0a9f6f2f8",
+    "research/test_structural_field_gate.py": "4b3d9c63c0cb5b33963f7c20640853bec412831ef06fcbe54c17716de7ef03db",
+    "research/test_structural_field_score.py": "46d7ce42b5fe43a6f4c659f91bf114d605da45a9879a1fed015bfdb61a037ceb"
+  },
+  "status": "FROZEN_BEFORE_FIELD_SCORING_MEASURE_ONLY",
+  "status_ceiling": "MEASURE_ONLY"
+}

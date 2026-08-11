@@ -1,0 +1,719 @@
+{
+  "aggregate": {
+    "base_median_well_rmse": 8.976565529912444,
+    "base_pooled_row_rmse": 13.970366410274352,
+    "candidate_median_well_rmse": 8.536818273072576,
+    "candidate_pooled_row_rmse": 13.573248505221173,
+    "mean_well_rmse_gain_ft": 0.3124077667708427,
+    "median_well_rmse_gain_ft": 0.3298206904387402,
+    "n_rows": 7539676,
+    "n_unique_wells": 770,
+    "n_well_repeat_predictions": 1540,
+    "p90_base_well_rmse": 19.266612954076127,
+    "p90_candidate_well_rmse": 18.913696053064506,
+    "pooled_row_rmse_gain_ft": 0.3971179050531788,
+    "primary_mean_repeat_pooled_rmse_gain_ft": 0.3972748940455988,
+    "primary_repeat_pooled_rmse_gains_ft": {
+      "0": 0.2971061295986459,
+      "1": 0.4974436584925517
+    },
+    "win_rate": 0.5727272727272728
+  },
+  "artifact_lineage": {
+    "fold_artifact_inventory_sha256": "ce47f1bda8c1758b914cebdc4b243dece5e10076d674bb6912694158ac307e32",
+    "manifest_sha256": "df6d5ff89ce08fd19c20ec4d359d4c10dad217e06c1a2917ae2f8a7a267694ed",
+    "protocol_sha256": "09352f21895584767893094e4d804981b5bba53fcad7a89b472a1c4bf8b87077",
+    "result_sealed_by": "equal_ordered_joint_outer_repeated.json.sha256",
+    "scored_sse_sha256": "174da7fca4cb029e76020f4a6952b88075edfe24a78e2ce9ac589681d775c14d"
+  },
+  "coefficient_sign_and_bound_stability": {
+    "absolute_tolerance": 1e-09,
+    "coefficients": {
+      "joint_ordered_coefficient": {
+        "bounds": [
+          -1.0,
+          2.0
+        ],
+        "lower_bound_hits": 0,
+        "maximum": 0.9436040965333863,
+        "minimum": 0.7845478603556627,
+        "negative_fold_count": 0,
+        "passed": true,
+        "positive_fold_count": 10,
+        "repeated_bound_hit": false,
+        "sign_flip": false,
+        "upper_bound_hits": 0,
+        "values_by_fold": [
+          0.9299005838989719,
+          0.8690979684598411,
+          0.9060590948183477,
+          0.9436040965333863,
+          0.8173741567833015,
+          0.93282586739241,
+          0.9152959793971894,
+          0.7845478603556627,
+          0.8886375840594238,
+          0.9071245532688639
+        ],
+        "zero_fold_count": 0
+      },
+      "joint_typewell_coefficient": {
+        "bounds": [
+          -1.0,
+          2.0
+        ],
+        "lower_bound_hits": 0,
+        "maximum": 0.9966446037857126,
+        "minimum": 0.911120382999105,
+        "negative_fold_count": 0,
+        "passed": true,
+        "positive_fold_count": 10,
+        "repeated_bound_hit": false,
+        "sign_flip": false,
+        "upper_bound_hits": 0,
+        "values_by_fold": [
+          0.9966446037857126,
+          0.9130833439675119,
+          0.9177432186459947,
+          0.9230096565982413,
+          0.9373493415281074,
+          0.9364699992213522,
+          0.9359864069649378,
+          0.911120382999105,
+          0.9356615366864224,
+          0.933042080149133
+        ],
+        "zero_fold_count": 0
+      },
+      "ordered_shrink": {
+        "bounds": [
+          0.0,
+          1.5
+        ],
+        "lower_bound_hits": 0,
+        "maximum": 0.2589557072410578,
+        "minimum": 0.13765560448195313,
+        "negative_fold_count": 0,
+        "passed": true,
+        "positive_fold_count": 10,
+        "repeated_bound_hit": false,
+        "sign_flip": false,
+        "upper_bound_hits": 0,
+        "values_by_fold": [
+          0.2589557072410578,
+          0.21584522868168216,
+          0.22799904190033815,
+          0.2471154097467033,
+          0.22405181484557127,
+          0.23589853403696887,
+          0.22274558072199807,
+          0.13765560448195313,
+          0.2183293364132903,
+          0.23266816038685878
+        ],
+        "zero_fold_count": 0
+      },
+      "typewell_shrink": {
+        "bounds": [
+          0.0,
+          1.5
+        ],
+        "lower_bound_hits": 0,
+        "maximum": 0.6168912800818884,
+        "minimum": 0.4281271249382156,
+        "negative_fold_count": 0,
+        "passed": true,
+        "positive_fold_count": 10,
+        "repeated_bound_hit": false,
+        "sign_flip": false,
+        "upper_bound_hits": 0,
+        "values_by_fold": [
+          0.4783230509488,
+          0.5664070956722165,
+          0.4871106989959949,
+          0.4661651603468601,
+          0.6168912800818884,
+          0.5539088841267715,
+          0.4281271249382156,
+          0.4992943006956094,
+          0.48383983047674417,
+          0.5131013089113217
+        ],
+        "zero_fold_count": 0
+      }
+    },
+    "fold_order": [
+      {
+        "outer_fold": 0,
+        "repeat": 0
+      },
+      {
+        "outer_fold": 1,
+        "repeat": 0
+      },
+      {
+        "outer_fold": 2,
+        "repeat": 0
+      },
+      {
+        "outer_fold": 3,
+        "repeat": 0
+      },
+      {
+        "outer_fold": 4,
+        "repeat": 0
+      },
+      {
+        "outer_fold": 0,
+        "repeat": 1
+      },
+      {
+        "outer_fold": 1,
+        "repeat": 1
+      },
+      {
+        "outer_fold": 2,
+        "repeat": 1
+      },
+      {
+        "outer_fold": 3,
+        "repeat": 1
+      },
+      {
+        "outer_fold": 4,
+        "repeat": 1
+      }
+    ],
+    "passed": true,
+    "repeated_bound_hit_definition": "two or more folds at one bound"
+  },
+  "exact_typewell_group_bootstrap": {
+    "ci95_high_ft": 0.6209736432317446,
+    "ci95_low_ft": 0.1693918480774232,
+    "draws": 4000,
+    "n_groups": 749,
+    "observed_mean_repeat_pooled_rmse_gain_ft": 0.3972748940455997,
+    "observed_repeat_pooled_rmse_gains_ft": {
+      "0": 0.2971061295986459,
+      "1": 0.49744365849255345
+    },
+    "repeat_coupling": "same sampled group multiplicities in both repeats",
+    "seed": 20260810,
+    "statistic": "mean of repeat-wise pooled RMSE gains",
+    "unit": "exact typewell profile group"
+  },
+  "fold_artifact_inventory": {
+    "fold_count": 10,
+    "inventory_sha256": "ce47f1bda8c1758b914cebdc4b243dece5e10076d674bb6912694158ac307e32",
+    "items": [
+      {
+        "outer_fold": 0,
+        "prediction_npz": {
+          "byte_sha256": "4f1f0950a8e3653d6895916795b7268da775eca2be41eaae5d8b1acf9232c6cf",
+          "logical_array_sha256": "c13ba88da211eebfe44b58644b925a75142ea4818dfd799115cf8459bb1efe96",
+          "name": "repeat_0_fold_0.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_0.npz",
+          "size_bytes": 9261303
+        },
+        "repeat": 0,
+        "shard_json": {
+          "byte_sha256": "fc07f8bd2b3e173da9878b50edd0a3eba5525de3de549d99d1909f1e0b8f7b42",
+          "name": "repeat_0_fold_0.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_0.json",
+          "sha256_sidecar_name": "repeat_0_fold_0.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_0.json.sha256",
+          "size_bytes": 73089
+        }
+      },
+      {
+        "outer_fold": 1,
+        "prediction_npz": {
+          "byte_sha256": "7d224141dccf0162772ca2d68fb4cf01997426d416231e93b1c0c70a02943a7c",
+          "logical_array_sha256": "7632faf1a05480504d3bdb4d681fcb6178a104c5cbf855a2bab2aecbd1f301da",
+          "name": "repeat_0_fold_1.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_1.npz",
+          "size_bytes": 8965357
+        },
+        "repeat": 0,
+        "shard_json": {
+          "byte_sha256": "ed4542352ab95b613d28e954b91eabbdf7f5e3e393548751a319567fc1699877",
+          "name": "repeat_0_fold_1.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_1.json",
+          "sha256_sidecar_name": "repeat_0_fold_1.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_1.json.sha256",
+          "size_bytes": 76829
+        }
+      },
+      {
+        "outer_fold": 2,
+        "prediction_npz": {
+          "byte_sha256": "fc9fa6dc68ae9e261e4c2e6148902662e0b1ccefd0cd12b22b0dc2e0cf6c21d1",
+          "logical_array_sha256": "2f540e79e6ab0926c23e63183f14245261c2e062def2feb18f38ca62e5d4c7da",
+          "name": "repeat_0_fold_2.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_2.npz",
+          "size_bytes": 8182284
+        },
+        "repeat": 0,
+        "shard_json": {
+          "byte_sha256": "a23eeaae6492d82c713ca3d776ec21cdb9d715f6b3ae5153c100f00e2370fa72",
+          "name": "repeat_0_fold_2.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_2.json",
+          "sha256_sidecar_name": "repeat_0_fold_2.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_2.json.sha256",
+          "size_bytes": 73040
+        }
+      },
+      {
+        "outer_fold": 3,
+        "prediction_npz": {
+          "byte_sha256": "001cb80d82c43976fccc5dfb920645accaf0b902baee101f3cf9e6f03a67f58e",
+          "logical_array_sha256": "ffa5bf5a115066b1a8b8eeb10ccc0e8c3007b7a7f79a7d305207d872df4b2c52",
+          "name": "repeat_0_fold_3.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_3.npz",
+          "size_bytes": 9975752
+        },
+        "repeat": 0,
+        "shard_json": {
+          "byte_sha256": "ac23237741da6780953bddf2f450581f39270cf40ed774be9c960b0b8e851c26",
+          "name": "repeat_0_fold_3.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_3.json",
+          "sha256_sidecar_name": "repeat_0_fold_3.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_3.json.sha256",
+          "size_bytes": 73075
+        }
+      },
+      {
+        "outer_fold": 4,
+        "prediction_npz": {
+          "byte_sha256": "dca7eddffde872e009ef95798e92411a8b264377194b638f1aee3830ddb0667b",
+          "logical_array_sha256": "ea0f893337fd293b2dfbcbeda4cc6b16e1184f67f1920d31a2429e566f63dfcf",
+          "name": "repeat_0_fold_4.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_4.npz",
+          "size_bytes": 8829748
+        },
+        "repeat": 0,
+        "shard_json": {
+          "byte_sha256": "f154fc1de98c6a99fd26ab7f39894a35584e6a947f75aa502cc0b13a385087d0",
+          "name": "repeat_0_fold_4.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_4.json",
+          "sha256_sidecar_name": "repeat_0_fold_4.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_0_fold_4.json.sha256",
+          "size_bytes": 71677
+        }
+      },
+      {
+        "outer_fold": 0,
+        "prediction_npz": {
+          "byte_sha256": "21b04abcdb3d1817897ea2c5e7d457f8ad379caa17e1b119715abfc8eefd157d",
+          "logical_array_sha256": "5206986a7b8110199da8438374726962313c3fe26cc47712c2ba2fa5cdc30f9d",
+          "name": "repeat_1_fold_0.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_0.npz",
+          "size_bytes": 8941585
+        },
+        "repeat": 1,
+        "shard_json": {
+          "byte_sha256": "1806e0c86992ee8b3613c362f9202a0a214ef61b86f693f3ea47c8493b47471c",
+          "name": "repeat_1_fold_0.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_0.json",
+          "sha256_sidecar_name": "repeat_1_fold_0.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_0.json.sha256",
+          "size_bytes": 72155
+        }
+      },
+      {
+        "outer_fold": 1,
+        "prediction_npz": {
+          "byte_sha256": "7832f2262b573fdb5955b9f6608ab4da2a3432d4316af2835fc8a2bb01308b25",
+          "logical_array_sha256": "fb22e39ba1ada6be30a12bf2dc00c1a016044ccf018e307d34ad7127437bb1fd",
+          "name": "repeat_1_fold_1.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_1.npz",
+          "size_bytes": 8816401
+        },
+        "repeat": 1,
+        "shard_json": {
+          "byte_sha256": "b3911de68fa0b022c58d5532b319cdede17db9720731504c9af819290d9085fa",
+          "name": "repeat_1_fold_1.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_1.json",
+          "sha256_sidecar_name": "repeat_1_fold_1.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_1.json.sha256",
+          "size_bytes": 72103
+        }
+      },
+      {
+        "outer_fold": 2,
+        "prediction_npz": {
+          "byte_sha256": "c9669de90d9ca5ada022bca22bc7390cf683d5b86c2d5ed54b33b4ee57b9b3cb",
+          "logical_array_sha256": "e8f5624d1c43506e557d97787b3cee98948203efb7e634b53897f9b215b545dc",
+          "name": "repeat_1_fold_2.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_2.npz",
+          "size_bytes": 9936975
+        },
+        "repeat": 1,
+        "shard_json": {
+          "byte_sha256": "1ec0c439e063fb0c054f0a01078ba97f9299c88504352f92249306f9bb42ccb5",
+          "name": "repeat_1_fold_2.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_2.json",
+          "sha256_sidecar_name": "repeat_1_fold_2.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_2.json.sha256",
+          "size_bytes": 77294
+        }
+      },
+      {
+        "outer_fold": 3,
+        "prediction_npz": {
+          "byte_sha256": "9454899c1a5491e7233d7d0630ee06ad0050e244a23c793e3296a5d59d7a24d4",
+          "logical_array_sha256": "0b9e67c30de5585e243ab6cd3432672f595dfd1fcb9b219ab56fd21944c28608",
+          "name": "repeat_1_fold_3.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_3.npz",
+          "size_bytes": 9136767
+        },
+        "repeat": 1,
+        "shard_json": {
+          "byte_sha256": "365c10df1ff4293ae388176cf9ada92ba49376cdd2783141f016f8bb0061ccef",
+          "name": "repeat_1_fold_3.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_3.json",
+          "sha256_sidecar_name": "repeat_1_fold_3.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_3.json.sha256",
+          "size_bytes": 73534
+        }
+      },
+      {
+        "outer_fold": 4,
+        "prediction_npz": {
+          "byte_sha256": "dadcc4dc9a2f6cf92c5236386a754eff20ac99403f5db9e983bdb1462cf8a8d6",
+          "logical_array_sha256": "59f67be06767de71dbcaecdb401ddffeb0ce0b8c355da60e386a10594d0abc1b",
+          "name": "repeat_1_fold_4.npz",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_4.npz",
+          "size_bytes": 9141807
+        },
+        "repeat": 1,
+        "shard_json": {
+          "byte_sha256": "725102e60c3458b573ba2c5984fe99b742e2b7414fca0a1b3880541e6e9c2e06",
+          "name": "repeat_1_fold_4.json",
+          "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_4.json",
+          "sha256_sidecar_name": "repeat_1_fold_4.json.sha256",
+          "sha256_sidecar_path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\equal_ordered_joint_outer_protocol_folds\\repeat_1_fold_4.json.sha256",
+          "size_bytes": 72614
+        }
+      }
+    ]
+  },
+  "interpretation": "Repeated CV on a previously studied corpus measures stability only; it is not pristine external confirmation and cannot promote production OPEN.",
+  "joint_vs_resample_best_component_group_bootstrap": {
+    "ci95_high_ft": 0.2498826994057175,
+    "ci95_low_ft": -0.00252314693769386,
+    "definition": "minimum of typewell-to-joint and ordered-to-joint gain in each resample; positive values mean joint beats the resample-best component",
+    "draws": 4000,
+    "n_groups": 749,
+    "observed_joint_vs_best_component_gain_ft": 0.16340887460687714,
+    "observed_joint_vs_ordered_gain_ft": 0.16340887460687714,
+    "observed_joint_vs_typewell_gain_ft": 0.18897236073381674,
+    "repeat_coupling": "same sampled group multiplicities in both repeats",
+    "seed": 20260810,
+    "unit": "exact typewell profile group"
+  },
+  "learned_parameters_by_fold": [
+    {
+      "base_shrink": 0.9400000000000001,
+      "inner_oof_point_r2": 0.2391065350520516,
+      "joint_coefficients": [
+        0.9966446037857126,
+        0.9299005838989719
+      ],
+      "ordered_shrink": 0.2589557072410578,
+      "outer_fold": 0,
+      "repeat": 0,
+      "training_points": 375977,
+      "training_typewell_groups": 599,
+      "training_wells": 617,
+      "typewell_shrink": 0.4783230509488
+    },
+    {
+      "base_shrink": 0.84,
+      "inner_oof_point_r2": 0.20084362888271734,
+      "joint_coefficients": [
+        0.9130833439675119,
+        0.8690979684598411
+      ],
+      "ordered_shrink": 0.21584522868168216,
+      "outer_fold": 1,
+      "repeat": 0,
+      "training_points": 375481,
+      "training_typewell_groups": 599,
+      "training_wells": 609,
+      "typewell_shrink": 0.5664070956722165
+    },
+    {
+      "base_shrink": 0.78,
+      "inner_oof_point_r2": 0.17267956623837588,
+      "joint_coefficients": [
+        0.9177432186459947,
+        0.9060590948183477
+      ],
+      "ordered_shrink": 0.22799904190033815,
+      "outer_fold": 2,
+      "repeat": 0,
+      "training_points": 378520,
+      "training_typewell_groups": 599,
+      "training_wells": 617,
+      "typewell_shrink": 0.4871106989959949
+    },
+    {
+      "base_shrink": 0.8200000000000001,
+      "inner_oof_point_r2": 0.2153226572680247,
+      "joint_coefficients": [
+        0.9230096565982413,
+        0.9436040965333863
+      ],
+      "ordered_shrink": 0.2471154097467033,
+      "outer_fold": 3,
+      "repeat": 0,
+      "training_points": 375825,
+      "training_typewell_groups": 599,
+      "training_wells": 617,
+      "typewell_shrink": 0.4661651603468601
+    },
+    {
+      "base_shrink": 0.84,
+      "inner_oof_point_r2": 0.2057067522270507,
+      "joint_coefficients": [
+        0.9373493415281074,
+        0.8173741567833015
+      ],
+      "ordered_shrink": 0.22405181484557127,
+      "outer_fold": 4,
+      "repeat": 0,
+      "training_points": 380433,
+      "training_typewell_groups": 600,
+      "training_wells": 620,
+      "typewell_shrink": 0.6168912800818884
+    },
+    {
+      "base_shrink": 0.8200000000000001,
+      "inner_oof_point_r2": 0.20100902398347464,
+      "joint_coefficients": [
+        0.9364699992213522,
+        0.93282586739241
+      ],
+      "ordered_shrink": 0.23589853403696887,
+      "outer_fold": 0,
+      "repeat": 1,
+      "training_points": 379197,
+      "training_typewell_groups": 599,
+      "training_wells": 619,
+      "typewell_shrink": 0.5539088841267715
+    },
+    {
+      "base_shrink": 0.9,
+      "inner_oof_point_r2": 0.24029705133449186,
+      "joint_coefficients": [
+        0.9359864069649378,
+        0.9152959793971894
+      ],
+      "ordered_shrink": 0.22274558072199807,
+      "outer_fold": 1,
+      "repeat": 1,
+      "training_points": 380786,
+      "training_typewell_groups": 599,
+      "training_wells": 619,
+      "typewell_shrink": 0.4281271249382156
+    },
+    {
+      "base_shrink": 0.88,
+      "inner_oof_point_r2": 0.21632114946594838,
+      "joint_coefficients": [
+        0.911120382999105,
+        0.7845478603556627
+      ],
+      "ordered_shrink": 0.13765560448195313,
+      "outer_fold": 2,
+      "repeat": 1,
+      "training_points": 371318,
+      "training_typewell_groups": 599,
+      "training_wells": 608,
+      "typewell_shrink": 0.4992943006956094
+    },
+    {
+      "base_shrink": 0.88,
+      "inner_oof_point_r2": 0.21908413279299976,
+      "joint_coefficients": [
+        0.9356615366864224,
+        0.8886375840594238
+      ],
+      "ordered_shrink": 0.2183293364132903,
+      "outer_fold": 3,
+      "repeat": 1,
+      "training_points": 377609,
+      "training_typewell_groups": 599,
+      "training_wells": 616,
+      "typewell_shrink": 0.48383983047674417
+    },
+    {
+      "base_shrink": 0.88,
+      "inner_oof_point_r2": 0.19292879982152478,
+      "joint_coefficients": [
+        0.933042080149133,
+        0.9071245532688639
+      ],
+      "ordered_shrink": 0.23266816038685878,
+      "outer_fold": 4,
+      "repeat": 1,
+      "training_points": 377326,
+      "training_typewell_groups": 600,
+      "training_wells": 618,
+      "typewell_shrink": 0.5131013089113217
+    }
+  ],
+  "manifest_sha256": "df6d5ff89ce08fd19c20ec4d359d4c10dad217e06c1a2917ae2f8a7a267694ed",
+  "method": "equal_ordered_joint_v2",
+  "predeclared_component_diagnostics_no_selection": {
+    "ordered": {
+      "base_median_well_rmse": 8.976565529912444,
+      "base_pooled_row_rmse": 13.970366410274352,
+      "candidate_median_well_rmse": 8.493028181402467,
+      "candidate_pooled_row_rmse": 13.736470448854213,
+      "mean_repeat_pooled_rmse_gain_ft": 0.23386601943872254,
+      "mean_well_rmse_gain_ft": 0.21814815558681003,
+      "median_well_rmse_gain_ft": 0.233118609817625,
+      "n_rows": 7539676,
+      "n_unique_wells": 770,
+      "n_well_repeat_predictions": 1540,
+      "p90_base_well_rmse": 19.266612954076127,
+      "p90_candidate_well_rmse": 19.763474896048777,
+      "pooled_row_rmse_gain_ft": 0.23389596142013858,
+      "repeat_pooled_rmse_gains_ft": {
+        "0": 0.20431944720657924,
+        "1": 0.26341259167086584
+      },
+      "win_rate": 0.6077922077922078
+    },
+    "typewell": {
+      "base_median_well_rmse": 8.976565529912444,
+      "base_pooled_row_rmse": 13.970366410274352,
+      "candidate_median_well_rmse": 8.651535270777897,
+      "candidate_pooled_row_rmse": 13.762161867403766,
+      "mean_repeat_pooled_rmse_gain_ft": 0.20830253331178206,
+      "mean_well_rmse_gain_ft": 0.1360722542400366,
+      "median_well_rmse_gain_ft": 0.055115706931477604,
+      "n_rows": 7539676,
+      "n_unique_wells": 770,
+      "n_well_repeat_predictions": 1540,
+      "p90_base_well_rmse": 19.266612954076127,
+      "p90_candidate_well_rmse": 19.20973614797048,
+      "pooled_row_rmse_gain_ft": 0.2082045428705861,
+      "repeat_pooled_rmse_gains_ft": {
+        "0": 0.1200286132331847,
+        "1": 0.2965764533903794
+      },
+      "win_rate": 0.5233766233766234
+    }
+  },
+  "predeclared_support_gate": {
+    "all_repeat_pooled_gains_positive": true,
+    "coefficient_sign_and_bound_stability": true,
+    "group_bootstrap_ci95_low_positive": true,
+    "joint_vs_resample_best_component_ci95_low_positive": false,
+    "paired_median_well_gain_at_least_ft": {
+      "observed_ft": 0.3298206904387402,
+      "passed": true,
+      "threshold_ft": 0.2
+    },
+    "passed": false,
+    "primary_materiality": {
+      "observed_ft": 0.3972748940455988,
+      "passed": true,
+      "threshold_ft": 0.2
+    },
+    "primary_metric": "mean of repeat-wise pooled suffix-row RMSE gains versus base",
+    "primary_observed_ft": 0.3972748940455988,
+    "top_10_positive_sse_removal_gain_positive": true
+  },
+  "protocol_sha256": "09352f21895584767893094e4d804981b5bba53fcad7a89b472a1c4bf8b87077",
+  "repeat_summaries": {
+    "0": {
+      "base_median_well_rmse": 8.888910522461979,
+      "base_pooled_row_rmse": 13.94140574839577,
+      "candidate_median_well_rmse": 8.485468132593741,
+      "candidate_pooled_row_rmse": 13.644299618797124,
+      "mean_well_rmse_gain_ft": 0.23201901992096383,
+      "median_well_rmse_gain_ft": 0.21820468219077327,
+      "n_rows": 3769838,
+      "n_unique_wells": 770,
+      "n_well_repeat_predictions": 770,
+      "p90_base_well_rmse": 19.397326236682293,
+      "p90_candidate_well_rmse": 18.998385635301897,
+      "pooled_row_rmse_gain_ft": 0.2971061295986459,
+      "win_rate": 0.5623376623376624
+    },
+    "1": {
+      "base_median_well_rmse": 8.944282615779088,
+      "base_pooled_row_rmse": 13.999267160578125,
+      "candidate_median_well_rmse": 8.3797392104056,
+      "candidate_pooled_row_rmse": 13.501823502085573,
+      "mean_well_rmse_gain_ft": 0.43077126976356195,
+      "median_well_rmse_gain_ft": 0.4319164670008786,
+      "n_rows": 3769838,
+      "n_unique_wells": 770,
+      "n_well_repeat_predictions": 770,
+      "p90_base_well_rmse": 19.868589945243567,
+      "p90_candidate_well_rmse": 19.501213282783052,
+      "pooled_row_rmse_gain_ft": 0.4974436584925517,
+      "win_rate": 0.6025974025974026
+    }
+  },
+  "result_sha256_sidecar": "equal_ordered_joint_outer_repeated.json.sha256",
+  "scored_sse_artifact": {
+    "columns": [
+      "repeat",
+      "outer_fold",
+      "well",
+      "typewell_profile_hash",
+      "n_rows",
+      "base_sse",
+      "typewell_sse",
+      "ordered_sse",
+      "joint_sse"
+    ],
+    "file": "equal_ordered_joint_outer_repeated_scored_sse.csv",
+    "rows": 1540,
+    "sha256": "174da7fca4cb029e76020f4a6952b88075edfe24a78e2ce9ac589681d775c14d",
+    "sha256_sidecar": "equal_ordered_joint_outer_repeated_scored_sse.csv.sha256"
+  },
+  "status": "MEASURE_ONLY_NOT_CONFIRMED",
+  "sum_fold_runtime_seconds": 7360.960089206696,
+  "top_10_positive_sse_removal": {
+    "definition": "remove the ten wells with largest positive base-minus-joint SSE summed across both repeats",
+    "passed": true,
+    "remaining_mean_repeat_pooled_rmse_gain_ft": 0.19555445811951966,
+    "remaining_repeat_pooled_rmse_gains_ft": {
+      "0": 0.06875066586856882,
+      "1": 0.3223582503704705
+    },
+    "removed_count": 10,
+    "removed_positive_sse_benefit": {
+      "1b1eba53": 11870471.407280058,
+      "2fd68f7b": 4642886.5907446,
+      "43e16325": 3537365.983948473,
+      "5f4d2a52": 3432021.016550403,
+      "78a4a386": 3410993.0800658558,
+      "86454a6f": 5477688.452604659,
+      "a959858c": 3753504.9446814377,
+      "b95e7121": 3082123.0794244744,
+      "d90aa14c": 3056960.3731138473,
+      "da3bfe4e": 2982480.397893999
+    },
+    "removed_wells": [
+      "1b1eba53",
+      "86454a6f",
+      "2fd68f7b",
+      "a959858c",
+      "43e16325",
+      "5f4d2a52",
+      "78a4a386",
+      "b95e7121",
+      "d90aa14c",
+      "da3bfe4e"
+    ],
+    "requested_removal_count": 10
+  }
+}

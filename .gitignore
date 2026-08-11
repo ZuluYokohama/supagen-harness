@@ -79,3 +79,13 @@ geosteern/*.pkl
 geosteern/*.json
 tvt_model.pkl
 tvt_model.json
+
+# research fold shards: ~178 MB, regenerable from the sealed protocol records
+# that are committed alongside them in research/results/
+research/results/*_folds/
+
+# research scratch
+research/.pytest_*/
+.ruff_cache/
+notebooks/.ipython/
+notebooks/.jupyter_runtime/

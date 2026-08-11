@@ -1,0 +1,51 @@
+{
+  "record_version": "geosteern-anchored-structural-field-stop/1",
+  "status": "STOP",
+  "status_ceiling": "MEASURE_ONLY",
+  "stage": "truth_quarantined_resource_benchmark",
+  "reason_code": "EXTERNAL_TIMEOUT_BEFORE_BENCHMARK_ATOMIC_COMMIT",
+  "method": "anchored_differential_field_over_sealed_joint_v1",
+  "protocol": {
+    "file": "anchored_structural_field_protocol.json",
+    "version": "geosteern-anchored-structural-field-gate/1",
+    "sha256": "654675c14fc197018f87d6d5e4960be480bf41325036570386303e4e11911d1e",
+    "sidecar_verified": true,
+    "bound_source_count": 14,
+    "all_bound_sources_match": true
+  },
+  "formal_attempt": {
+    "exit_code": 124,
+    "external_wall_seconds_reported": 3600.3,
+    "watchdog_timeout_milliseconds": 3600267,
+    "frozen_total_wall_limit_seconds": 3600.0,
+    "process_terminated": true,
+    "benchmark_file_exists": false,
+    "benchmark_sidecar_exists": false,
+    "internal_total_seconds": null,
+    "internal_phase_split": null,
+    "internal_acceptance": "UNMEASURED",
+    "completed_and_sealed_within_watchdog": false
+  },
+  "excluded_attempt": {
+    "external_wall_seconds": 120.2,
+    "classification": "ORCHESTRATION_ONLY_EXCLUDED",
+    "artifacts_written": 0
+  },
+  "downstream_state": {
+    "prediction_shards": 0,
+    "pretruth_inventory_exists": false,
+    "anchored_field_score_artifacts": 0,
+    "validation_truth_scoring_performed": false
+  },
+  "filesystem_audit": {
+    "surviving_benchmark_temp_artifacts": 0,
+    "new_workspace_cache_artifacts": 0,
+    "note": "Existing caches predate protocol freeze; deleted transient files cannot be inferred."
+  },
+  "interpretation": {
+    "operational_resource_gate_pass": false,
+    "internal_total_wall_threshold_violation_proven": false,
+    "residue": "The external timeout does not identify whether termination occurred during measured computation or the final commit audit."
+  },
+  "decision": "V1 remains STOP; RUN, AGGREGATE, and SCORE remain closed."
+}
