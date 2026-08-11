@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -417,7 +418,7 @@ def _metric_block(records: list[PredictionRecord],
     if corrections is None:
         corrections = np.zeros(len(records))
     well_rmse, counts, squared = [], [], 0.0
-    for record, correction in zip(records, corrections):
+    for record, correction in zip(records, corrections, strict=True):
         err = record.prediction + correction - record.truth
         well_rmse.append(float(np.sqrt(np.mean(err ** 2))))
         counts.append(len(err))
@@ -430,7 +431,9 @@ def _metric_block(records: list[PredictionRecord],
         "pooled_row_rmse": float(np.sqrt(squared / np.sum(counts))),
         "n_wells": int(len(records)),
         "n_rows": int(np.sum(counts)),
-        "per_well": dict(zip((r.well for r in records), values.tolist())),
+        "per_well": dict(
+            zip((r.well for r in records), values.tolist(), strict=True)
+        ),
     }
 
 
@@ -438,7 +441,7 @@ def _bootstrap_gain(records: list[PredictionRecord],
                     corrections: np.ndarray | list[np.ndarray]) -> dict:
     base_rmse, candidate_rmse = [], []
     base_sse, candidate_sse, counts = [], [], []
-    for record, correction in zip(records, corrections):
+    for record, correction in zip(records, corrections, strict=True):
         base_error = record.prediction - record.truth
         candidate_error = base_error + correction
         base_sse.append(float(np.sum(base_error ** 2)))
@@ -561,7 +564,7 @@ def _ordered_corrections(
 def _calibrate_vector_shrink(records: list[PredictionRecord],
                              corrections: list[np.ndarray]) -> float:
     numerator, denominator = 0.0, 0.0
-    for record, correction in zip(records, corrections):
+    for record, correction in zip(records, corrections, strict=True):
         residual = record.truth - record.prediction
         numerator += float(np.sum(correction * residual))
         denominator += float(np.sum(correction ** 2))
@@ -578,7 +581,7 @@ def _fit_joint_correction(
     """Fit two global coefficients on OOF development residuals."""
     gram = np.zeros((2, 2), dtype=float)
     rhs = np.zeros(2, dtype=float)
-    for record, a, b in zip(records, first, second):
+    for record, a, b in zip(records, first, second, strict=True):
         design = np.column_stack((a, b))
         target = record.truth - record.prediction
         gram += design.T @ design
@@ -593,6 +596,12 @@ def run(args: argparse.Namespace) -> dict:
     _assert_inference_safe_feature_surface()
     params, train_stride, eval_stride = _research_params(args.confirm)
     files, dev_files, hold_files, typewell_hashes = _filtered_files(args.data_dir)
+    if not dev_files:
+        raise RuntimeError(
+            f"development split is empty: no eligible wells under {args.data_dir!r} "
+            f"({len(files)} eligible in total). Check --data-dir points at a corpus "
+            "containing train/."
+        )
     _runtime_mutation_audit(dev_files[0])
     print(
         f"eligible wells {len(files)}  dev {len(dev_files)}  hold {len(hold_files)}  "
@@ -789,8 +798,10 @@ def run(args: argparse.Namespace) -> dict:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--data-dir", default=r"C:\PRIMEdEV-1\GeoSteerN-Codex",
-        help="directory containing train/, test/, and sample_submission.csv",
+        "--data-dir", default=os.environ.get("GEOSTEERN_DATA_DIR"),
+        required="GEOSTEERN_DATA_DIR" not in os.environ,
+        help="directory containing train/, test/, and sample_submission.csv; "
+             "defaults to $GEOSTEERN_DATA_DIR",
     )
     parser.add_argument(
         "--confirm", action="store_true",

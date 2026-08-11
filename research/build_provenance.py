@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -114,8 +115,13 @@ def build(data_dir: Path, result_path: Path) -> tuple[Path, Path]:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("result", type=Path)
+    default_data_dir = os.environ.get("GEOSTEERN_DATA_DIR")
     parser.add_argument(
-        "--data-dir", type=Path, default=Path(r"C:\PRIMEdEV-1\GeoSteerN-Codex")
+        "--data-dir",
+        type=Path,
+        default=Path(default_data_dir) if default_data_dir else None,
+        required=default_data_dir is None,
+        help="directory containing train/ and test/; defaults to $GEOSTEERN_DATA_DIR",
     )
     return parser.parse_args()
 

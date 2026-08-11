@@ -108,6 +108,7 @@ FROZEN_ORDERED_SETTING_ITEMS = (
     ("geometry_sigma_initial", 1.5),
     ("geometry_sigma_growth_per_md", 0.015),
     ("huber_cap", 4.0),
+    ("anchor_huber_cap", 100.0),
 )
 
 SOURCE_FILES = (
@@ -1268,7 +1269,7 @@ def _run_one_fold(
     test_ordered = [ordered_shrink * correction for correction in test_ordered_raw]
     train_tw_arrays = [
         np.full(len(record.idx), correction)
-        for record, correction in zip(train_records, train_tw_scalar)
+        for record, correction in zip(train_records, train_tw_scalar, strict=True)
     ]
     test_tw_arrays = [
         np.full(len(record.idx), correction)
@@ -2178,7 +2179,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     freeze.add_argument(
         "--data-dir",
         type=Path,
-        default=Path(r"C:\PRIMEdEV-1\GeoSteerN-Codex"),
+        required=True,
+        help="directory containing train/ and test/",
     )
     freeze.add_argument("--protocol", type=Path, required=True)
 

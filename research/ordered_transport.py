@@ -21,8 +21,8 @@ that it was not derived from suffix truth.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -44,6 +44,9 @@ ANCHOR_WEIGHT = 10.0
 GEOMETRY_SIGMA_INITIAL = 1.5
 GEOMETRY_SIGMA_GROWTH_PER_MD = 0.015
 HUBER_CAP = 4.0
+# The anchor prior runs its own, much looser cap than the emission term's
+# HUBER_CAP; it is a separate frozen setting, not a reuse of that one.
+ANCHOR_HUBER_CAP = 100.0
 
 FROZEN_SETTINGS: Mapping[str, float | int] = {
     "window_half_width_md": WINDOW_HALF_WIDTH_MD,
@@ -60,6 +63,7 @@ FROZEN_SETTINGS: Mapping[str, float | int] = {
     "geometry_sigma_initial": GEOMETRY_SIGMA_INITIAL,
     "geometry_sigma_growth_per_md": GEOMETRY_SIGMA_GROWTH_PER_MD,
     "huber_cap": HUBER_CAP,
+    "anchor_huber_cap": ANCHOR_HUBER_CAP,
 }
 
 _FORBIDDEN_INPUT_NAMES = frozenset(
@@ -338,7 +342,7 @@ def ordered_reversible_interval_transport(
     source_clipped = np.clip(source, 0, state_count - 1)
 
     previous_cost = ANCHOR_WEIGHT * robust_huber_cost(
-        (state_tvt - anchor) / STATE_STEP_TVT, cap=100.0
+        (state_tvt - anchor) / STATE_STEP_TVT, cap=ANCHOR_HUBER_CAP
     )
     backpointer = np.empty((len(nodes), state_count), dtype=np.int32)
     orientation_by_state = np.empty((len(nodes), state_count), dtype=np.int8)

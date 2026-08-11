@@ -1,7 +1,9 @@
 """Small deterministic checks for the interval measurement instrument."""
+import os
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from research.interval_gate import (
     EXCLUDED_TEST_OVERLAP,
@@ -61,6 +63,10 @@ def test_leakage_guards_are_present_and_feature_surface_passes() -> None:
 
 
 def test_real_well_features_ignore_mutated_targets_and_surfaces() -> None:
-    path = Path(r"C:\PRIMEdEV-1\GeoSteerN-Codex\train\015fe0d2__horizontal_well.csv")
-    if path.exists():
-        _runtime_mutation_audit(str(path))
+    data_dir = os.environ.get("GEOSTEERN_DATA_DIR")
+    if not data_dir:
+        pytest.skip("GEOSTEERN_DATA_DIR is unset; no well corpus to audit against")
+    path = Path(data_dir) / "train" / "015fe0d2__horizontal_well.csv"
+    if not path.exists():
+        pytest.skip(f"fixture well not present under $GEOSTEERN_DATA_DIR: {path}")
+    _runtime_mutation_audit(str(path))
