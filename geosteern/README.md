@@ -107,8 +107,47 @@ Each was implemented, measured on the same holdout, and dropped:
 | quantile-0.5 objective | significantly *worse* — the metric is RMSE, minimised by the conditional mean |
 | heteroscedastic shrinkage | spread correlates +0.32 with error but per-bin shrinks are non-monotonic |
 | learned sequence encoder (dilated CNN) | 10.21 median; overfits past epoch 50 on 510 wells |
-| survey geometry (DLS, build/turn rate, azimuth) | promising on one holdout (+0.31 median), **refuted** by 773-well CV: better on 49.9% of wells, Wilcoxon p=0.71 |
+| survey geometry (DLS, build/turn rate, azimuth) | **retired on a valid test — see below.** The original CV result was uninformative: those features were differenced at 1 ft, where the signal is 100% coordinate-rounding artifact. Rebuilt correctly and retested, geometry still adds nothing |
 | split-point augmentation (3 prefix cuts/well, 3x training rows) | screened well (mean 11.44 → 11.05), **not confirmed**: CV mean +0.096 ft CI [-0.151, +0.354], better on 49.9% of wells, Wilcoxon p=0.86. Does improve calibration — optimal shrink rises 0.85 → ~1.0 — but not accuracy |
+
+### Survey geometry, retested
+
+The first attempt reported "+0.31 median on one holdout, refuted by 773-well CV:
+better on 49.9% of wells, p=0.71." That refutation happened to reach the right
+conclusion for the wrong reason, and it is worth recording why.
+
+X/Y/Z are stored to 0.01 ft. Differencing them at 1 ft yields `0.01/1` rad =
+**57.3°/100 ft of pure rounding**; measured apparent dogleg at that baseline is
+**57.15** against the 57.30 prediction. The original DLS/build/turn features
+contained no geometry at all. A 49.9% win rate is precisely what a pure-noise
+feature produces — so that number described the *inputs*, not survey geometry.
+
+Rebuilt through `research/survey_primitives` (signed inclination unfolded past
+90°, azimuth relative to each well's own derived section azimuth, dogleg and
+build/turn rates at course scale) and rerun on the same 4-fold grouped CV with
+shrinkage calibrated inside each fold:
+
+| set | window | median gain | better on | Wilcoxon p |
+|---|---:|---:|---:|---:|
+| N/S subset, n=130 | 96 ft | +0.041 | 43.8% | 0.255 |
+| N/S subset, n=130 | 128 ft | −0.006 | 50.8% | 0.832 |
+| corpus, n=773 | 96 ft | +0.067 | 50.5% | 0.606 |
+| corpus, n=773 | 128 ft | +0.167 | 51.5% | 0.126 |
+
+Null on four counts. Every gain sits under the ~0.2 ft resolution floor. Win
+rates are coin flips. The two windows — both inside the swept usable band —
+disagree by 2.5×, so protocol sensitivity exceeds the effect. And decisively,
+the effect is *weakest* where it should be strongest: the N/S subset is the
+~130 wells whose azimuth is least corrupted by axial magnetic interference
+(`sin(I)·sin(A_mag) < 0.34`), and geometry there is worthless at both windows,
+with a negative mean at 96 ft.
+
+The +0.167 ft at 128 ft is the largest number in the experiment and the one to
+distrust, for the same reason the original +0.31 was: a positive point estimate
+with a ~50% per-well win rate is the signature of noise, not signal. This
+project has now made that error twice and caught it twice.
+
+Geometry is retired — this time on evidence that could have shown otherwise.
 
 ## Learning curve — still improving at 580 wells
 
