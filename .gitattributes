@@ -4,5 +4,8 @@
 # Git for Windows) rewrites LF to CRLF on checkout, which changes those exact
 # bytes and breaks every recorded digest on a fresh clone.
 #
-# Leave this tree byte-identical to what was committed.
+# Leave these byte-identical to what was committed. Three protocol records
+# also seal geosteern/data.py, features.py and model.py, so the model package
+# is covered too -- a fresh clone fails those three digests without this.
 research/** -text
+geosteern/*.py -text
