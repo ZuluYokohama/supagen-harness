@@ -1,0 +1,54 @@
+{
+  "status": "MEASURE_ONLY_NOT_OPEN",
+  "generated_at_utc": "2026-08-10T08:24:08.305517+00:00",
+  "git_head_before_untracked_research": "9724aca2ba4d30bb4ec50a82b3e4cde299b3aa5a",
+  "result": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\interval_gate_strict_confirm_v2.json",
+  "data_dir": "C:\\PRIMEdEV-1\\GeoSteerN-Codex",
+  "excluded_test_overlap_ids": [
+    "000d7d20",
+    "00bbac68",
+    "00e12e8b"
+  ],
+  "eligible_wells": 770,
+  "unique_typewell_groups": 749,
+  "dev_wells": 498,
+  "holdout_wells": 272,
+  "holdout_suffix_rows": 1324387,
+  "frozen_ordered_settings": {
+    "window_half_width_md": 90.0,
+    "window_samples": 13,
+    "emission_weight": 4.0,
+    "smoothing_samples": 7,
+    "state_step_tvt": 0.5,
+    "state_half_width_tvt": 150.0,
+    "node_step_md": 15.0,
+    "max_transition_bins": 10,
+    "transition_weight": 0.15,
+    "transition_scale_tvt": 1.2,
+    "anchor_weight": 10.0,
+    "geometry_sigma_initial": 1.5,
+    "geometry_sigma_growth_per_md": 0.015,
+    "huber_cap": 4.0
+  },
+  "sha256": {
+    "research/interval_gate.py": "066646a725045cb65a40d5d2f70505a010b580e036d1cd327e295bb4eae2ca2d",
+    "research/ordered_transport.py": "5cc7d9a0dba36b0bacd7a3899c5eb5f4e7141ae3bb580b334159b3359f8e6bbd",
+    "research/test_interval_gate.py": "90a82955c620c7d65b66336f8e9d8e3c00c2b20ad0ea1c4612e9348175eeeeec",
+    "research/test_ordered_transport.py": "0bf1c8a631b553eb24ee0c52d4663afb8f9f9ad0ded4b31cd4878853d84fb33d",
+    "interval_gate_strict_confirm_v2.json": "7af51a2cb4cafa7a74d2e2408870df99a2dc7307af4724e889a48ddcabcec6f6",
+    "interval_gate_strict_confirm_v2_fold_manifest.csv": "087bf86f0a1e31aef4e2451a8c0becf492454f90d3bfaa3a088a7efdb0f49b15",
+    "competition_pdf": "bad2da16a25b1221f16b047c7e75c46675255236fac22ddcf7bbbb7a54df37d9"
+  },
+  "packages": {
+    "numpy": "2.5.1",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "scikit-learn": "1.8.0",
+    "lightgbm": "4.7.0"
+  },
+  "notes": [
+    "Formation surfaces, suffix TVT, Geology, PNGs, and ID lookup are forbidden features.",
+    "Ordered diagnostic correction magnitudes in the result are pre-shrink raw solver values.",
+    "The artifact is one deterministic outer holdout and is not an OPEN certificate."
+  ]
+}

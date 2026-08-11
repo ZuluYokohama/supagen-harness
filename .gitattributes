@@ -1,0 +1,11 @@
+# The research tree is hash-sealed: anchored_structural_field_protocol.json
+# records byte-level sha256 for 14 source files and 53 result artifacts, and
+# every result carries a .sha256 sidecar. core.autocrlf (true by default in
+# Git for Windows) rewrites LF to CRLF on checkout, which changes those exact
+# bytes and breaks every recorded digest on a fresh clone.
+#
+# Leave these byte-identical to what was committed. Three protocol records
+# also seal geosteern/data.py, features.py and model.py, so the model package
+# is covered too -- a fresh clone fails those three digests without this.
+research/** -text
+geosteern/*.py -text

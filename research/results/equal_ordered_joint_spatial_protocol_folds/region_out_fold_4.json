@@ -1,0 +1,2776 @@
+{
+  "all_spatial_manifest_sha256": {
+    "pad_out": {
+      "byte_sha256": "c9a80bbdf5acb28d34f542381ddba53a1f50c7b243dee234183a3f01cb5d82e6",
+      "logical_manifest_sha256": "f17ec3ec67b1490b7efab6250f7c674b24a7de080e563310dfc8b5ef9a3c4b8c"
+    },
+    "region_out": {
+      "byte_sha256": "af0160c67397c18d4e6cb70da18ba5ea76429973b5b0c8d2a9d4b1f0752ac5df",
+      "logical_manifest_sha256": "70af52ed2ca2ed3e77e218471836869ea74771e08eacfbd4e7f93c9067bda622"
+    }
+  },
+  "embargo_well_count": 53,
+  "fold": 4,
+  "frozen_membership_sha256": {
+    "embargo_ids": "13e628eaa16b6e5c95f5fdeff8f77faf5b6747990e111d20f53c089dcb5c88f8",
+    "training_ids": "845809103efb4420bf94132a33b87d2c7430ccee27ace23746cb0407fefc244d",
+    "validation_ids": "33a6721f66b318a7293b26d522eb1bcfc4d7d675e3cc2ef55c62e65078695a06"
+  },
+  "learned_from_manifest_retained_training_only": {
+    "base_shrink": 0.9400000000000001,
+    "inner_oof_point_r2": 0.2520128663838409,
+    "joint_coefficients": [
+      1.023361597002595,
+      0.9735115269989425
+    ],
+    "ordered_shrink": 0.1975812802978544,
+    "training_points": 352042,
+    "training_typewell_groups": 551,
+    "training_wells": 566,
+    "typewell_shrink": 0.37224387624755545
+  },
+  "manifest_byte_sha256": "af0160c67397c18d4e6cb70da18ba5ea76429973b5b0c8d2a9d4b1f0752ac5df",
+  "manifest_logical_sha256": "70af52ed2ca2ed3e77e218471836869ea74771e08eacfbd4e7f93c9067bda622",
+  "method": "equal_ordered_joint_v2",
+  "mode": "region_out",
+  "mode_role": "primary spatial falsification gate",
+  "prediction_channels": [
+    "base_prediction",
+    "typewell_prediction",
+    "ordered_prediction",
+    "joint_prediction"
+  ],
+  "prediction_file": "region_out_fold_4.npz",
+  "prediction_logical_sha256": "d160ef8d8343aaec8e723d0b075283a552a912ef0a1e598d735e7418e5333909",
+  "prediction_rows": 726759,
+  "prediction_sha256": "b3ef24a526207fbf1c7dc3601da7405c1380688f0790c3fd9c3470ca6d127fb3",
+  "protocol_sha256": "0454bb539aaf8584bcb485fe2a2ba8429fa2beaa4db0bc5226f410765bba377b",
+  "runtime_seconds": 653.7888588905334,
+  "status": "MEASURE_ONLY_SPATIAL_PREDICTIONS_SEALED_TRUTH_UNREAD",
+  "test_wells": [
+    {
+      "inner_equality_group": "equality_0000",
+      "n_rows": 4296,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "f54c2d8e8b904d19f277c7dc43746043d417bbe85d88e8495189ee58f0a96870",
+      "well": "015fe0d2",
+      "well_index": 0
+    },
+    {
+      "inner_equality_group": "equality_0003",
+      "n_rows": 6234,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "cf34ef2df48068d83528821f0f8e32dec2db346367954621966ebf60c3298a58",
+      "well": "028d7b28",
+      "well_index": 1
+    },
+    {
+      "inner_equality_group": "equality_0006",
+      "n_rows": 2786,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "026875fc11d291119937b5219e2402265c1ce22bae44f8182ec5cf4d50224315",
+      "well": "03a935ae",
+      "well_index": 2
+    },
+    {
+      "inner_equality_group": "equality_0008",
+      "n_rows": 4798,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "cce0c192b09395912b50d5a88c368ff83aa200a37c240468afeefa7961e39ed2",
+      "well": "0498acab",
+      "well_index": 3
+    },
+    {
+      "inner_equality_group": "equality_0030",
+      "n_rows": 7342,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "2acc6f0e53c607264873cbf98ba184fd285b7919bc79aec71552698ab9984897",
+      "well": "0dd99dc5",
+      "well_index": 4
+    },
+    {
+      "inner_equality_group": "equality_0035",
+      "n_rows": 3272,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "857035812eb27e9bce844731e42998bc79d541a829eeb06530326b13adb91a48",
+      "well": "113011eb",
+      "well_index": 5
+    },
+    {
+      "inner_equality_group": "equality_0041",
+      "n_rows": 5597,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "aa3b632103d76bb445d41b79602f9c89d3cbeb0524cb4b82125634b7f998f010",
+      "well": "1285a37b",
+      "well_index": 6
+    },
+    {
+      "inner_equality_group": "equality_0044",
+      "n_rows": 4554,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "4be418e45dae85fad0eff745ab8e2bb72f0c07faf41062e75fc758f56552eec7",
+      "well": "137d1e44",
+      "well_index": 7
+    },
+    {
+      "inner_equality_group": "equality_0046",
+      "n_rows": 7306,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "5f436200ca5d460892f7acbd1b82d8ed2147bd9b9b7c1189d724bb25e1b76cc3",
+      "well": "13f598d9",
+      "well_index": 8
+    },
+    {
+      "inner_equality_group": "equality_0051",
+      "n_rows": 4695,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "3404d5570ee582a46acd754c662b2d01cc390f8ce4dc702efd874b861e68a939",
+      "well": "153552f5",
+      "well_index": 9
+    },
+    {
+      "inner_equality_group": "equality_0053",
+      "n_rows": 5585,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6f8fdacb57006c9ca08434b8c64eec7498e407755a50bf1f5957341003e116d1",
+      "well": "155887bb",
+      "well_index": 10
+    },
+    {
+      "inner_equality_group": "equality_0056",
+      "n_rows": 4443,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6b5aae65bf00a2da7b4b2ef958626293cd17cb95af55994df61b7ed11c979b5b",
+      "well": "1619e2ca",
+      "well_index": 11
+    },
+    {
+      "inner_equality_group": "equality_0057",
+      "n_rows": 4131,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6ac177febe4de6defb565ad3f1ca0145dace0dc147fcbdc974acbda1ffc48ba1",
+      "well": "16e4a047",
+      "well_index": 12
+    },
+    {
+      "inner_equality_group": "equality_0058",
+      "n_rows": 4883,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "014c211abc0054c592252d014438d34a0f795152416a5a1df6e3fc43910124d7",
+      "well": "173ed841",
+      "well_index": 13
+    },
+    {
+      "inner_equality_group": "equality_0059",
+      "n_rows": 7240,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "4609857f1ecdc5329618ec01f7ac6aee08aea2f83f42dba47db609229f7d4ba9",
+      "well": "1770d7c6",
+      "well_index": 14
+    },
+    {
+      "inner_equality_group": "equality_0060",
+      "n_rows": 3154,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "3c8f37fcfb72f23197c07cc40afb5726f3a665ab8e2b30f04f912343d690ab05",
+      "well": "177622d7",
+      "well_index": 15
+    },
+    {
+      "inner_equality_group": "equality_0065",
+      "n_rows": 5293,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "ea636008b0b84229db08ff0c29086c4688b004c624059d75fce6efaa63201a6e",
+      "well": "19871e7f",
+      "well_index": 16
+    },
+    {
+      "inner_equality_group": "equality_0067",
+      "n_rows": 5620,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "9a19587ac2155fee3db1817ed2c7521673673752cf11993654aec95bd108a608",
+      "well": "19fb4f7b",
+      "well_index": 17
+    },
+    {
+      "inner_equality_group": "equality_0074",
+      "n_rows": 4655,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "e816d75338f5544230706e39f1a607a8d755edc10ec9fe0fb291a51a4c189ab5",
+      "well": "1b1eba53",
+      "well_index": 18
+    },
+    {
+      "inner_equality_group": "equality_0077",
+      "n_rows": 4524,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6450019b44dcab4173396346a26ff63ea82a6e429c20b3be9c341b6bd4b3a411",
+      "well": "1bcb2fcf",
+      "well_index": 19
+    },
+    {
+      "inner_equality_group": "equality_0083",
+      "n_rows": 5328,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "31ce99ea3d82087d90cd6ae1798abf3f93b0855a5d7c00841dc651a04a37c8fd",
+      "well": "1f9afacb",
+      "well_index": 20
+    },
+    {
+      "inner_equality_group": "equality_0086",
+      "n_rows": 5133,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "591b4f7aab5db0230193a16ab4e014defeeee1562f865a52b429884b9f8e2234",
+      "well": "20096916",
+      "well_index": 21
+    },
+    {
+      "inner_equality_group": "equality_0087",
+      "n_rows": 3926,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "fd85b14c55d2d7a916366e09ec2fb992e9dc6adfec9795dbc4dcb61981aa1e40",
+      "well": "200d233d",
+      "well_index": 22
+    },
+    {
+      "inner_equality_group": "equality_0092",
+      "n_rows": 4805,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "04c66301df928fa0dc0f73bb9a1b3055d972c9e4bcd43ea51a481330c878ba14",
+      "well": "204cc64b",
+      "well_index": 23
+    },
+    {
+      "inner_equality_group": "equality_0095",
+      "n_rows": 5172,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "7ce8898679f22966aad54f69e993c766ae97c596d5334ba667b984e3d57dac21",
+      "well": "22c5f93f",
+      "well_index": 24
+    },
+    {
+      "inner_equality_group": "equality_0101",
+      "n_rows": 4319,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "42acee97968ba87b1f0a7fbec44851bd00f12ac7051e9c38006245ffd4968473",
+      "well": "25939962",
+      "well_index": 25
+    },
+    {
+      "inner_equality_group": "equality_0106",
+      "n_rows": 4721,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "67223b1cbd8196df41273d5f3325578db4f9a69c6127b9564778e116bd36429d",
+      "well": "26d3a96a",
+      "well_index": 26
+    },
+    {
+      "inner_equality_group": "equality_0107",
+      "n_rows": 4135,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "cadcf5d1f3d1a6421a9fc2a853f76ecba953c1c11393da9820b3084c9c1c2e06",
+      "well": "272abef3",
+      "well_index": 27
+    },
+    {
+      "inner_equality_group": "equality_0108",
+      "n_rows": 5467,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "a96b0f17c5ff797f50d4140461370e1d1549ce0cf024f0b4c10f61f20a08343f",
+      "well": "27300fd5",
+      "well_index": 28
+    },
+    {
+      "inner_equality_group": "equality_0109",
+      "n_rows": 4837,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "13485705d0b8c33b345b7a4a54b96278f33291c555eef91fcf14426eff85323d",
+      "well": "276b012a",
+      "well_index": 29
+    },
+    {
+      "inner_equality_group": "equality_0110",
+      "n_rows": 4958,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "b9574357084b1544e1720949ef7272bad2627f770825b90f2fd143b744275f0c",
+      "well": "27c3155b",
+      "well_index": 30
+    },
+    {
+      "inner_equality_group": "equality_0117",
+      "n_rows": 1852,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "8a443edd7da24ab7094dfd13f50d1d8fa955e87b428f6184365956952ec076b0",
+      "well": "2ab29395",
+      "well_index": 31
+    },
+    {
+      "inner_equality_group": "equality_0122",
+      "n_rows": 3480,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "5980208dfbdcc30f275012b706838af89ea80bae28ab29003195363c3f0a83e1",
+      "well": "2b547943",
+      "well_index": 32
+    },
+    {
+      "inner_equality_group": "equality_0123",
+      "n_rows": 4210,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "3b6eb0e756bf17d70b45e893ff91cf36b13abf7a5642432d06fc7fa0281bbb10",
+      "well": "2be5c96a",
+      "well_index": 33
+    },
+    {
+      "inner_equality_group": "equality_0132",
+      "n_rows": 7338,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "42a3af865ef0f58fc4c9e4b872c3dce131cf8e43b0404b6ce77b797ccfaebc70",
+      "well": "2d9f6cb9",
+      "well_index": 34
+    },
+    {
+      "inner_equality_group": "equality_0136",
+      "n_rows": 4699,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "0deb626535eb883fe669abc05260b09a4b7a9dfa409d4b0e896d9025f0d3f55c",
+      "well": "2e63d9de",
+      "well_index": 35
+    },
+    {
+      "inner_equality_group": "equality_0138",
+      "n_rows": 3088,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "75ca99142ab0041f2617a213e63f339d8dd1ab090bf7c19b28ea62a1ba47e372",
+      "well": "2f19d536",
+      "well_index": 36
+    },
+    {
+      "inner_equality_group": "equality_0139",
+      "n_rows": 2594,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "b4038f88443a76c41318edbe94e62c4071d26fc67da2aace6fbdc276c011aa11",
+      "well": "2f8e53c3",
+      "well_index": 37
+    },
+    {
+      "inner_equality_group": "equality_0140",
+      "n_rows": 2174,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "f845e55a155fa1a07004dfd9561ccd0acf6c3f6657138927f0f450d9487d439c",
+      "well": "2fa01aa6",
+      "well_index": 38
+    },
+    {
+      "inner_equality_group": "equality_0151",
+      "n_rows": 4494,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "4c27b0910684a692cea16f73ad61282220f30a1160fb280937cb58271830d1a4",
+      "well": "3584a6eb",
+      "well_index": 39
+    },
+    {
+      "inner_equality_group": "equality_0161",
+      "n_rows": 4367,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "ac079adb4d82546b4cf28a7ff361fa3eb523da9dd4e37cb834fe5d75910c0643",
+      "well": "37d36812",
+      "well_index": 40
+    },
+    {
+      "inner_equality_group": "equality_0170",
+      "n_rows": 4201,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "a44aa0ec03e244df4616d729337b9656d8f3e89c28232afeb36db311dcc56893",
+      "well": "3a824aa7",
+      "well_index": 41
+    },
+    {
+      "inner_equality_group": "equality_0174",
+      "n_rows": 7376,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "427b3f00779bac2e904948a10e533879d2b687c1f692d61561c1f6ad808558c4",
+      "well": "3b21ea64",
+      "well_index": 42
+    },
+    {
+      "inner_equality_group": "equality_0176",
+      "n_rows": 3603,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6df85ab3093ae08984fd1d61ac6c3be746e21af2262c4bbea4e9390f686d06c6",
+      "well": "3bfee975",
+      "well_index": 43
+    },
+    {
+      "inner_equality_group": "equality_0177",
+      "n_rows": 5069,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "cc9dc47c5695b3529a158adeb71c4ff68df19a2d81ba2468fdf8875a2b22ab0f",
+      "well": "3c3dbcbc",
+      "well_index": 44
+    },
+    {
+      "inner_equality_group": "equality_0181",
+      "n_rows": 6858,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "0a68a746f2e3c6570255bb47075e52fd45665722c0185e0decb420cca57a40af",
+      "well": "3e678ea7",
+      "well_index": 45
+    },
+    {
+      "inner_equality_group": "equality_0187",
+      "n_rows": 2973,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "a37d455f53c40a0871a0dcde702310757c0e3c65f69e91486c5d80a08a16f623",
+      "well": "41fb0192",
+      "well_index": 46
+    },
+    {
+      "inner_equality_group": "equality_0198",
+      "n_rows": 3373,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "db6876c71a5830499d336e9cb651f223c92c1fec5802877197b5cb0d6392b5da",
+      "well": "4630ab92",
+      "well_index": 47
+    },
+    {
+      "inner_equality_group": "equality_0201",
+      "n_rows": 6197,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "303475534e0e9c5e56144689086a311b27248841017492872bf70596ad97fade",
+      "well": "466fc788",
+      "well_index": 48
+    },
+    {
+      "inner_equality_group": "equality_0203",
+      "n_rows": 4215,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6c64f388f80b5af1d4738c21e9de8363d8d5d815a7014a8c15c2ae1fc0bfcc96",
+      "well": "46a7190b",
+      "well_index": 49
+    },
+    {
+      "inner_equality_group": "equality_0206",
+      "n_rows": 3606,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "8dd001fecafc4483cac4616fe1cc7b2489d71371fbce8d42b27585a128f08ec1",
+      "well": "46dfcfca",
+      "well_index": 50
+    },
+    {
+      "inner_equality_group": "equality_0207",
+      "n_rows": 4406,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "c77ed8ddd6ba798d7f0b62bfdea3be4d2164553f9b1db7fda793e9c72d4ab1e0",
+      "well": "47222616",
+      "well_index": 51
+    },
+    {
+      "inner_equality_group": "equality_0212",
+      "n_rows": 4671,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "476da80165fa60854e32fbc653a0e7df7e8ef5e7dc95c979acc11208e2a59d1e",
+      "well": "493b5b31",
+      "well_index": 52
+    },
+    {
+      "inner_equality_group": "equality_0214",
+      "n_rows": 2588,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "226fc4c3fcc908b9928bf4dd998ee4539e7c74caa0bb221ca5a3ffafe356d400",
+      "well": "4a035ec2",
+      "well_index": 53
+    },
+    {
+      "inner_equality_group": "equality_0216",
+      "n_rows": 5809,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "16c046fd402be4cbe4d77a984e2ac554ecfffbc7d70d9e2200eb68afb39b3d9e",
+      "well": "4a8ecc0b",
+      "well_index": 54
+    },
+    {
+      "inner_equality_group": "equality_0218",
+      "n_rows": 7312,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "376bfd0e40206f3dd0c060278bcee733949f91c4933fa9d6765b3fcdaacaabdb",
+      "well": "4b831d20",
+      "well_index": 55
+    },
+    {
+      "inner_equality_group": "equality_0219",
+      "n_rows": 5384,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "3d543c19e48875b7aa616a06ad64c2217884074b29901e06d7fde862d6a35a03",
+      "well": "4c2208f5",
+      "well_index": 56
+    },
+    {
+      "inner_equality_group": "equality_0224",
+      "n_rows": 6019,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "e78c3c036010bb9ab78fe65d070c763458b40873eac00914d940278f3e9dfcbf",
+      "well": "4cecf7b3",
+      "well_index": 57
+    },
+    {
+      "inner_equality_group": "equality_0257",
+      "n_rows": 4771,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "406c8b4af56742d2482e923bfe3cdc730ccf0a3741b97a0a082541a449bec7bc",
+      "well": "57f05c51",
+      "well_index": 58
+    },
+    {
+      "inner_equality_group": "equality_0258",
+      "n_rows": 4995,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "9c81690d20d363ea40fb890c42a9f8fcadabb1c71a5a86177eb1ac43fb50259c",
+      "well": "58850d2c",
+      "well_index": 59
+    },
+    {
+      "inner_equality_group": "equality_0263",
+      "n_rows": 5260,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "c08e648a23fb1354e2f294d15a816c20a72f11bec5268afb338fcdf4457867ea",
+      "well": "5a1a8fd8",
+      "well_index": 60
+    },
+    {
+      "inner_equality_group": "equality_0281",
+      "n_rows": 5562,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "44e93140ea811f27646134b7e79e5bd6807cc73e5247e9b81b28e96df917c450",
+      "well": "5f75f796",
+      "well_index": 61
+    },
+    {
+      "inner_equality_group": "equality_0290",
+      "n_rows": 3881,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "48a4ec8f7acdc964cd291b920487b214f323c82714136526631d0c6185b9bfc4",
+      "well": "647f2a41",
+      "well_index": 62
+    },
+    {
+      "inner_equality_group": "equality_0297",
+      "n_rows": 7429,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "838b18d99e86ae0fc3bea66a115ca67810ef11a113d0012ea1f9e5736f6db734",
+      "well": "67847288",
+      "well_index": 63
+    },
+    {
+      "inner_equality_group": "equality_0298",
+      "n_rows": 4911,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "58300c24451bfb238e465b919940d066b00d0d474c67959da6a7aea6d8105d60",
+      "well": "67a8da4a",
+      "well_index": 64
+    },
+    {
+      "inner_equality_group": "equality_0301",
+      "n_rows": 4120,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "9491e6a5b9eb2f36ece391079a6b3ca9775fb0c81295a656be9bcf0ddda684af",
+      "well": "699ea575",
+      "well_index": 65
+    },
+    {
+      "inner_equality_group": "equality_0310",
+      "n_rows": 5632,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6445a832e0e5792583b8dcf276561230595172897074888a40c0649b815bb826",
+      "well": "6e6d122c",
+      "well_index": 66
+    },
+    {
+      "inner_equality_group": "equality_0315",
+      "n_rows": 5947,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "0d28b77badd0f0361a5315773c2353de4da2c2d7150bda81debc21b2d6b4817a",
+      "well": "70925e23",
+      "well_index": 67
+    },
+    {
+      "inner_equality_group": "equality_0324",
+      "n_rows": 4397,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "81f762e9c55b2da777cb971f2c1484a504c10c7e2674a68b796d0988e99768ca",
+      "well": "727a3a10",
+      "well_index": 68
+    },
+    {
+      "inner_equality_group": "equality_0325",
+      "n_rows": 4263,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "7aee1cac1bf181e191c9a8ba4c6584f0071f0132db38ad0393705f1de7d59a34",
+      "well": "729665c0",
+      "well_index": 69
+    },
+    {
+      "inner_equality_group": "equality_0328",
+      "n_rows": 5193,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6d98c2642b8e50232b7ed6e9075f32a1adfebdf112430e8808322d3ef120cdd9",
+      "well": "72dd8501",
+      "well_index": 70
+    },
+    {
+      "inner_equality_group": "equality_0331",
+      "n_rows": 5670,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "c26329d9ef083440f8c45b1592e28e1176262f7492a807bd0fd05cc2d9c7cdff",
+      "well": "73b1447d",
+      "well_index": 71
+    },
+    {
+      "inner_equality_group": "equality_0333",
+      "n_rows": 5361,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "12434c86de169f507d1c01108ccb8b64781d1035988c200815c5df92f84a1099",
+      "well": "75c20ec7",
+      "well_index": 72
+    },
+    {
+      "inner_equality_group": "equality_0338",
+      "n_rows": 4174,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "1277629ee6f5cd76f723e97821b2541d25c8d02b2b6735bcbec0cff4bd7f7dbc",
+      "well": "77b0d905",
+      "well_index": 73
+    },
+    {
+      "inner_equality_group": "equality_0340",
+      "n_rows": 5497,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "18a98091bdf6333a0cadf0ef8ff479989802507608ce0a65c49bf5b7af26ac0e",
+      "well": "7850c72e",
+      "well_index": 74
+    },
+    {
+      "inner_equality_group": "equality_0342",
+      "n_rows": 5302,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "e61ee860fcdfa3becd3d36a96561174253de465fba0c0060713ea62103a9d4e3",
+      "well": "79507629",
+      "well_index": 75
+    },
+    {
+      "inner_equality_group": "equality_0345",
+      "n_rows": 4998,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "f3946ed5bc17738ff873ef9b6d0dd1c149c19bcda99788b80c40477ed6088323",
+      "well": "7a5660b0",
+      "well_index": 76
+    },
+    {
+      "inner_equality_group": "equality_0101",
+      "n_rows": 3077,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "42acee97968ba87b1f0a7fbec44851bd00f12ac7051e9c38006245ffd4968473",
+      "well": "8050c789",
+      "well_index": 77
+    },
+    {
+      "inner_equality_group": "equality_0360",
+      "n_rows": 4543,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "9612bb18431fbb0f4ee1ee81f00093b9d73d902ae1c1387f5009fa5a8ef8a36f",
+      "well": "81bf5923",
+      "well_index": 78
+    },
+    {
+      "inner_equality_group": "equality_0369",
+      "n_rows": 3647,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "c64a67793a8c26036c4b48c860882434329c07ce7df0fc3ded23ef74d162e314",
+      "well": "84815d5a",
+      "well_index": 79
+    },
+    {
+      "inner_equality_group": "equality_0374",
+      "n_rows": 7964,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "683bede3a9b060f56f7c8d4ee653f50d486f9598c24a1214160f4f131fb53221",
+      "well": "86454a6f",
+      "well_index": 80
+    },
+    {
+      "inner_equality_group": "equality_0385",
+      "n_rows": 5994,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "88afad4477dfdde28721024e0694fcaa87b630599c6b4642678b4c96f4ce3913",
+      "well": "89f1085d",
+      "well_index": 81
+    },
+    {
+      "inner_equality_group": "equality_0392",
+      "n_rows": 5234,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "0fec821b2c7fe722bd73d15fac4c886c9d8b5ecba843c8c36ef995e634cf2fbf",
+      "well": "8b12bab6",
+      "well_index": 82
+    },
+    {
+      "inner_equality_group": "equality_0395",
+      "n_rows": 6163,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "5786f708713875a31ed30c3f4ebf0e8719e8f0ef2d1671af3788c51af0901586",
+      "well": "8b9d8326",
+      "well_index": 83
+    },
+    {
+      "inner_equality_group": "equality_0398",
+      "n_rows": 4089,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "51c067ef648d3a0dc2726536acfccea33919e37260d87cbe3d02f63724db0735",
+      "well": "8bfa881d",
+      "well_index": 84
+    },
+    {
+      "inner_equality_group": "equality_0400",
+      "n_rows": 3888,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "959df0f712d499eda4ddf8a69f97c2aa82b4d280895cf5cd1a6daceba381635f",
+      "well": "8c8348e8",
+      "well_index": 85
+    },
+    {
+      "inner_equality_group": "equality_0139",
+      "n_rows": 4073,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "b4038f88443a76c41318edbe94e62c4071d26fc67da2aace6fbdc276c011aa11",
+      "well": "91db7070",
+      "well_index": 86
+    },
+    {
+      "inner_equality_group": "equality_0409",
+      "n_rows": 4517,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "8c814bb6bee2ff235b4f18de0604cebff503c543b354a2732a7cf446c1916bdd",
+      "well": "925a7cd1",
+      "well_index": 87
+    },
+    {
+      "inner_equality_group": "equality_0421",
+      "n_rows": 4847,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "973720f0ce7b93e4ca13beaf2daebe00d1172aa1dcf6639f6145a4e3922e20d4",
+      "well": "94d813a4",
+      "well_index": 88
+    },
+    {
+      "inner_equality_group": "equality_0424",
+      "n_rows": 3346,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "944631a73e6c50387ccb5fb04456782592bf59ee3212245337488bf820878731",
+      "well": "96936c22",
+      "well_index": 89
+    },
+    {
+      "inner_equality_group": "equality_0430",
+      "n_rows": 4772,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "b403525330edce19d58d74c17f4ac595a722c597a5dfde4523a41602cb32a71b",
+      "well": "98177ced",
+      "well_index": 90
+    },
+    {
+      "inner_equality_group": "equality_0439",
+      "n_rows": 6294,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "4501b84f0eb414db0baf3d098b4cdae16dbedda7b77136baaeb477c8bdb85d9e",
+      "well": "9a8ae0d6",
+      "well_index": 91
+    },
+    {
+      "inner_equality_group": "equality_0447",
+      "n_rows": 7439,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "83a81c26fe17d9f2fa32843020527727b76f2263e548278bb2410358e37d1d68",
+      "well": "9bd2bba3",
+      "well_index": 92
+    },
+    {
+      "inner_equality_group": "equality_0449",
+      "n_rows": 6052,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "30dc974a5c995269250c4b166b99b1c20e4965c38bd69fa9705eb783b902daf6",
+      "well": "9c350a6a",
+      "well_index": 93
+    },
+    {
+      "inner_equality_group": "equality_0451",
+      "n_rows": 5107,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "c18a201ff96d4034c377a6c3c57b0db3780a09ff73c2c7336333d5ca8f3b18e9",
+      "well": "9d072e4c",
+      "well_index": 94
+    },
+    {
+      "inner_equality_group": "equality_0453",
+      "n_rows": 4030,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "4850d68cc604a7f70f216e79a2a0aeea58399b34088777c0bb0c115c1d071fef",
+      "well": "9d4272e3",
+      "well_index": 95
+    },
+    {
+      "inner_equality_group": "equality_0474",
+      "n_rows": 4532,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "fb2e687689f5b219681372fda5d5414c6faed145678f4f55ff8d9cdfa3a2735b",
+      "well": "a48640d9",
+      "well_index": 96
+    },
+    {
+      "inner_equality_group": "equality_0485",
+      "n_rows": 4670,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "9f3982fee9b6ddf8f4fb6ed8a84e774889afd863315863aea7276f3f239ff877",
+      "well": "a6f967fb",
+      "well_index": 97
+    },
+    {
+      "inner_equality_group": "equality_0493",
+      "n_rows": 5721,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "1a840ed14a6ee6b3d50dc2eff32346615083100b417f6003c111644436fd93b2",
+      "well": "a87433c9",
+      "well_index": 98
+    },
+    {
+      "inner_equality_group": "equality_0494",
+      "n_rows": 5538,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "1c584189e1cd0a4402a01017b272f2a5b8971a38d90f7882ba17419353ccdeb9",
+      "well": "a8ed028a",
+      "well_index": 99
+    },
+    {
+      "inner_equality_group": "equality_0499",
+      "n_rows": 2712,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "2fee5147534159e599b04e1c89b602b71992d1b4dc8f668b4f9b8543b991141d",
+      "well": "aaeffccb",
+      "well_index": 100
+    },
+    {
+      "inner_equality_group": "equality_0500",
+      "n_rows": 5185,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "d0cc9683497530608a76e43f99068feba4d408a2ed6c534d36ac49984af241d2",
+      "well": "ab112491",
+      "well_index": 101
+    },
+    {
+      "inner_equality_group": "equality_0501",
+      "n_rows": 5694,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "c40e607dd2c39943936e1842b3a1120361118091823ac46ffd26c27fa2575598",
+      "well": "ab18d3fc",
+      "well_index": 102
+    },
+    {
+      "inner_equality_group": "equality_0502",
+      "n_rows": 4250,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "79b92bc1dc1eb3cebf3a4faeef5aa220b79002ea721b14bf4bfea060faa88128",
+      "well": "ab3ced07",
+      "well_index": 103
+    },
+    {
+      "inner_equality_group": "equality_0505",
+      "n_rows": 3217,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "d7389f5432151af05f1bb4c1ffc928b506aeba0c19b054a22cc306fad3441c15",
+      "well": "abf460d2",
+      "well_index": 104
+    },
+    {
+      "inner_equality_group": "equality_0506",
+      "n_rows": 5004,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "00ca5e55378dfcf65064fcfd40c4c88566fc315edeef11dcda9cf5fc4aa19d64",
+      "well": "ac6f01d5",
+      "well_index": 105
+    },
+    {
+      "inner_equality_group": "equality_0385",
+      "n_rows": 2719,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "88afad4477dfdde28721024e0694fcaa87b630599c6b4642678b4c96f4ce3913",
+      "well": "aed44918",
+      "well_index": 106
+    },
+    {
+      "inner_equality_group": "equality_0518",
+      "n_rows": 2755,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "cc0038555f67252e0d8e11fa54139c2b1054a1e14158fd667441b7af29ca7720",
+      "well": "b0f53bf4",
+      "well_index": 107
+    },
+    {
+      "inner_equality_group": "equality_0520",
+      "n_rows": 5998,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "5bfd53a0b99223a57e39ea6b98240eac6b348d852871ff8481ada9824c88fd9d",
+      "well": "b1efb8a4",
+      "well_index": 108
+    },
+    {
+      "inner_equality_group": "equality_0525",
+      "n_rows": 6211,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "8e0ccdc97bf7715d75ce3d454dda9f2e73040922a74e007103c166fc28ebade8",
+      "well": "b38e3116",
+      "well_index": 109
+    },
+    {
+      "inner_equality_group": "equality_0530",
+      "n_rows": 7326,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "3267580d8d460b55ca4d523323c4f5465ef272d28bcebf9f56d4bd7ee3d4b5eb",
+      "well": "b5aa9634",
+      "well_index": 110
+    },
+    {
+      "inner_equality_group": "equality_0539",
+      "n_rows": 4166,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "2fb8f1f013244de79f2f8db24d18b10933357e372beef40cf0902b75b3d82c11",
+      "well": "ba48188d",
+      "well_index": 111
+    },
+    {
+      "inner_equality_group": "equality_0549",
+      "n_rows": 4226,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6b2551f90d2aa3b3cbea822fecc63579274db1f610a1d7ec3ad55080ff78567c",
+      "well": "be35c8f2",
+      "well_index": 112
+    },
+    {
+      "inner_equality_group": "equality_0553",
+      "n_rows": 5723,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "62865d3db19a3a19abbcc0da867cf692d2157c88e7e913ca19aeec744f3a4638",
+      "well": "bffe3082",
+      "well_index": 113
+    },
+    {
+      "inner_equality_group": "equality_0557",
+      "n_rows": 4191,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "f49b83358a1473b6e9c4e0eae1402b481a0cee64eb44cc16182501c6c0eec358",
+      "well": "c07fd0cd",
+      "well_index": 114
+    },
+    {
+      "inner_equality_group": "equality_0562",
+      "n_rows": 7119,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "c680da48245f1da4fd4903cee5540da85c00f02d062db3c83eb4d768ef475383",
+      "well": "c2c6fc71",
+      "well_index": 115
+    },
+    {
+      "inner_equality_group": "equality_0564",
+      "n_rows": 5316,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "33c6abbb3cad79abdeba4182a37542860e5bfb253fc4c1415ccb1db767e13fed",
+      "well": "c3957531",
+      "well_index": 116
+    },
+    {
+      "inner_equality_group": "equality_0568",
+      "n_rows": 4356,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "22d1672e69c769ee2966c3bbc14b6129766d293bb1c54d152a7322fa70b2e870",
+      "well": "c47e0767",
+      "well_index": 117
+    },
+    {
+      "inner_equality_group": "equality_0573",
+      "n_rows": 4664,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "404e6e727621dab683e2be5060818c25da2d58836709031b84d54131a68d17e4",
+      "well": "c6797dd7",
+      "well_index": 118
+    },
+    {
+      "inner_equality_group": "equality_0576",
+      "n_rows": 4312,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "67809a1766cb2ab46b34a691ff1a508659110722ecda82b4d440f5a6284ff8f3",
+      "well": "c70c0e01",
+      "well_index": 119
+    },
+    {
+      "inner_equality_group": "equality_0585",
+      "n_rows": 4848,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "788f272b3094a1c26e785e8c1d5e5010c24a44c7b2074754a2302e759c39ae0f",
+      "well": "cad13e8f",
+      "well_index": 120
+    },
+    {
+      "inner_equality_group": "equality_0586",
+      "n_rows": 5609,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "26c98c01460eb8c72cbde7176dac87a7ed061b05044a2b72e7406099200d4252",
+      "well": "cb34231f",
+      "well_index": 121
+    },
+    {
+      "inner_equality_group": "equality_0592",
+      "n_rows": 4401,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "7ed87342c6038dff0cf5ccedfef97af067fa265d6cdd749f37643be0c5a40ac0",
+      "well": "ccedb12b",
+      "well_index": 122
+    },
+    {
+      "inner_equality_group": "equality_0595",
+      "n_rows": 4840,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "ee3c880ddfd89c5f7ef93dee06e71441dce1f8524531f8d300d51aae962b6a82",
+      "well": "cdc31d65",
+      "well_index": 123
+    },
+    {
+      "inner_equality_group": "equality_0601",
+      "n_rows": 2957,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "95fe21cabbd37b526c8ede533a8342df8e9550f40202d522e7e03c8ed847eddf",
+      "well": "d07aed8f",
+      "well_index": 124
+    },
+    {
+      "inner_equality_group": "equality_0610",
+      "n_rows": 3838,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "c3a0905e50618acd5fa75024edd3fb07c9496f50c1a1295f8536bfabb52061c2",
+      "well": "d217e0c5",
+      "well_index": 125
+    },
+    {
+      "inner_equality_group": "equality_0612",
+      "n_rows": 3899,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "fb313d69d98a7f6507a5036410530ce7898b54002018c1e7f35c404b1f81886f",
+      "well": "d273674e",
+      "well_index": 126
+    },
+    {
+      "inner_equality_group": "equality_0618",
+      "n_rows": 4501,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "7b50fce1678de7ccf597236383ab1fa3709930f21a42d6f4eb2421cf4bfbc6e4",
+      "well": "d4f60a28",
+      "well_index": 127
+    },
+    {
+      "inner_equality_group": "equality_0625",
+      "n_rows": 6193,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "775b1ef3091f7b6c38b8758c0acbcf59956b7c5b8f5c7d6f9663fb5bdefb8ad7",
+      "well": "d6dd7330",
+      "well_index": 128
+    },
+    {
+      "inner_equality_group": "equality_0626",
+      "n_rows": 6023,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "b318bbb467c7b8e145d3258523b5689007534716c6e26bd21cfa7688bde820d6",
+      "well": "d7ba4f9d",
+      "well_index": 129
+    },
+    {
+      "inner_equality_group": "equality_0627",
+      "n_rows": 5401,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "825ddd438f2fef9e77a1ce78bb50f81fa13ef416264a1b55b6291f20c2fec415",
+      "well": "d7eb0be8",
+      "well_index": 130
+    },
+    {
+      "inner_equality_group": "equality_0632",
+      "n_rows": 4919,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "45fe35f281a0b7bd6a0d8e4fc6d6d7d2467046dbcc0b42814df0a1b85de97474",
+      "well": "d9d6d94d",
+      "well_index": 131
+    },
+    {
+      "inner_equality_group": "equality_0634",
+      "n_rows": 2114,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "6129a232239899e9f92d0375a7df9a7d96bb4204277b279fc6cd68472e877e84",
+      "well": "da2d4d7c",
+      "well_index": 132
+    },
+    {
+      "inner_equality_group": "equality_0639",
+      "n_rows": 7369,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "eaf0a89bb7b724ab045d8b264657ab1c68c07050097e504e8cb4b07bf2179206",
+      "well": "dbee6c86",
+      "well_index": 133
+    },
+    {
+      "inner_equality_group": "equality_0649",
+      "n_rows": 5311,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "5be7b22cff50650fe569187302a583722758b0d67882c2ac6792e3f7315ba922",
+      "well": "df73b8f3",
+      "well_index": 134
+    },
+    {
+      "inner_equality_group": "equality_0656",
+      "n_rows": 2949,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "ea37b5866ec2e892c469f8fbc0d9785d251914972f80beeab4625b83c018af90",
+      "well": "e161bd0c",
+      "well_index": 135
+    },
+    {
+      "inner_equality_group": "equality_0657",
+      "n_rows": 5070,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "4c75d784420d0de5f5b8643e68159069854384c288681bd090817b48fc561771",
+      "well": "e201fd6d",
+      "well_index": 136
+    },
+    {
+      "inner_equality_group": "equality_0663",
+      "n_rows": 7195,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "007c90c0f10491ad6068b34279e5c667bfe2b479c9983118908a0ea929d9abc3",
+      "well": "e46f4ef4",
+      "well_index": 137
+    },
+    {
+      "inner_equality_group": "equality_0665",
+      "n_rows": 4469,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "a9922add79664c407245a03dde392602cf6f6f8b14f804b261dddcfd61fc27e5",
+      "well": "e5864244",
+      "well_index": 138
+    },
+    {
+      "inner_equality_group": "equality_0671",
+      "n_rows": 4812,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "5568595aa41cd5319cfabefc4ca216eebede5c23e47d2a0af548c1a1e7105252",
+      "well": "e748dd88",
+      "well_index": 139
+    },
+    {
+      "inner_equality_group": "equality_0681",
+      "n_rows": 5348,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "2ca25e9fdb7c43ffba3a03db0284fdc0644c07d7b43bf2d501f67b021453e4bb",
+      "well": "eabc711b",
+      "well_index": 140
+    },
+    {
+      "inner_equality_group": "equality_0690",
+      "n_rows": 5462,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "22a9c202bc94e326d71da37715f551f3b4b317a02901ee563114ddb18d5ad410",
+      "well": "ec13af42",
+      "well_index": 141
+    },
+    {
+      "inner_equality_group": "equality_0692",
+      "n_rows": 2945,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "5ad85c76fa37c244121b9cdc7c8cf893140deea91823dd34aa2a92b7b70b2816",
+      "well": "ed6436d6",
+      "well_index": 142
+    },
+    {
+      "inner_equality_group": "equality_0693",
+      "n_rows": 3117,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "f7bbdcacbc44317370070d9bb44970e32dff2457c15f62594e19034255b0e7c6",
+      "well": "edf885a3",
+      "well_index": 143
+    },
+    {
+      "inner_equality_group": "equality_0694",
+      "n_rows": 4544,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "227b3e6f6519a6888bd55af087e34190e4eaf8d51cb4e9188e4c1a3862d07d1f",
+      "well": "ee0300f7",
+      "well_index": 144
+    },
+    {
+      "inner_equality_group": "equality_0705",
+      "n_rows": 4108,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "88121ea67439affbb6593865b80a776f89e7e9b6a0b81e4af499c1010bb66898",
+      "well": "f053a1b9",
+      "well_index": 145
+    },
+    {
+      "inner_equality_group": "equality_0712",
+      "n_rows": 5141,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "946fa9cc6d0dd4615a51d662037b3a9e372d9fbd6399cd7b905951e00f88eff5",
+      "well": "f321a31c",
+      "well_index": 146
+    },
+    {
+      "inner_equality_group": "equality_0712",
+      "n_rows": 7296,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "946fa9cc6d0dd4615a51d662037b3a9e372d9fbd6399cd7b905951e00f88eff5",
+      "well": "fa667be2",
+      "well_index": 147
+    },
+    {
+      "inner_equality_group": "equality_0735",
+      "n_rows": 407,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "1d5862ff43d915db7a0c5a524520dee837a19fc77123a417620ecd56c3a15c6c",
+      "well": "fba7683c",
+      "well_index": 148
+    },
+    {
+      "inner_equality_group": "equality_0740",
+      "n_rows": 4217,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "8bdbdaca48f7dca33957d9b3e96b8facc9a22b4d348516cb0e043d040ec482ae",
+      "well": "fd710aea",
+      "well_index": 149
+    },
+    {
+      "inner_equality_group": "equality_0744",
+      "n_rows": 4247,
+      "spatial_cluster_id": "region_fold_4",
+      "typewell_profile_hash": "2a7ce8dbfbb4412ca88e26d2f224236bfae2ff45047935c85738cdf7911ddea8",
+      "well": "febb4411",
+      "well_index": 150
+    }
+  ],
+  "train_typewell_groups": 551,
+  "train_wells": 566,
+  "validation_diagnostics": {
+    "015fe0d2": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 156,
+      "observed_gr_fraction": 0.7457142857142857,
+      "reversal_count": 46,
+      "reverse_orientation_nodes": 132,
+      "states": 566,
+      "status": "ok",
+      "viterbi_nodes": 288
+    },
+    "028d7b28": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 285,
+      "observed_gr_fraction": 0.7821157067388224,
+      "reversal_count": 113,
+      "reverse_orientation_nodes": 132,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 417
+    },
+    "03a935ae": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 108,
+      "observed_gr_fraction": 0.9604966139954854,
+      "reversal_count": 30,
+      "reverse_orientation_nodes": 79,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 187
+    },
+    "0498acab": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 173,
+      "observed_gr_fraction": 0.5422885572139303,
+      "reversal_count": 53,
+      "reverse_orientation_nodes": 148,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 321
+    },
+    "0dd99dc5": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 279,
+      "observed_gr_fraction": 0.5291875408407755,
+      "reversal_count": 79,
+      "reverse_orientation_nodes": 212,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 491
+    },
+    "113011eb": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 114,
+      "observed_gr_fraction": 0.5220346415259811,
+      "reversal_count": 28,
+      "reverse_orientation_nodes": 106,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 220
+    },
+    "1285a37b": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 209,
+      "observed_gr_fraction": 0.9616371741186006,
+      "reversal_count": 32,
+      "reverse_orientation_nodes": 166,
+      "states": 535,
+      "status": "ok",
+      "viterbi_nodes": 375
+    },
+    "137d1e44": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 172,
+      "observed_gr_fraction": 0.5634405195628069,
+      "reversal_count": 27,
+      "reverse_orientation_nodes": 133,
+      "states": 545,
+      "status": "ok",
+      "viterbi_nodes": 305
+    },
+    "13f598d9": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 270,
+      "observed_gr_fraction": 0.46586075665995075,
+      "reversal_count": 80,
+      "reverse_orientation_nodes": 218,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 488
+    },
+    "153552f5": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 200,
+      "observed_gr_fraction": 0.8124038165589412,
+      "reversal_count": 78,
+      "reverse_orientation_nodes": 114,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 314
+    },
+    "155887bb": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 241,
+      "observed_gr_fraction": 0.7506372132540357,
+      "reversal_count": 47,
+      "reverse_orientation_nodes": 133,
+      "states": 445,
+      "status": "ok",
+      "viterbi_nodes": 374
+    },
+    "1619e2ca": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 226,
+      "observed_gr_fraction": 0.6391202932355882,
+      "reversal_count": 65,
+      "reverse_orientation_nodes": 72,
+      "states": 572,
+      "status": "ok",
+      "viterbi_nodes": 298
+    },
+    "16e4a047": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 188,
+      "observed_gr_fraction": 0.4479239971850809,
+      "reversal_count": 35,
+      "reverse_orientation_nodes": 88,
+      "states": 584,
+      "status": "ok",
+      "viterbi_nodes": 277
+    },
+    "173ed841": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 169,
+      "observed_gr_fraction": 0.639509954058193,
+      "reversal_count": 51,
+      "reverse_orientation_nodes": 158,
+      "states": 597,
+      "status": "ok",
+      "viterbi_nodes": 327
+    },
+    "1770d7c6": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 308,
+      "observed_gr_fraction": 0.9550487885100318,
+      "reversal_count": 78,
+      "reverse_orientation_nodes": 176,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 484
+    },
+    "177622d7": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 117,
+      "observed_gr_fraction": 0.5267078101723771,
+      "reversal_count": 44,
+      "reverse_orientation_nodes": 95,
+      "states": 445,
+      "status": "ok",
+      "viterbi_nodes": 212
+    },
+    "19871e7f": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 199,
+      "observed_gr_fraction": 0.858920581655481,
+      "reversal_count": 53,
+      "reverse_orientation_nodes": 155,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 354
+    },
+    "19fb4f7b": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 237,
+      "observed_gr_fraction": 0.9621355547141235,
+      "reversal_count": 57,
+      "reverse_orientation_nodes": 139,
+      "states": 514,
+      "status": "ok",
+      "viterbi_nodes": 376
+    },
+    "1b1eba53": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 186,
+      "observed_gr_fraction": 0.8597615499254844,
+      "reversal_count": 55,
+      "reverse_orientation_nodes": 126,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 312
+    },
+    "1bcb2fcf": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 150,
+      "observed_gr_fraction": 0.9274427603998711,
+      "reversal_count": 37,
+      "reverse_orientation_nodes": 153,
+      "states": 494,
+      "status": "ok",
+      "viterbi_nodes": 303
+    },
+    "1f9afacb": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 247,
+      "observed_gr_fraction": 0.6114261411964843,
+      "reversal_count": 53,
+      "reverse_orientation_nodes": 110,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 357
+    },
+    "20096916": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 200,
+      "observed_gr_fraction": 0.5162790697674419,
+      "reversal_count": 54,
+      "reverse_orientation_nodes": 144,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 344
+    },
+    "200d233d": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 156,
+      "observed_gr_fraction": 0.9341926729986432,
+      "reversal_count": 45,
+      "reverse_orientation_nodes": 107,
+      "states": 534,
+      "status": "ok",
+      "viterbi_nodes": 263
+    },
+    "204cc64b": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 209,
+      "observed_gr_fraction": 0.6718314223737217,
+      "reversal_count": 78,
+      "reverse_orientation_nodes": 113,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 322
+    },
+    "22c5f93f": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 208,
+      "observed_gr_fraction": 0.4500650383003324,
+      "reversal_count": 41,
+      "reverse_orientation_nodes": 138,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 346
+    },
+    "25939962": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 162,
+      "observed_gr_fraction": 0.4201943666611761,
+      "reversal_count": 37,
+      "reverse_orientation_nodes": 126,
+      "states": 519,
+      "status": "ok",
+      "viterbi_nodes": 289
+    },
+    "26d3a96a": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 182,
+      "observed_gr_fraction": 0.6815158546017015,
+      "reversal_count": 46,
+      "reverse_orientation_nodes": 134,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 316
+    },
+    "272abef3": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 147,
+      "observed_gr_fraction": 0.9538894755367828,
+      "reversal_count": 53,
+      "reverse_orientation_nodes": 130,
+      "states": 596,
+      "status": "ok",
+      "viterbi_nodes": 277
+    },
+    "27300fd5": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 203,
+      "observed_gr_fraction": 0.9662875710804224,
+      "reversal_count": 61,
+      "reverse_orientation_nodes": 163,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 366
+    },
+    "276b012a": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 204,
+      "observed_gr_fraction": 0.8524876808138611,
+      "reversal_count": 66,
+      "reverse_orientation_nodes": 120,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 324
+    },
+    "27c3155b": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 212,
+      "observed_gr_fraction": 0.9665754214090189,
+      "reversal_count": 49,
+      "reverse_orientation_nodes": 120,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 332
+    },
+    "2ab29395": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 59,
+      "observed_gr_fraction": 0.7016541353383459,
+      "reversal_count": 20,
+      "reverse_orientation_nodes": 66,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 125
+    },
+    "2b547943": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 149,
+      "observed_gr_fraction": 0.6827129214578055,
+      "reversal_count": 45,
+      "reverse_orientation_nodes": 84,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 233
+    },
+    "2be5c96a": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 168,
+      "observed_gr_fraction": 0.2702937597775074,
+      "reversal_count": 37,
+      "reverse_orientation_nodes": 104,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 282
+    },
+    "2d9f6cb9": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 296,
+      "observed_gr_fraction": 0.9616320853135505,
+      "reversal_count": 66,
+      "reverse_orientation_nodes": 195,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 491
+    },
+    "2e63d9de": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 172,
+      "observed_gr_fraction": 0.8518063028439662,
+      "reversal_count": 51,
+      "reverse_orientation_nodes": 143,
+      "states": 538,
+      "status": "ok",
+      "viterbi_nodes": 315
+    },
+    "2f19d536": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 140,
+      "observed_gr_fraction": 0.6935075885328836,
+      "reversal_count": 29,
+      "reverse_orientation_nodes": 67,
+      "states": 475,
+      "status": "ok",
+      "viterbi_nodes": 207
+    },
+    "2f8e53c3": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 118,
+      "observed_gr_fraction": 0.6479554802806679,
+      "reversal_count": 36,
+      "reverse_orientation_nodes": 56,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 174
+    },
+    "2fa01aa6": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 115,
+      "observed_gr_fraction": 0.7329015544041451,
+      "reversal_count": 52,
+      "reverse_orientation_nodes": 31,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 146
+    },
+    "3584a6eb": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 203,
+      "observed_gr_fraction": 0.824390243902439,
+      "reversal_count": 32,
+      "reverse_orientation_nodes": 98,
+      "states": 586,
+      "status": "ok",
+      "viterbi_nodes": 301
+    },
+    "37d36812": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 163,
+      "observed_gr_fraction": 0.7726441748379591,
+      "reversal_count": 42,
+      "reverse_orientation_nodes": 130,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 293
+    },
+    "3a824aa7": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 158,
+      "observed_gr_fraction": 0.5327580133849947,
+      "reversal_count": 67,
+      "reverse_orientation_nodes": 123,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 281
+    },
+    "3b21ea64": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 260,
+      "observed_gr_fraction": 0.9451829067340437,
+      "reversal_count": 43,
+      "reverse_orientation_nodes": 233,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 493
+    },
+    "3bfee975": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 149,
+      "observed_gr_fraction": 0.42197327044025157,
+      "reversal_count": 30,
+      "reverse_orientation_nodes": 92,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 242
+    },
+    "3c3dbcbc": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 212,
+      "observed_gr_fraction": 0.4675155549124584,
+      "reversal_count": 40,
+      "reverse_orientation_nodes": 127,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 339
+    },
+    "3e678ea7": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 281,
+      "observed_gr_fraction": 0.6141696234405403,
+      "reversal_count": 86,
+      "reverse_orientation_nodes": 178,
+      "states": 549,
+      "status": "ok",
+      "viterbi_nodes": 459
+    },
+    "41fb0192": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 115,
+      "observed_gr_fraction": 0.9413375941565852,
+      "reversal_count": 20,
+      "reverse_orientation_nodes": 85,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 200
+    },
+    "4630ab92": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 118,
+      "observed_gr_fraction": 0.7542867910307142,
+      "reversal_count": 37,
+      "reverse_orientation_nodes": 108,
+      "states": 561,
+      "status": "ok",
+      "viterbi_nodes": 226
+    },
+    "466fc788": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 223,
+      "observed_gr_fraction": 0.5448693189133513,
+      "reversal_count": 80,
+      "reverse_orientation_nodes": 192,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 415
+    },
+    "46a7190b": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 163,
+      "observed_gr_fraction": 0.6452355650017711,
+      "reversal_count": 39,
+      "reverse_orientation_nodes": 119,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 282
+    },
+    "46dfcfca": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 142,
+      "observed_gr_fraction": 0.539524486892908,
+      "reversal_count": 35,
+      "reverse_orientation_nodes": 100,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 242
+    },
+    "47222616": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 178,
+      "observed_gr_fraction": 0.8339331619537275,
+      "reversal_count": 39,
+      "reverse_orientation_nodes": 117,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 295
+    },
+    "493b5b31": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 202,
+      "observed_gr_fraction": 0.9578733294596165,
+      "reversal_count": 68,
+      "reverse_orientation_nodes": 111,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 313
+    },
+    "4a035ec2": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 84,
+      "observed_gr_fraction": 0.9113224237063247,
+      "reversal_count": 19,
+      "reverse_orientation_nodes": 90,
+      "states": 577,
+      "status": "ok",
+      "viterbi_nodes": 174
+    },
+    "4a8ecc0b": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 229,
+      "observed_gr_fraction": 0.9816924328722538,
+      "reversal_count": 32,
+      "reverse_orientation_nodes": 160,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 389
+    },
+    "4b831d20": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 240,
+      "observed_gr_fraction": 0.9630022262270752,
+      "reversal_count": 74,
+      "reverse_orientation_nodes": 249,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 489
+    },
+    "4c2208f5": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 232,
+      "observed_gr_fraction": 0.96219646799117,
+      "reversal_count": 34,
+      "reverse_orientation_nodes": 128,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 360
+    },
+    "4cecf7b3": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 248,
+      "observed_gr_fraction": 0.5445544554455446,
+      "reversal_count": 66,
+      "reverse_orientation_nodes": 155,
+      "states": 509,
+      "status": "ok",
+      "viterbi_nodes": 403
+    },
+    "57f05c51": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 201,
+      "observed_gr_fraction": 0.9410311824637234,
+      "reversal_count": 54,
+      "reverse_orientation_nodes": 118,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 319
+    },
+    "58850d2c": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 207,
+      "observed_gr_fraction": 0.9797629372651055,
+      "reversal_count": 52,
+      "reverse_orientation_nodes": 127,
+      "states": 552,
+      "status": "ok",
+      "viterbi_nodes": 334
+    },
+    "5a1a8fd8": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 217,
+      "observed_gr_fraction": 0.5086586439683005,
+      "reversal_count": 54,
+      "reverse_orientation_nodes": 135,
+      "states": 572,
+      "status": "ok",
+      "viterbi_nodes": 352
+    },
+    "5f75f796": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 166,
+      "observed_gr_fraction": 0.559393773894047,
+      "reversal_count": 44,
+      "reverse_orientation_nodes": 206,
+      "states": 508,
+      "status": "ok",
+      "viterbi_nodes": 372
+    },
+    "647f2a41": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 156,
+      "observed_gr_fraction": 0.6905414667580535,
+      "reversal_count": 34,
+      "reverse_orientation_nodes": 97,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 260
+    },
+    "67847288": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 300,
+      "observed_gr_fraction": 0.5345541748419447,
+      "reversal_count": 78,
+      "reverse_orientation_nodes": 197,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 497
+    },
+    "67a8da4a": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 189,
+      "observed_gr_fraction": 0.8264860797592175,
+      "reversal_count": 52,
+      "reverse_orientation_nodes": 140,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 329
+    },
+    "699ea575": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 157,
+      "observed_gr_fraction": 0.5761782974059189,
+      "reversal_count": 44,
+      "reverse_orientation_nodes": 119,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 276
+    },
+    "6e6d122c": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 199,
+      "observed_gr_fraction": 0.7419172666949033,
+      "reversal_count": 44,
+      "reverse_orientation_nodes": 178,
+      "states": 507,
+      "status": "ok",
+      "viterbi_nodes": 377
+    },
+    "70925e23": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 216,
+      "observed_gr_fraction": 0.8950693756194251,
+      "reversal_count": 53,
+      "reverse_orientation_nodes": 182,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 398
+    },
+    "727a3a10": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 160,
+      "observed_gr_fraction": 0.7264269946389151,
+      "reversal_count": 34,
+      "reverse_orientation_nodes": 135,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 295
+    },
+    "729665c0": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 150,
+      "observed_gr_fraction": 0.5807792207792207,
+      "reversal_count": 46,
+      "reverse_orientation_nodes": 125,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 286
+    },
+    "72dd8501": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 194,
+      "observed_gr_fraction": 0.5142898383371824,
+      "reversal_count": 47,
+      "reverse_orientation_nodes": 153,
+      "states": 577,
+      "status": "ok",
+      "viterbi_nodes": 348
+    },
+    "73b1447d": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 244,
+      "observed_gr_fraction": 0.6542143047061951,
+      "reversal_count": 58,
+      "reverse_orientation_nodes": 135,
+      "states": 461,
+      "status": "ok",
+      "viterbi_nodes": 379
+    },
+    "75c20ec7": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 189,
+      "observed_gr_fraction": 0.37168632893823733,
+      "reversal_count": 62,
+      "reverse_orientation_nodes": 166,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 359
+    },
+    "77b0d905": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 127,
+      "observed_gr_fraction": 0.7722437953739659,
+      "reversal_count": 49,
+      "reverse_orientation_nodes": 153,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 280
+    },
+    "7850c72e": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 202,
+      "observed_gr_fraction": 0.9553941908713693,
+      "reversal_count": 53,
+      "reverse_orientation_nodes": 166,
+      "states": 507,
+      "status": "ok",
+      "viterbi_nodes": 368
+    },
+    "79507629": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 180,
+      "observed_gr_fraction": 0.8719945355191256,
+      "reversal_count": 69,
+      "reverse_orientation_nodes": 175,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 355
+    },
+    "7a5660b0": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 172,
+      "observed_gr_fraction": 0.96280276816609,
+      "reversal_count": 34,
+      "reverse_orientation_nodes": 163,
+      "states": 579,
+      "status": "ok",
+      "viterbi_nodes": 335
+    },
+    "8050c789": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 117,
+      "observed_gr_fraction": 0.7487854251012146,
+      "reversal_count": 23,
+      "reverse_orientation_nodes": 90,
+      "states": 468,
+      "status": "ok",
+      "viterbi_nodes": 207
+    },
+    "81bf5923": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 201,
+      "observed_gr_fraction": 0.9242092076417162,
+      "reversal_count": 45,
+      "reverse_orientation_nodes": 103,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 304
+    },
+    "84815d5a": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 121,
+      "observed_gr_fraction": 0.7557699583806281,
+      "reversal_count": 39,
+      "reverse_orientation_nodes": 124,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 245
+    },
+    "86454a6f": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 270,
+      "observed_gr_fraction": 0.19901098901098901,
+      "reversal_count": 68,
+      "reverse_orientation_nodes": 221,
+      "states": 566,
+      "status": "ok",
+      "viterbi_nodes": 532
+    },
+    "89f1085d": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 266,
+      "observed_gr_fraction": 0.6822729091636655,
+      "reversal_count": 77,
+      "reverse_orientation_nodes": 135,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 401
+    },
+    "8b12bab6": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 208,
+      "observed_gr_fraction": 0.4492836676217765,
+      "reversal_count": 52,
+      "reverse_orientation_nodes": 142,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 350
+    },
+    "8b9d8326": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 205,
+      "observed_gr_fraction": 0.3933861082737487,
+      "reversal_count": 56,
+      "reverse_orientation_nodes": 195,
+      "states": 539,
+      "status": "ok",
+      "viterbi_nodes": 412
+    },
+    "8bfa881d": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 163,
+      "observed_gr_fraction": 0.5779565291802157,
+      "reversal_count": 41,
+      "reverse_orientation_nodes": 111,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 274
+    },
+    "8c8348e8": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 173,
+      "observed_gr_fraction": 0.7358896255151407,
+      "reversal_count": 49,
+      "reverse_orientation_nodes": 88,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 261
+    },
+    "91db7070": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 162,
+      "observed_gr_fraction": 0.7052780729720156,
+      "reversal_count": 35,
+      "reverse_orientation_nodes": 111,
+      "states": 555,
+      "status": "ok",
+      "viterbi_nodes": 273
+    },
+    "925a7cd1": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 176,
+      "observed_gr_fraction": 0.8398707891093677,
+      "reversal_count": 33,
+      "reverse_orientation_nodes": 127,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 303
+    },
+    "94d813a4": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 198,
+      "observed_gr_fraction": 0.7338795326961007,
+      "reversal_count": 61,
+      "reverse_orientation_nodes": 127,
+      "states": 565,
+      "status": "ok",
+      "viterbi_nodes": 325
+    },
+    "96936c22": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 136,
+      "observed_gr_fraction": 0.8262957774664799,
+      "reversal_count": 35,
+      "reverse_orientation_nodes": 88,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 224
+    },
+    "98177ced": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 209,
+      "observed_gr_fraction": 0.958904109589041,
+      "reversal_count": 64,
+      "reverse_orientation_nodes": 111,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 320
+    },
+    "9a8ae0d6": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 260,
+      "observed_gr_fraction": 0.5027440970006382,
+      "reversal_count": 70,
+      "reverse_orientation_nodes": 161,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 421
+    },
+    "9bd2bba3": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 294,
+      "observed_gr_fraction": 0.9621645402551694,
+      "reversal_count": 85,
+      "reverse_orientation_nodes": 203,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 497
+    },
+    "9c350a6a": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 209,
+      "observed_gr_fraction": 0.5687708493713113,
+      "reversal_count": 53,
+      "reverse_orientation_nodes": 196,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 405
+    },
+    "9d072e4c": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 216,
+      "observed_gr_fraction": 0.8595175051485731,
+      "reversal_count": 65,
+      "reverse_orientation_nodes": 126,
+      "states": 590,
+      "status": "ok",
+      "viterbi_nodes": 342
+    },
+    "9d4272e3": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 158,
+      "observed_gr_fraction": 0.48154565933113846,
+      "reversal_count": 51,
+      "reverse_orientation_nodes": 112,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 270
+    },
+    "a48640d9": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 203,
+      "observed_gr_fraction": 0.8741269359246887,
+      "reversal_count": 47,
+      "reverse_orientation_nodes": 101,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 304
+    },
+    "a6f967fb": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 201,
+      "observed_gr_fraction": 0.9600398179749715,
+      "reversal_count": 40,
+      "reverse_orientation_nodes": 112,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 313
+    },
+    "a87433c9": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 212,
+      "observed_gr_fraction": 0.4581769436997319,
+      "reversal_count": 39,
+      "reverse_orientation_nodes": 171,
+      "states": 336,
+      "status": "ok",
+      "viterbi_nodes": 383
+    },
+    "a8ed028a": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 180,
+      "observed_gr_fraction": 0.9544459644322846,
+      "reversal_count": 70,
+      "reverse_orientation_nodes": 191,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 371
+    },
+    "aaeffccb": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 141,
+      "observed_gr_fraction": 0.45660706498037507,
+      "reversal_count": 28,
+      "reverse_orientation_nodes": 41,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 182
+    },
+    "ab112491": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 223,
+      "observed_gr_fraction": 0.9541655057118975,
+      "reversal_count": 46,
+      "reverse_orientation_nodes": 124,
+      "states": 481,
+      "status": "ok",
+      "viterbi_nodes": 347
+    },
+    "ab18d3fc": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 232,
+      "observed_gr_fraction": 0.705465449093635,
+      "reversal_count": 63,
+      "reverse_orientation_nodes": 149,
+      "states": 469,
+      "status": "ok",
+      "viterbi_nodes": 381
+    },
+    "ab3ced07": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 127,
+      "observed_gr_fraction": 0.5635818908122503,
+      "reversal_count": 48,
+      "reverse_orientation_nodes": 157,
+      "states": 589,
+      "status": "ok",
+      "viterbi_nodes": 285
+    },
+    "abf460d2": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 97,
+      "observed_gr_fraction": 0.48792777661137937,
+      "reversal_count": 31,
+      "reverse_orientation_nodes": 116,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 216
+    },
+    "ac6f01d5": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 188,
+      "observed_gr_fraction": 0.975925100312082,
+      "reversal_count": 50,
+      "reverse_orientation_nodes": 147,
+      "states": 558,
+      "status": "ok",
+      "viterbi_nodes": 335
+    },
+    "aed44918": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 110,
+      "observed_gr_fraction": 0.34253731343283583,
+      "reversal_count": 20,
+      "reverse_orientation_nodes": 73,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 183
+    },
+    "b0f53bf4": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 105,
+      "observed_gr_fraction": 0.7256068538791052,
+      "reversal_count": 24,
+      "reverse_orientation_nodes": 80,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 185
+    },
+    "b1efb8a4": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 266,
+      "observed_gr_fraction": 0.9502777043110289,
+      "reversal_count": 75,
+      "reverse_orientation_nodes": 135,
+      "states": 582,
+      "status": "ok",
+      "viterbi_nodes": 401
+    },
+    "b38e3116": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 252,
+      "observed_gr_fraction": 0.9471963791802867,
+      "reversal_count": 79,
+      "reverse_orientation_nodes": 163,
+      "states": 588,
+      "status": "ok",
+      "viterbi_nodes": 415
+    },
+    "b5aa9634": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 254,
+      "observed_gr_fraction": 0.959871956099234,
+      "reversal_count": 68,
+      "reverse_orientation_nodes": 236,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 490
+    },
+    "ba48188d": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 173,
+      "observed_gr_fraction": 0.8330321647994218,
+      "reversal_count": 50,
+      "reverse_orientation_nodes": 106,
+      "states": 490,
+      "status": "ok",
+      "viterbi_nodes": 279
+    },
+    "be35c8f2": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 150,
+      "observed_gr_fraction": 0.6848084096303831,
+      "reversal_count": 45,
+      "reverse_orientation_nodes": 133,
+      "states": 507,
+      "status": "ok",
+      "viterbi_nodes": 283
+    },
+    "bffe3082": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 215,
+      "observed_gr_fraction": 0.6938491511271918,
+      "reversal_count": 60,
+      "reverse_orientation_nodes": 168,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 383
+    },
+    "c07fd0cd": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 161,
+      "observed_gr_fraction": 0.5663628831814416,
+      "reversal_count": 50,
+      "reverse_orientation_nodes": 120,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 281
+    },
+    "c2c6fc71": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 237,
+      "observed_gr_fraction": 0.6323529411764706,
+      "reversal_count": 66,
+      "reverse_orientation_nodes": 239,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 476
+    },
+    "c3957531": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 186,
+      "observed_gr_fraction": 0.9616763165150262,
+      "reversal_count": 54,
+      "reverse_orientation_nodes": 170,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 356
+    },
+    "c47e0767": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 166,
+      "observed_gr_fraction": 0.8819478603049681,
+      "reversal_count": 43,
+      "reverse_orientation_nodes": 126,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 292
+    },
+    "c6797dd7": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 156,
+      "observed_gr_fraction": 0.8200923419837606,
+      "reversal_count": 55,
+      "reverse_orientation_nodes": 156,
+      "states": 546,
+      "status": "ok",
+      "viterbi_nodes": 312
+    },
+    "c70c0e01": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 179,
+      "observed_gr_fraction": 0.3161631170546475,
+      "reversal_count": 27,
+      "reverse_orientation_nodes": 108,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 289
+    },
+    "cad13e8f": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 201,
+      "observed_gr_fraction": 0.9580541800174774,
+      "reversal_count": 47,
+      "reverse_orientation_nodes": 124,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 325
+    },
+    "cb34231f": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 223,
+      "observed_gr_fraction": 0.9115845539280959,
+      "reversal_count": 43,
+      "reverse_orientation_nodes": 152,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 375
+    },
+    "ccedb12b": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 176,
+      "observed_gr_fraction": 0.5742959390073129,
+      "reversal_count": 37,
+      "reverse_orientation_nodes": 119,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 295
+    },
+    "cdc31d65": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 192,
+      "observed_gr_fraction": 0.5543280871670703,
+      "reversal_count": 29,
+      "reverse_orientation_nodes": 131,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 324
+    },
+    "d07aed8f": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 104,
+      "observed_gr_fraction": 0.7050329156933531,
+      "reversal_count": 25,
+      "reverse_orientation_nodes": 95,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 199
+    },
+    "d217e0c5": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 139,
+      "observed_gr_fraction": 0.8688955014878348,
+      "reversal_count": 33,
+      "reverse_orientation_nodes": 118,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 257
+    },
+    "d273674e": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 155,
+      "observed_gr_fraction": 0.8021958870686651,
+      "reversal_count": 42,
+      "reverse_orientation_nodes": 106,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 261
+    },
+    "d4f60a28": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 175,
+      "observed_gr_fraction": 0.6399378399378399,
+      "reversal_count": 48,
+      "reverse_orientation_nodes": 126,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 301
+    },
+    "d6dd7330": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 252,
+      "observed_gr_fraction": 0.9369451697127937,
+      "reversal_count": 44,
+      "reverse_orientation_nodes": 162,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 414
+    },
+    "d7ba4f9d": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 290,
+      "observed_gr_fraction": 0.6866555140908506,
+      "reversal_count": 76,
+      "reverse_orientation_nodes": 113,
+      "states": 585,
+      "status": "ok",
+      "viterbi_nodes": 403
+    },
+    "d7eb0be8": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 180,
+      "observed_gr_fraction": 0.9533851276359601,
+      "reversal_count": 67,
+      "reverse_orientation_nodes": 181,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 361
+    },
+    "d9d6d94d": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 212,
+      "observed_gr_fraction": 0.8343843843843843,
+      "reversal_count": 42,
+      "reverse_orientation_nodes": 117,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 329
+    },
+    "da2d4d7c": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 96,
+      "observed_gr_fraction": 0.7544154751892347,
+      "reversal_count": 17,
+      "reverse_orientation_nodes": 46,
+      "states": 532,
+      "status": "ok",
+      "viterbi_nodes": 142
+    },
+    "dbee6c86": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 299,
+      "observed_gr_fraction": 0.9489795918367347,
+      "reversal_count": 62,
+      "reverse_orientation_nodes": 194,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 493
+    },
+    "df73b8f3": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 206,
+      "observed_gr_fraction": 0.3702097902097902,
+      "reversal_count": 50,
+      "reverse_orientation_nodes": 144,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 355
+    },
+    "e161bd0c": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 120,
+      "observed_gr_fraction": 0.5360482027841263,
+      "reversal_count": 33,
+      "reverse_orientation_nodes": 76,
+      "states": 596,
+      "status": "ok",
+      "viterbi_nodes": 198
+    },
+    "e201fd6d": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 186,
+      "observed_gr_fraction": 0.7173032407407407,
+      "reversal_count": 49,
+      "reverse_orientation_nodes": 153,
+      "states": 570,
+      "status": "ok",
+      "viterbi_nodes": 339
+    },
+    "e46f4ef4": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 250,
+      "observed_gr_fraction": 0.6182530795072788,
+      "reversal_count": 52,
+      "reverse_orientation_nodes": 231,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 481
+    },
+    "e5864244": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 160,
+      "observed_gr_fraction": 0.6672188172933576,
+      "reversal_count": 46,
+      "reverse_orientation_nodes": 139,
+      "states": 598,
+      "status": "ok",
+      "viterbi_nodes": 299
+    },
+    "e748dd88": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 186,
+      "observed_gr_fraction": 0.9663154533844189,
+      "reversal_count": 57,
+      "reverse_orientation_nodes": 136,
+      "states": 557,
+      "status": "ok",
+      "viterbi_nodes": 322
+    },
+    "eabc711b": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 214,
+      "observed_gr_fraction": 0.5888706590101176,
+      "reversal_count": 54,
+      "reverse_orientation_nodes": 144,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 358
+    },
+    "ec13af42": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 199,
+      "observed_gr_fraction": 0.4837000814995925,
+      "reversal_count": 66,
+      "reverse_orientation_nodes": 167,
+      "states": 601,
+      "status": "ok",
+      "viterbi_nodes": 366
+    },
+    "ed6436d6": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 107,
+      "observed_gr_fraction": 0.9635965784762284,
+      "reversal_count": 33,
+      "reverse_orientation_nodes": 91,
+      "states": 572,
+      "status": "ok",
+      "viterbi_nodes": 198
+    },
+    "edf885a3": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 121,
+      "observed_gr_fraction": 0.895332099527041,
+      "reversal_count": 31,
+      "reverse_orientation_nodes": 88,
+      "states": 473,
+      "status": "ok",
+      "viterbi_nodes": 209
+    },
+    "ee0300f7": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 146,
+      "observed_gr_fraction": 0.6946924200616783,
+      "reversal_count": 56,
+      "reverse_orientation_nodes": 158,
+      "states": 549,
+      "status": "ok",
+      "viterbi_nodes": 304
+    },
+    "f053a1b9": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 166,
+      "observed_gr_fraction": 0.8012432795698925,
+      "reversal_count": 32,
+      "reverse_orientation_nodes": 109,
+      "states": 483,
+      "status": "ok",
+      "viterbi_nodes": 275
+    },
+    "f321a31c": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 228,
+      "observed_gr_fraction": 0.9606407322654462,
+      "reversal_count": 69,
+      "reverse_orientation_nodes": 116,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 344
+    },
+    "fa667be2": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 333,
+      "observed_gr_fraction": 0.8683791770857013,
+      "reversal_count": 86,
+      "reverse_orientation_nodes": 155,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 488
+    },
+    "fba7683c": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 25,
+      "observed_gr_fraction": 0.9795918367346939,
+      "reversal_count": 9,
+      "reverse_orientation_nodes": 4,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 29
+    },
+    "fd710aea": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 198,
+      "observed_gr_fraction": 0.7778523489932886,
+      "reversal_count": 28,
+      "reverse_orientation_nodes": 85,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 283
+    },
+    "febb4411": {
+      "boundary_state_nodes": 0,
+      "forward_orientation_nodes": 143,
+      "observed_gr_fraction": 0.9681274900398407,
+      "reversal_count": 34,
+      "reverse_orientation_nodes": 142,
+      "states": 600,
+      "status": "ok",
+      "viterbi_nodes": 285
+    }
+  },
+  "validation_typewell_groups": 147,
+  "validation_well_count": 151
+}

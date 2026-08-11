@@ -1,0 +1,296 @@
+{
+  "created_at_utc": "2026-08-10T13:19:20.188215+00:00",
+  "data": {
+    "data_dir": "C:\\PRIMEdEV-1\\GeoSteerN-Codex",
+    "eligible_wells": 770,
+    "excluded_test_overlap_ids": [
+      "000d7d20",
+      "00bbac68",
+      "00e12e8b"
+    ],
+    "inventory_columns": [
+      "well",
+      "typewell_profile_hash",
+      "rows",
+      "prefix_rows",
+      "suffix_rows",
+      "gr_valid_fraction",
+      "horizontal_sha256",
+      "typewell_sha256",
+      "horizontal_file",
+      "typewell_file"
+    ],
+    "inventory_file": "equal_ordered_joint_spatial_protocol_data_inventory.csv",
+    "inventory_sha256": "b76066cd50269133daf5e926e8b3ddfda96f14dbbe4762c083ce19d0210e3169",
+    "suffix_rows": 3769838,
+    "unique_typewell_groups": 749
+  },
+  "evaluation": {
+    "aggregate_artifacts": {
+      "inventory": "protocol, data inventory, both manifests, all ten shard JSON files and sidecars, all ten prediction NPZ files, scored SSE, and final result identity",
+      "overwrite": "forbidden",
+      "result": "final JSON plus SHA-256 sidecar",
+      "scored_rows": "per-mode/per-well SSE CSV plus SHA-256 sidecar"
+    },
+    "bootstrap": {
+      "channel_coupling": "each resample applies identical cluster multiplicities to base, typewell, ordered, and joint SSE and row counts",
+      "interval": "percentile 95%",
+      "pad_out": {
+        "draws": 4000,
+        "expected_clusters": 183,
+        "method": "seeded cluster bootstrap with replacement",
+        "seed": 20260810,
+        "unit": "sealed pad component"
+      },
+      "region_out": {
+        "clusters": 5,
+        "draws": 3125,
+        "method": "deterministic exhaustive ordered resampling with replacement",
+        "unit": "sealed validation region fold"
+      }
+    },
+    "components": "typewell and ordered channels are reported as predeclared diagnostics; they are never used to select a candidate or a mode",
+    "interim_metrics": "forbidden",
+    "mode_policy": {
+      "primary": "region_out",
+      "primary_role": "buffered spatial-isolation falsification gate using only retained manifest training IDs",
+      "secondary": "pad_out",
+      "secondary_can_rescue_primary": false,
+      "secondary_can_veto_primary": false,
+      "secondary_role": "centroid-component sensitivity diagnostic only; cross-fold laterals may approach or cross",
+      "winner_selection": "forbidden"
+    },
+    "prediction_artifact": {
+      "arrays": [
+        "well_index",
+        "row_index",
+        "base_prediction",
+        "typewell_prediction",
+        "ordered_prediction",
+        "joint_prediction"
+      ],
+      "format": "compressed NPZ plus hash-sealed JSON metadata",
+      "truth_columns": "forbidden"
+    },
+    "primary_metric": "region_out pooled full-suffix-row RMSE gain of frozen joint candidate versus its fold-local base",
+    "primary_support_criteria": {
+      "all_five_region_fold_gains_positive": true,
+      "coefficient_stability": {
+        "absolute_tolerance": 1e-09,
+        "joint_coefficient_bounds": [
+          -1.0,
+          2.0
+        ],
+        "no_sign_flips_across_region_folds": true,
+        "repeated_bound_hit_definition": "two or more folds at one bound",
+        "repeated_bound_hits_allowed": false,
+        "shrink_bounds": [
+          0.0,
+          1.5
+        ]
+      },
+      "joint_vs_resample_best_component_ci95_low_positive": true,
+      "paired_median_well_gain_at_least_ft": 0.2,
+      "pooled_rmse_gain_at_least_ft": 0.2,
+      "sealed_region_fold_bootstrap_ci95_low_positive": true,
+      "top_positive_sse_removal": {
+        "remaining_pooled_rmse_gain_positive": true,
+        "remove": 10,
+        "unit": "well"
+      }
+    },
+    "status_ceiling": "MEASURE_ONLY; cannot promote production OPEN",
+    "truth_boundary": "all ten JSON/NPZ prediction shards must validate before any outer validation suffix TVT is opened"
+  },
+  "fit": {
+    "base_model": {
+      "colsample_bytree": 0.7,
+      "deterministic": true,
+      "force_col_wise": true,
+      "learning_rate": 0.04,
+      "min_child_samples": 200,
+      "n_estimators": 900,
+      "n_jobs": 4,
+      "num_leaves": 63,
+      "random_state": 20260810,
+      "reg_lambda": 20.0,
+      "subsample": 0.8,
+      "subsample_freq": 1,
+      "verbose": -1
+    },
+    "evaluation_stride": 1,
+    "implementation": "imports fold-local base/evidence/shrink/joint primitives from research/repeated_group_gate.py",
+    "inner_group": "sealed manifest equality group, proven one-to-one with the exact parsed typewell TVT/GR profile partition on this frozen corpus",
+    "inner_splits": 4,
+    "method": "equal_ordered_joint_v2",
+    "ordered_transport": {
+      "anchor_weight": 10.0,
+      "emission_weight": 4.0,
+      "geometry_sigma_growth_per_md": 0.015,
+      "geometry_sigma_initial": 1.5,
+      "huber_cap": 4.0,
+      "max_transition_bins": 10,
+      "node_step_md": 15.0,
+      "smoothing_samples": 7,
+      "state_half_width_tvt": 150.0,
+      "state_step_tvt": 0.5,
+      "transition_scale_tvt": 1.2,
+      "transition_weight": 0.15,
+      "window_half_width_md": 90.0,
+      "window_samples": 13
+    },
+    "refit_scope": "every model weight, base shrink, typewell shrink, ordered shrink, and joint coefficient is refit from each manifest-retained spatial training set using inner exact-profile grouped OOF",
+    "region_embargo_policy": "embargo IDs are excluded and never repurposed as training or validation",
+    "state_isolation": "no fitted model, OOF prediction, coefficient, transform, matrix, or cache is shared across folds or modes",
+    "train_stride": 8
+  },
+  "method": "equal_ordered_joint_v2",
+  "notes": [
+    "Both spatial modes are frozen and run; no mode or component selection is allowed.",
+    "region_out is primary; pad_out is a secondary non-isolated sensitivity diagnostic.",
+    "Region trajectory separation is measured on 100-MD-ft resampled points, not exact continuous segments.",
+    "Pad cross-fold laterals may approach or cross and its observed distance may be zero.",
+    "Region embargo wells are excluded, not added to the training population.",
+    "Every learned quantity is refit on each retained spatial training fold.",
+    "Freeze inventories inference columns and raw bytes without opening suffix TVT values.",
+    "Run may open labels for retained training fits only; validation truth is aggregate-only.",
+    "Spatial results remain MEASURE_ONLY and cannot promote production OPEN."
+  ],
+  "packages": {
+    "lightgbm": "4.7.0",
+    "numpy": "2.5.1",
+    "pandas": "3.0.1",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.17.1"
+  },
+  "protocol_version": "geosteern-spatial-falsification-gate/1",
+  "source_sha256": {
+    "geosteern/data.py": "b3acb742b1939d6eabbcd832b18a67d218ae3ebd79443336cc83030bc645a6ab",
+    "geosteern/features.py": "08f22021083c50617cc2e06f153e3165322af4dd0d33eaa130e80a4efcb94be2",
+    "geosteern/model.py": "7c694ef58fd659df427dd0b786d98020b1ce51aebe76e042a9d5a2d23e109593",
+    "research/interval_gate.py": "066646a725045cb65a40d5d2f70505a010b580e036d1cd327e295bb4eae2ca2d",
+    "research/ordered_transport.py": "5cc7d9a0dba36b0bacd7a3899c5eb5f4e7141ae3bb580b334159b3359f8e6bbd",
+    "research/repeated_group_gate.py": "238248219db92246bd300575d06c32333781b1396cac9eddcfee3607c20e0bf9",
+    "research/spatial_score_gate.py": "e7c03ac1ac702b68efae849a33ec1c78c77a95ee2fa2a906b20b38b20d9f1135",
+    "research/spatial_split.py": "91fd0b48b10bf8c579e77ba242e3f8c889b6ae159cedf271f8a9b014438b6b86",
+    "research/test_interval_gate.py": "90a82955c620c7d65b66336f8e9d8e3c00c2b20ad0ea1c4612e9348175eeeeec",
+    "research/test_ordered_transport.py": "0bf1c8a631b553eb24ee0c52d4663afb8f9f9ad0ded4b31cd4878853d84fb33d",
+    "research/test_repeated_group_gate.py": "4b45ffd19ef3fa07f684e21684b0343a76fe2ed8eeaaf8732cc1cb927b992e5b",
+    "research/test_spatial_score_gate.py": "f603826450bdf2fdf99329081bd0c85ef47e4b009a57c99bd47d44aeeada4361",
+    "research/test_spatial_split.py": "5e1464422d1031538e709d24d216410ac62ba512eda0ed22390a5493aa5bfda1"
+  },
+  "spatial_manifests": {
+    "pad_out": {
+      "byte_sha256": "c9a80bbdf5acb28d34f542381ddba53a1f50c7b243dee234183a3f01cb5d82e6",
+      "construction_columns": [
+        "MD",
+        "X",
+        "Y",
+        "TVT_input"
+      ],
+      "construction_provenance": {
+        "packages": {
+          "numpy": "2.5.1",
+          "pandas": "3.0.1",
+          "scikit-learn": "1.8.0",
+          "scipy": "1.17.1"
+        },
+        "source_file": "research/spatial_split.py",
+        "source_sha256": "91fd0b48b10bf8c579e77ba242e3f8c889b6ae159cedf271f8a9b014438b6b86"
+      },
+      "dataset_sha256": "9a9e36ded16a390263bf8c9123422a79baefd21779ede2b90ab0693951310465",
+      "eligible_wells": 770,
+      "equality_groups": 749,
+      "excluded_ids": [
+        "000d7d20",
+        "00bbac68",
+        "00e12e8b"
+      ],
+      "file": "pad_out.json",
+      "logical_manifest_sha256": "f17ec3ec67b1490b7efab6250f7c674b24a7de080e563310dfc8b5ef9a3c4b8c",
+      "parameters": {
+        "centroid_component_radius_ft": 1500.0,
+        "component_assignment": "descending suffix rows, tie min well ID; place in fold with fewest suffix rows, then wells, then fold number",
+        "constraints": {
+          "min_training_suffix_rows": 2400000,
+          "min_training_wells": 500,
+          "min_validation_suffix_rows": 400000,
+          "min_validation_wells": 100
+        },
+        "interpretation": "centroid-component pad-out only; cross-fold laterals may approach or cross",
+        "n_folds": 5,
+        "trajectory_isolation": false
+      },
+      "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\spatial_gate_manifests\\pad_out.json",
+      "resampled_polyline_spacing_ft": 100.0,
+      "role": "secondary centroid-component sensitivity only",
+      "schema_version": 1,
+      "suffix_rows": 3769838
+    },
+    "region_out": {
+      "byte_sha256": "af0160c67397c18d4e6cb70da18ba5ea76429973b5b0c8d2a9d4b1f0752ac5df",
+      "construction_columns": [
+        "MD",
+        "X",
+        "Y",
+        "TVT_input"
+      ],
+      "construction_provenance": {
+        "packages": {
+          "numpy": "2.5.1",
+          "pandas": "3.0.1",
+          "scikit-learn": "1.8.0",
+          "scipy": "1.17.1"
+        },
+        "source_file": "research/spatial_split.py",
+        "source_sha256": "91fd0b48b10bf8c579e77ba242e3f8c889b6ae159cedf271f8a9b014438b6b86"
+      },
+      "dataset_sha256": "9a9e36ded16a390263bf8c9123422a79baefd21779ede2b90ab0693951310465",
+      "eligible_wells": 770,
+      "equality_groups": 749,
+      "excluded_ids": [
+        "000d7d20",
+        "00bbac68",
+        "00e12e8b"
+      ],
+      "file": "region_out.json",
+      "logical_manifest_sha256": "70af52ed2ca2ed3e77e218471836869ea74771e08eacfbd4e7f93c9067bda622",
+      "parameters": {
+        "centroid_embargo_ft": 5000.0,
+        "constraints": {
+          "min_training_suffix_rows": 2400000,
+          "min_training_wells": 500,
+          "min_validation_suffix_rows": 400000,
+          "min_validation_wells": 100
+        },
+        "coordinate_center": "componentwise median",
+        "coordinate_metric": "raw Euclidean XY feet",
+        "coordinate_scale_ft": 10000.0,
+        "kmeans_algorithm": "lloyd",
+        "kmeans_n_init": 50,
+        "kmeans_seed": 20260810,
+        "n_folds": 5,
+        "resampled_polyline_embargo_ft": 1500.0,
+        "trajectory_isolation": true
+      },
+      "path": "C:\\PRIMEdEV-1\\GeoSteerN-Codex\\.claude\\worktrees\\well-datum-surface-fit-e24e6c\\research\\results\\spatial_gate_manifests\\region_out.json",
+      "resampled_polyline_spacing_ft": 100.0,
+      "role": "primary spatial falsification gate",
+      "schema_version": 1,
+      "suffix_rows": 3769838
+    }
+  },
+  "spatial_run": {
+    "folds_per_mode": 5,
+    "modes": [
+      "region_out",
+      "pad_out"
+    ],
+    "required_prediction_shards": 10,
+    "single_process_estimated_wall_clock_hours": [
+      2.0,
+      2.5
+    ]
+  },
+  "status": "FROZEN_BEFORE_SPATIAL_SCORING_MEASURE_ONLY"
+}

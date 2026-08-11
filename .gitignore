@@ -73,3 +73,19 @@ primed-topology/
 topology-sees-sequence/
 desktop.ini
 
+
+# geosteern trained model artifacts (regenerate with: python -m geosteern.cli train)
+geosteern/*.pkl
+geosteern/*.json
+tvt_model.pkl
+tvt_model.json
+
+# Fold shards are NOT ignored: anchored_structural_field_protocol.json seals
+# byte-level sha256 hashes for 45 of them, so a clone that lacks them cannot
+# verify the inventory it commits. They stay tracked to keep that chain intact.
+
+# research scratch
+research/.pytest_*/
+.ruff_cache/
+notebooks/.ipython/
+notebooks/.jupyter_runtime/

@@ -1,0 +1,192 @@
+{
+  "created_at_utc": "2026-08-10T09:54:32.593602+00:00",
+  "data": {
+    "data_dir": "C:\\PRIMEdEV-1\\GeoSteerN-Codex",
+    "eligible_wells": 770,
+    "excluded_test_overlap_ids": [
+      "000d7d20",
+      "00bbac68",
+      "00e12e8b"
+    ],
+    "forbidden_feature_columns": [
+      "ANCC",
+      "ASTNL",
+      "ASTNU",
+      "BUDA",
+      "EGFDL",
+      "EGFDU",
+      "Geology",
+      "TVT"
+    ],
+    "unique_typewell_groups": 749
+  },
+  "evaluation": {
+    "aggregate_artifacts": {
+      "fold_lineage": "complete repeat/fold inventory of shard JSON and prediction NPZ paths, names, byte hashes, and NPZ logical-array digests",
+      "overwrite": "forbidden",
+      "result": "final JSON plus SHA-256 sidecar",
+      "scored_rows": "per-well/per-repeat SSE CSV plus SHA-256 sidecar"
+    },
+    "bootstrap_draws": 4000,
+    "bootstrap_repeat_coupling": "one sampled group multiplicity is applied to every well in both repeats; each draw averages the two repeat-wise pooled RMSE gains",
+    "bootstrap_seed": 20260810,
+    "bootstrap_unit": "exact typewell profile group",
+    "interim_metrics": "forbidden",
+    "prediction_artifact": {
+      "arrays": [
+        "well_index",
+        "row_index",
+        "base_prediction",
+        "typewell_prediction",
+        "ordered_prediction",
+        "joint_prediction"
+      ],
+      "format": "compressed NPZ plus sealed JSON metadata",
+      "truth_columns": "forbidden"
+    },
+    "primary_metric": "mean of repeat-wise pooled suffix-row RMSE gains versus base",
+    "repeat_aggregation": "compute each repeat gain independently, then arithmetic mean",
+    "support_criteria": {
+      "all_repeat_pooled_gains_positive": true,
+      "coefficient_stability": {
+        "absolute_tolerance": 1e-09,
+        "joint_coefficient_bounds": [
+          -1.0,
+          2.0
+        ],
+        "no_sign_flips_across_outer_folds": true,
+        "repeated_bound_hit_definition": "two or more folds at one bound",
+        "repeated_bound_hits_allowed": false,
+        "shrink_bounds": [
+          0.0,
+          1.5
+        ]
+      },
+      "exact_group_bootstrap_ci95_low_positive": true,
+      "joint_vs_resample_best_component_group_bootstrap_ci95_low_positive": true,
+      "paired_median_well_gain_at_least_ft": 0.2,
+      "primary_mean_repeat_pooled_gain_at_least_ft": 0.2,
+      "top_positive_sse_removal": {
+        "ranking": "descending sum over both repeats of base_sse minus joint_sse, restricted to positive values; well ID breaks ties",
+        "remaining_mean_repeat_pooled_gain_positive": true,
+        "remove": 10,
+        "unit": "well"
+      }
+    },
+    "unresolved_effect_ft": 0.2
+  },
+  "inner_fit": {
+    "evaluation_stride": 1,
+    "group": "exact typewell TVT/GR profile hash",
+    "research_params": {
+      "colsample_bytree": 0.7,
+      "deterministic": true,
+      "force_col_wise": true,
+      "learning_rate": 0.04,
+      "min_child_samples": 200,
+      "n_estimators": 900,
+      "n_jobs": 4,
+      "num_leaves": 63,
+      "random_state": 20260810,
+      "reg_lambda": 20.0,
+      "subsample": 0.8,
+      "subsample_freq": 1,
+      "verbose": -1
+    },
+    "splits": 4,
+    "train_stride": 8
+  },
+  "interval_method": {
+    "bin_widths_ft": [
+      1.0,
+      2.0,
+      4.0
+    ],
+    "final_correction_clip_ft": [
+      -25.0,
+      25.0
+    ],
+    "joint_coefficient_clip": [
+      -1.0,
+      2.0
+    ],
+    "joint_penalty_trace_multiplier": 0.0001,
+    "landscape_correlation_weight": 0.3,
+    "landscape_gradient_weight": 0.2,
+    "landscape_min_cells": 6,
+    "offsets_ft": [
+      -30.0,
+      30.0,
+      0.5
+    ],
+    "ordered_transport": {
+      "anchor_weight": 10.0,
+      "emission_weight": 4.0,
+      "geometry_sigma_growth_per_md": 0.015,
+      "geometry_sigma_initial": 1.5,
+      "huber_cap": 4.0,
+      "max_transition_bins": 10,
+      "node_step_md": 15.0,
+      "smoothing_samples": 7,
+      "state_half_width_tvt": 150.0,
+      "state_step_tvt": 0.5,
+      "transition_scale_tvt": 1.2,
+      "transition_weight": 0.15,
+      "window_half_width_md": 90.0,
+      "window_samples": 13
+    },
+    "ordered_vector_shrink_clip": [
+      0.0,
+      1.5
+    ],
+    "typewell_scalar_shrink_clip": [
+      0.0,
+      1.5
+    ]
+  },
+  "manifest": {
+    "file": "equal_ordered_joint_outer_protocol_fold_manifest.csv",
+    "rows": 1540,
+    "sha256": "df6d5ff89ce08fd19c20ec4d359d4c10dad217e06c1a2917ae2f8a7a267694ed"
+  },
+  "method": "equal_ordered_joint_v2",
+  "notes": [
+    "Only the equal_ordered_joint_v2 procedure is scored; no candidate selection is allowed.",
+    "All model weights and all shrink/joint coefficients are refit inside each outer train fold.",
+    "Freeze inventories inference columns only and never opens horizontal suffix TVT.",
+    "Run opens suffix TVT for outer-training fits only; every outer-test suffix is scoring-only in aggregate.",
+    "Held-out own-well prefix calibration is allowed because TVT_input is available at inference.",
+    "Formation surfaces, Geology, PNGs, and ID lookup are forbidden features.",
+    "Repeated CV on this previously studied corpus measures stability, not pristine external confirmation."
+  ],
+  "outer_cv": {
+    "group": "exact typewell TVT/GR profile hash",
+    "repeats": 2,
+    "seeds": [
+      20260810,
+      20260811
+    ],
+    "splits": 5,
+    "splitter": "sklearn.model_selection.GroupKFold(shuffle=True)"
+  },
+  "packages": {
+    "lightgbm": "4.7.0",
+    "numpy": "2.5.1",
+    "pandas": "3.0.1",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.17.1"
+  },
+  "protocol_version": "geosteern-repeated-typewell-gate/1",
+  "source_sha256": {
+    "geosteern/data.py": "b3acb742b1939d6eabbcd832b18a67d218ae3ebd79443336cc83030bc645a6ab",
+    "geosteern/features.py": "08f22021083c50617cc2e06f153e3165322af4dd0d33eaa130e80a4efcb94be2",
+    "geosteern/model.py": "7c694ef58fd659df427dd0b786d98020b1ce51aebe76e042a9d5a2d23e109593",
+    "research/interval_gate.py": "066646a725045cb65a40d5d2f70505a010b580e036d1cd327e295bb4eae2ca2d",
+    "research/ordered_transport.py": "5cc7d9a0dba36b0bacd7a3899c5eb5f4e7141ae3bb580b334159b3359f8e6bbd",
+    "research/repeated_group_gate.py": "238248219db92246bd300575d06c32333781b1396cac9eddcfee3607c20e0bf9",
+    "research/test_interval_gate.py": "90a82955c620c7d65b66336f8e9d8e3c00c2b20ad0ea1c4612e9348175eeeeec",
+    "research/test_ordered_transport.py": "0bf1c8a631b553eb24ee0c52d4663afb8f9f9ad0ded4b31cd4878853d84fb33d",
+    "research/test_repeated_group_gate.py": "4b45ffd19ef3fa07f684e21684b0343a76fe2ed8eeaaf8732cc1cb927b992e5b"
+  },
+  "status": "FROZEN_BEFORE_SCORING_MEASURE_ONLY"
+}

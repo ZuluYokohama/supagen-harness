@@ -1,0 +1,16 @@
+# Dependency floors for the research tree.
+#
+# scikit-learn>=1.6 is a hard requirement, not a preference: the repeated-group
+# and spatial gates build folds with GroupKFold(shuffle=True, random_state=...),
+# and GroupKFold only gained shuffle/random_state in 1.6. Earlier versions
+# reject those arguments outright.
+#
+# The remaining floors are the versions the sealed protocol records were
+# produced under; see the "packages" block in
+# research/results/anchored_structural_field_protocol.json.
+scikit-learn>=1.6
+lightgbm>=4.7.0
+numpy>=2.0
+pandas>=2.0
+scipy>=1.11
+psutil>=5.9
