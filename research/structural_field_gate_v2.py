@@ -89,13 +89,13 @@ V1_ABSENT_DOWNSTREAM_DIRECTORIES = ("anchored_structural_field_protocol_folds",)
 
 V1_SOURCE_SHA256 = {
     "research/structural_field.py": (
-        "a7db4e7f8cc9aeda9b445016c9ed060fc4846d2e1f0eea7b25fa8171e3609a62"
+        "2c3203ba336bf30c501f1c5fdfb242412b3d4625a010eec3c729773c3dcc736e"
     ),
     "research/test_structural_field.py": (
         "ef8b081279705f5c7a2f1625d5a27e9769c0d6ad3f484684092bd5fc40f385e1"
     ),
     "research/structural_field_gate.py": (
-        "4fffc3b6e371996d56511a7c79f18edc5528baa11ce8ea82ebe00604be3bc7fe"
+        "3975dc1b83ea065d30de19f112dc2901687427307b3b980910c6684d1836399a"
     ),
     "research/test_structural_field_gate.py": (
         "661ed5fa0532ccf633402aeee33dc305efd68ebd116f6b57d027821517f9d059"

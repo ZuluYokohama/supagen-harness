@@ -534,6 +534,31 @@ def _ordered_corrections(
         df, tw = w["df"], w["tw"]
         proposal = w["tvt_prefix"].copy()
         proposal[record.idx] = record.prediction
+
+        # The solver requires finite MD to place nodes and a finite proposal
+        # over the evaluated tail. (GR may have gaps -- observed_gr_fraction
+        # reports them.) A well violating either cannot be confirmed, so record
+        # why and leave its prediction uncorrected instead of raising and
+        # discarding the whole pass.
+        md_values = df["MD"].to_numpy()
+        tail_proposal = proposal[record.idx]
+        non_finite_md = int((~np.isfinite(md_values)).sum())
+        non_finite_tail = int((~np.isfinite(tail_proposal)).sum())
+        if non_finite_md or non_finite_tail:
+            corrections.append(np.zeros(len(record.idx), dtype=float))
+            diagnostics[record.well] = {
+                "status": "skipped_non_finite_solver_inputs",
+                "non_finite_md_rows": non_finite_md,
+                "non_finite_proposal_tail_rows": non_finite_tail,
+            }
+            print(
+                f"  ordered {label}: SKIP {record.well} "
+                f"({non_finite_md} non-finite MD, "
+                f"{non_finite_tail} non-finite tail proposal)",
+                flush=True,
+            )
+            continue
+
         result = ordered_reversible_interval_transport(
             horizontal_md=df["MD"].to_numpy(),
             horizontal_gr=df["GR"].to_numpy(),

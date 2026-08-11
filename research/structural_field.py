@@ -800,20 +800,32 @@ def _node_training_diagnostics(
     node_weights: NDArray[np.float64],
     n_nodes: int,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    well_sets: list[set[int]] = [set() for _ in range(n_nodes)]
     gram = np.zeros((n_nodes, 2, 2), dtype=float)
-    for obs_index in range(len(observations.q)):
-        outer = np.outer(observations.u[obs_index], observations.u[obs_index])
-        for node, interpolation_weight in zip(
-            node_indices[obs_index], node_weights[obs_index], strict=True
-        ):
-            if interpolation_weight <= 0.0:
-                continue
-            weight = observations.base_weight[obs_index] * interpolation_weight
-            node_int = int(node)
-            well_sets[node_int].add(int(observations.well_index[obs_index]))
-            gram[node_int] += weight * outer
-    effective_wells = np.asarray([len(items) for items in well_sets], dtype=float)
+    if len(observations.q) == 0 or node_indices.size == 0:
+        return np.zeros(n_nodes, dtype=float), gram
+
+    # Flatten (observation, node) pairs once. np.add.at applies in index order,
+    # which is the same order the nested loop accumulated in, so the Gram sums
+    # match the sequential version rather than merely approximating it.
+    per_obs = node_indices.shape[1]
+    obs_of = np.repeat(np.arange(len(observations.q)), per_obs)
+    flat_nodes = np.asarray(node_indices).reshape(-1)
+    flat_weights = np.asarray(node_weights).reshape(-1)
+
+    keep = flat_weights > 0.0
+    obs_of = obs_of[keep]
+    flat_nodes = flat_nodes[keep].astype(np.int64)
+    flat_weights = flat_weights[keep]
+
+    u = observations.u[obs_of]
+    weights = observations.base_weight[obs_of] * flat_weights
+    np.add.at(gram, flat_nodes, weights[:, None, None] * (u[:, :, None] * u[:, None, :]))
+
+    wells = np.asarray(observations.well_index)[obs_of].astype(np.int64)
+    unique_pairs = np.unique(np.stack((flat_nodes, wells), axis=1), axis=0)
+    effective_wells = np.bincount(
+        unique_pairs[:, 0], minlength=n_nodes
+    ).astype(float)
     return effective_wells, gram
 
 

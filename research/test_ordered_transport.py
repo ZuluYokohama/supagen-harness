@@ -124,3 +124,24 @@ def test_fully_finite_tvt_vector_is_rejected_as_possible_truth() -> None:
     md, gr, tw_tvt, tw_gr, _, proposed, latent = _reversing_well()
     with pytest.raises(InferenceSafetyError, match="suffix truth"):
         ordered_reversible_interval_transport(md, gr, tw_tvt, tw_gr, latent, proposed)
+
+
+def test_unexpected_keyword_outside_the_forbidden_set_is_a_type_error() -> None:
+    """A benign-looking unknown kwarg must be rejected, not silently ignored."""
+    md, gr, tw_tvt, tw_gr, known, proposed, _ = _reversing_well()
+    with pytest.raises(TypeError, match="unexpected keyword inputs: telemetry"):
+        ordered_reversible_interval_transport(
+            md, gr, tw_tvt, tw_gr, known, proposed, telemetry=np.zeros_like(md)
+        )
+
+
+def test_observed_value_after_a_gap_is_rejected_as_non_contiguous_prefix() -> None:
+    """A finite value past the first NaN is suffix truth leaking back in."""
+    md, gr, tw_tvt, tw_gr, known, proposed, _ = _reversing_well()
+    punctured = np.asarray(known, dtype=float).copy()
+    gap = int(np.flatnonzero(~np.isfinite(punctured))[0])
+    punctured[gap + 1] = 42.0
+    with pytest.raises(InferenceSafetyError, match="contiguous finite prefix"):
+        ordered_reversible_interval_transport(
+            md, gr, tw_tvt, tw_gr, punctured, proposed
+        )

@@ -45,7 +45,7 @@ STATUS_CEILING = "MEASURE_ONLY"
 # Re-pinned after the 2026-08-11 review pass edited both files (NumPy inverse
 # shape normalisation, cut-edge bounding-box prefilter, wall-clock assertion
 # removal). The pre-review digests are recorded in docs/SEAL_STATE.md.
-CORE_SHA256 = "a7db4e7f8cc9aeda9b445016c9ed060fc4846d2e1f0eea7b25fa8171e3609a62"
+CORE_SHA256 = "2c3203ba336bf30c501f1c5fdfb242412b3d4625a010eec3c729773c3dcc736e"
 CORE_TEST_SHA256 = "ef8b081279705f5c7a2f1625d5a27e9769c0d6ad3f484684092bd5fc40f385e1"
 SCORE_SHA256 = "6f5ea31f13181c63306e818764a7281aa04ae194a4a71b052ae5d59fcc8ed640"
 SCORE_TEST_SHA256 = "f68a39645b03789dfd9b5e36f916e7128f586e72f8f1c5b58f570a79ee6202e6"

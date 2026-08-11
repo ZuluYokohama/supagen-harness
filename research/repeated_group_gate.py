@@ -1133,6 +1133,20 @@ def _validate_fold_artifact_inventory_payload(inventory: dict) -> None:
         raise ProtocolError("fold artifact inventory logical digest mismatch")
 
 
+def _portable_artifact_path(path: Path) -> str:
+    """Path as recorded in an inventory: repo-relative POSIX, host-independent.
+
+    Absolute paths bake the build machine's layout into a hashed artifact, so a
+    reader on another machine sees a path that cannot exist for them. Falls back
+    to the bare name for anything outside the repository.
+    """
+    resolved = Path(path).resolve()
+    try:
+        return resolved.relative_to(ROOT).as_posix()
+    except ValueError:
+        return resolved.name
+
+
 def _build_fold_artifact_inventory(
     validated: Sequence[tuple[int, int, Path, dict, dict[str, np.ndarray]]],
 ) -> dict:
@@ -1174,15 +1188,17 @@ def _build_fold_artifact_inventory(
                 "outer_fold": int(fold),
                 "shard_json": {
                     "name": shard_path.name,
-                    "path": str(shard_path),
+                    "path": _portable_artifact_path(shard_path),
                     "size_bytes": int(shard_path.stat().st_size),
                     "byte_sha256": shard_hash,
                     "sha256_sidecar_name": _protocol_sidecar(shard_path).name,
-                    "sha256_sidecar_path": str(_protocol_sidecar(shard_path).resolve()),
+                    "sha256_sidecar_path": _portable_artifact_path(
+                        _protocol_sidecar(shard_path)
+                    ),
                 },
                 "prediction_npz": {
                     "name": prediction_path.name,
-                    "path": str(prediction_path),
+                    "path": _portable_artifact_path(prediction_path),
                     "size_bytes": int(prediction_path.stat().st_size),
                     "byte_sha256": prediction_hash,
                     "logical_array_sha256": logical_hash,

@@ -138,8 +138,18 @@ def build() -> Path:
                     Path(provenance["data_dir"]) / "AI_wellbore_geology_prediction_task_en.pdf"
                 ),
             }
-            verified_hashes = {name: sha256_file(path) for name, path in tracked_paths.items()}
-            assert verified_hashes == provenance["sha256"]
+            # The competition PDF lives in the private data directory, not in
+            # the repo, so a reader without it must still get the in-repo
+            # hashes checked rather than a FileNotFoundError before the first.
+            verified_hashes = {
+                name: (sha256_file(path) if path.exists() else "unavailable")
+                for name, path in tracked_paths.items()
+            }
+            checked = {n: h for n, h in verified_hashes.items() if h != "unavailable"}
+            skipped = sorted(set(verified_hashes) - set(checked))
+            assert all(provenance["sha256"][n] == h for n, h in checked.items())
+            if skipped:
+                print(f"hash check skipped for unavailable inputs: {skipped}")
 
             data_summary = pd.DataFrame({
                 "measure": [

@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from geosteern.data import find_typewell, well_id
+from geosteern.data import find_typewell, load_well, well_id
 from research.interval_gate import (
     EXCLUDED_TEST_OVERLAP,
     _filtered_files,
@@ -33,6 +33,18 @@ def sha256_file(path: Path) -> str:
 
 def build(data_dir: Path, result_path: Path) -> tuple[Path, Path]:
     files, dev, hold, typewell_hashes = _filtered_files(str(data_dir))
+    # _filtered_files only drops the test-overlap wells. The gate additionally
+    # rejects anything load_well refuses -- schema, missing typewell, a
+    # non-contiguous prefix, too few rows -- so a manifest built off the raw
+    # list would count wells the gate never scores, and would raise on the
+    # usecols read below for any well missing TVT_input or GR.
+    loadable = {path for path in files if load_well(path) is not None}
+    skipped = len(files) - len(loadable)
+    if skipped:
+        print(f"excluding {skipped} well(s) the gate does not load", flush=True)
+    files = [path for path in files if path in loadable]
+    dev = [path for path in dev if path in loadable]
+    hold = [path for path in hold if path in loadable]
     split = {well_id(path): "dev" for path in dev}
     split.update({well_id(path): "holdout" for path in hold})
     rows = []
@@ -59,14 +71,16 @@ def build(data_dir: Path, result_path: Path) -> tuple[Path, Path]:
 
     manifest = pd.DataFrame(rows).sort_values("well").reset_index(drop=True)
     fold_path = result_path.with_name(result_path.stem + "_fold_manifest.csv")
-    manifest.to_csv(fold_path, index=False)
 
+    # Validate before writing. A manifest that disagrees with the result must
+    # not be left on disk, where a later step would read it back as sound.
     result = json.loads(result_path.read_text(encoding="utf-8"))
     if int((manifest["split"] == "holdout").sum()) != result["holdout_wells"]:
         raise RuntimeError("fold manifest does not match result holdout")
     if int(manifest.loc[manifest["split"] == "holdout", "suffix_rows"].sum()) \
             != result["base_model"]["holdout"]["n_rows"]:
         raise RuntimeError("fold manifest suffix rows do not match scored rows")
+    manifest.to_csv(fold_path, index=False)
 
     tracked = {
         "research/interval_gate.py": ROOT / "research" / "interval_gate.py",
