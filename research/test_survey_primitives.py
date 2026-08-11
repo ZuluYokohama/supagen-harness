@@ -170,7 +170,8 @@ def test_unwrap_azimuth_removes_the_wrap_discontinuity():
 
 
 def test_vertical_section_projects_along_and_ignores_across():
-    east = np.array([0.0, 0.0]); north = np.array([0.0, 100.0])
+    east = np.array([0.0, 0.0])
+    north = np.array([0.0, 100.0])
     assert np.isclose(vertical_section(east, north, 0.0)[1], 100.0)
     assert np.isclose(vertical_section(east, north, 90.0)[1], 0.0, atol=1e-9)
 
@@ -182,7 +183,7 @@ def test_derive_section_azimuth_recovers_the_heading(azimuth):
     x = t * np.sin(theta)
     y = t * np.cos(theta)
     z = np.zeros_like(t)
-    assert np.isclose(derive_section_azimuth(x, y, z), azimuth % 180.0, atol=0.5)
+    assert np.isclose(derive_section_azimuth(t, x, y, z), azimuth % 180.0, atol=0.5)
 
 
 def test_derive_section_azimuth_is_indifferent_to_drilling_direction():
@@ -190,25 +191,28 @@ def test_derive_section_azimuth_is_indifferent_to_drilling_direction():
     theta = np.radians(140.0)
     t = np.arange(N, dtype=float)
     x, y, z = t * np.sin(theta), t * np.cos(theta), np.zeros_like(t)
-    forward = derive_section_azimuth(x, y, z)
-    reverse = derive_section_azimuth(x[::-1], y[::-1], z)
+    forward = derive_section_azimuth(t, x, y, z)
+    reverse = derive_section_azimuth(t, x[::-1], y[::-1], z)
     assert np.isclose(forward, reverse, atol=1e-6)
 
 
 def test_derive_section_azimuth_needs_enough_points():
     with pytest.raises(SurveyPrimitiveError, match="at least 50"):
-        derive_section_azimuth(np.zeros(10), np.zeros(10), np.zeros(10))
+        derive_section_azimuth(np.arange(10.0), np.zeros(10), np.zeros(10), np.zeros(10))
 
 
-def test_azimuth_trust_is_zero_north_south_and_one_east_west():
+def test_azimuth_sensitivity_is_zero_north_south_and_one_east_west():
     inc = np.array([90.0, 90.0, 90.0, 90.0])
     azi = np.array([0.0, 90.0, 180.0, 270.0])
     w = azimuth_error_multiplier(azi, inc, mag_to_grid_deg=0.0)
     assert np.allclose(w, [0.0, 1.0, 0.0, 1.0], atol=1e-9)
 
 
-def test_azimuth_trust_applies_the_magnetic_correction():
-    """N/S immunity is relative to MAGNETIC north, not grid north."""
+def test_azimuth_sensitivity_applies_the_magnetic_correction():
+    """N/S immunity is relative to MAGNETIC north, not grid north.
+
+    Higher output means MORE error, not more trust.
+    """
     inc = np.array([90.0])
     w_grid = azimuth_error_multiplier(np.array([8.7414]), inc, mag_to_grid_deg=8.7414)
     assert np.isclose(w_grid[0], 0.0, atol=1e-9)
@@ -246,3 +250,39 @@ def test_build_section_sweeps_zero_to_ninety_on_real_wells():
         # toe-up must survive on real data too
         assert inc.max() < 180.0
     assert swept >= 10, f"only {swept} wells traced a full build sweep"
+
+
+def test_window_ft_is_a_physical_baseline_not_an_index_count():
+    """On a 2 ft grid a stride of 96 spans 192 ft; the window must stay honest."""
+    md = np.arange(0.0, 800.0, 2.0)
+    d = np.array([0.0, 1.0, 0.0])
+    pts = md[:, None] * d[None, :]
+    s = windowed_survey(md, pts[:, 0], pts[:, 1], pts[:, 2], window_ft=96)
+    assert s.window_ft == 96
+    # centres are half a *physical* 96 ft window in from each end
+    assert np.isclose(s.md[0] - md[0], 48.0, atol=1e-6)
+
+
+def test_window_not_a_whole_multiple_of_spacing_is_rejected():
+    md = np.arange(0.0, 800.0, 7.0)
+    d = np.array([0.0, 1.0, 0.0])
+    pts = md[:, None] * d[None, :]
+    with pytest.raises(SurveyPrimitiveError, match="whole multiple"):
+        windowed_survey(md, pts[:, 0], pts[:, 1], pts[:, 2], window_ft=96)
+
+
+def test_landed_selection_aligns_by_measured_depth_not_array_position():
+    """Survey values sit at window centres; length-based mapping shifts ~W/2."""
+    n = 1200
+    md = np.arange(n, dtype=float)
+    theta = np.radians(np.clip(np.linspace(-40.0, 120.0, n), 0.0, 90.0))
+    heading = np.radians(140.0)
+    step = np.column_stack((
+        np.sin(theta) * np.sin(heading),
+        np.sin(theta) * np.cos(heading),
+        -np.cos(theta),
+    ))
+    pts = np.cumsum(step, axis=0)
+    s = windowed_survey(md, pts[:, 0], pts[:, 1], pts[:, 2])
+    got = derive_section_azimuth(md, pts[:, 0], pts[:, 1], pts[:, 2], survey=s)
+    assert np.isclose(got, 140.0, atol=1.5)

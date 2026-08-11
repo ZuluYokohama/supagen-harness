@@ -45,7 +45,7 @@ structurally impossible to forget.
 
 ## 2. High-level design
 
-```
+```text
  raw 1-ft CSV
       |
       v
@@ -89,7 +89,8 @@ the survey-geometry result cannot recur.
 ## 3. Contracts
 
 ### L0 → L1
-```
+
+```text
 StationIndex:
   well_id            str
   course_length_ft   float     # fitted, ~95-96
@@ -101,7 +102,8 @@ StationIndex:
 `DELIVERED` when real station data arrives and reconstruction is retired.
 
 ### L1 → L3
-```
+
+```text
 SurveyStation:
   md, inc_deg, azi_deg, tvd, vsec, ns, ew, dls
   north_reference    enum{GRID, TRUE, MAGNETIC}   # required, no default
@@ -126,7 +128,7 @@ The "context of merit" per field, dimensioned by what it can actually support:
 | station MD/Inc/Azi | ~96 ft | ~58 in lateral | steering features, control error |
 | position X/Y/Z | derived | 0 beyond stations | geometry **only** at ≥96 ft baselines |
 | TVT_input prefix | 1 ft, labelled | prefix length | anchor, hold-last baseline |
-| GR | 1 ft, measured | high | genuinely per-foot — the one dense channel |
+| GR | measured; effective res **unknown, ≥1 ft** | **unknown, ≤ rows** | densest real channel, but not per-foot independent |
 | formation tops | per well | train-only | **nothing** — leakage |
 
 **Correction to an earlier draft of this table.** GR was previously listed as
@@ -150,10 +152,22 @@ human decision against information the human never had is worth testing
 explicitly — degrade GR to the controller's information set and check whether
 it predicts the decision *better*.
 
-**GR remains the densest real channel.** It is a real per-foot log
-measurement, not an interpolation. The corpus's only true high-frequency
-channel is GR; geometry is not. Designs that treat X/Y/Z and GR as equally
-dense are wrong in a way this table makes visible.
+**GR remains the densest real channel, but its independent N is unknown.** It
+is a measurement rather than an interpolation, so it is categorically unlike
+geometry — designs that treat X/Y/Z and GR as equally dense are wrong. But
+"denser than geometry" is not "one independent observation per foot", and the
+accumulation finding above forbids that stronger claim.
+
+Until the accumulation window is disclosed, the contract is:
+
+- GR effective depth resolution: **unknown, ≥ 1 ft**
+- GR independent N per well: **unknown, ≤ row count**
+- aggregation for course-indexed features: mean over the course, and any
+  estimator that assumes per-foot independence must be flagged, not shipped
+
+Requesting that window is cheap and it is the only thing standing between this
+row and a real number — see `DATA_REQUEST.md` §1.0, which asks for the raw
+`gama` channel alongside the decode.
 
 ---
 

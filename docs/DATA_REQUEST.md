@@ -13,11 +13,17 @@ Calamity Jane 2133H REV0, Schlumberger `ExchangeServices 2.9.365.0`).
 
 ## What is wrong with the corpus as delivered
 
-**1. It was resampled to 1 ft, and that destroyed the survey stations.**
-Every MD in every well is an exact integer on a 1 ft grid. A periodicity scan
-over 80 wells (P = 20–200 ft) found no station structure at any period —
-strongest peak 1.24× baseline, and 94.5 ft came in *below* baseline. The
-original station MDs are unrecoverable.
+**1. It was resampled to 1 ft, so station identity is gone even though the
+station *spacing* survives.** Every MD in every well is an exact integer on a
+1 ft grid, so the original station MDs are unrecoverable. The spacing is not:
+arc-fit phase contrast over 60 wells peaks at **95–96 ft with contrast 0.65
+against a 0.02 no-station null**, and 46 of 60 wells fall in 95–99 ft.
+
+An earlier revision of this document claimed no station structure existed at
+all. That was wrong, and the error is instructive: the first scan ran on the
+*curvature-break* signal, which defect 2 shows is 100% quantization noise. It
+tested noise and returned a null. The arc-fit test uses position, which is
+precise to 0.01 ft, and finds the structure at 30× the null.
 
 **2. Sub-100-ft geometry is 100% quantization artifact.**
 X/Y/Z are stored to 2 decimals. A 0.01 ft rounding across a 1 ft step is
@@ -87,6 +93,7 @@ stored values.
 ## Tier 1 — changes the model class
 
 ### 1.0 Decoded MWD telemetry channels — **the highest-value item**
+
 `aTFA`, `CInc`, `CAzm`, raw `gama`, and ideally the raw sensor components
 `Ax/Ay/Az` (13-bit) and `Mx/My/Mz` (12-bit) from the static survey frame.
 
@@ -103,6 +110,7 @@ cycle, and a motor-vs-RSS discriminator is provably washed out at that scale
 is telemetered continuously and is the only channel that resolves it.
 
 ### 1.0b BHA sensor offsets, per section
+
 Bit-to-directional-sensor and bit-to-gamma-sensor distances. These are
 **different from each other**, and both vary by well and by section: non-mag
 spacing increases for sections planned past ~45° inclination to keep
@@ -118,10 +126,11 @@ surface whose argmax piles up at the search boundary, because a horizontal
 well stays inside one bed and TVT barely modulates GR.
 
 ### 1.1 Directional plan per well
+
 The Proposal Geodetic Report equivalent. Specifically the **control-point table**,
 which is the setpoint program:
 
-```
+```text
 Comments | MD | Incl | Azim(Grid) | TVD | VSEC | NS | EW | DLS
 ```
 
@@ -135,11 +144,25 @@ valuable field in the pack.
 which is what the evidence already says it is.
 
 ### 1.2 As-drilled definitive survey at station resolution
-Not resampled. Station spacing as acquired (100 ft in the reference pack).
 
+Not resampled. **Acquisition** station spacing as run -- the interval at which
+surveys were actually taken, which is a different quantity from the `EOU Freq`
+in the survey program. EOU frequency is how often the positional error ellipse
+is evaluated for anti-collision; it may match the survey interval, coarsen it,
+or interpolate it. The reference pack lists `EOU Freq 1/100.000 ft`, and the
+corpus measures a ~95-96 ft course, so state both rather than assuming one
+implies the other.
+
+```text
+MD | Incl | Azim | TVD | VSEC | NS | EW | DLS
 ```
-MD | Incl (signed, >90 permitted) | Azim | TVD | VSEC | NS | EW | DLS
-```
+
+**Inclination encoding, stated once so there is no ambiguity:** degrees from
+vertical-down, range **0-180**, where 90 is horizontal and a toe-up hole reads
+**above 90** (a 2 deg climb is `92`, not `-88`). A signed-deviation encoding
+(`-88`) carries the same information but is not interchangeable, and silently
+mixing the two inverts the steering state. If the export uses deviation, say so
+and give the conversion.
 
 *Unlocks:* real geometry. The existing "survey geometry refuted by 773-well CV
 (better on 49.9% of wells, p=0.71)" result was computed on quantization
@@ -150,6 +173,7 @@ artifact and does not stand — geometry has never actually been tested.
 ## Tier 2 — makes uncertainty honest
 
 ### 2.1 Survey program and error model
+
 Tool type, EOU frequency, ISCWSA revision, sigma / confidence level, and the
 MD intervals each tool covers. Per-station covariance if it can be exported;
 otherwise the inputs to compute it.
@@ -158,6 +182,7 @@ otherwise the inputs to compute it.
 uncertainty instead of treating 0.01 ft as truth.
 
 ### 2.2 Geodetic header
+
 CRS and zone; grid convergence; grid scale factor; magnetic declination with
 model and date; TVD reference datum and elevation; vertical section azimuth
 and origin; explicit north reference (grid / true / magnetic).
@@ -171,6 +196,7 @@ stated north reference — the reference pack shows `Grid Conv −1.5441°` and
 ## Tier 3 — context features
 
 ### 3.1 Pad and offset relationships
+
 Which wells share a pad and drilling program; offset well identifiers;
 leaseline and hard-line geometry (the reference wall plot names seven offsets
 plus `Leaseline` and `330'x200' HL`).
@@ -185,9 +211,11 @@ East-referenced angles mod 180 split the N–S group across both ends of the
 range and hid it.
 
 ### 3.2 Formation tops for test wells, or an explicit statement they are withheld
+
 Current asymmetry is silently exploitable.
 
 ### 3.3 Steering records
+
 Slide/rotate intervals, motor yield, bit depth vs hole depth. Toolface itself
 is covered by §1.0, which is the better route — it is telemetered rather than
 hand-recorded.
@@ -210,16 +238,25 @@ Run these on arrival. Each corresponds to a defect found in the current corpus:
 
 1. **MDs are not on a uniform integer grid.** `np.diff(md)` should vary.
 2. **Station spacing matches the stated EOU frequency.**
-3. **Inclination exceeds 90° somewhere** in toe-up laterals. If nothing exceeds
-   90°, the sign has been folded — reject.
+3. **A known toe-up well reads above 90°.** Pick a well whose lateral is known
+   to climb and confirm its inclination exceeds 90 under the 0-180 encoding
+   above. Do not require every delivery to contain a value above 90 -- a batch
+   of genuinely toe-down wells would fail that. Folding is the thing being
+   detected, so test it where it must show.
 4. **Decimal precision is greater than 2** on X/Y/Z, or precision is documented.
-5. **Apparent DLS at native station spacing is physical** (< ~15°/100 ft).
-   Compare against `degrees(quantum / baseline) × 100` — if observed tracks
-   that, you are looking at rounding.
+5. **Apparent DLS is dominated by geometry, not quantization.** Compare
+   observed DLS against the quantization contribution
+   `degrees(coordinate_quantum / baseline) × 100`; if observed tracks that
+   figure, you are looking at rounding. Do **not** reject on an absolute
+   threshold — build sections legitimately exceed 15°/100 ft (the reference
+   plan builds at 10°/100 ft and corpus builds measure p90 13.4). Judge high
+   DLS against the declared plan and tool limits for that interval.
 6. **Plan and as-drilled resolve to the same well** and share a north reference.
-7. **Sensor offsets are stated per section**, and bit-to-gamma differs from
-   bit-to-directional. A single well-level offset, or one shared across
-   sections, has been assumed rather than measured — treat it as absent.
+7. **Sensor offsets carry per-section fields and measurement provenance.**
+   Bit-to-gamma and bit-to-directional must be reported separately, per
+   section. Equal values are not a defect -- a fixed BHA genuinely produces
+   constant offsets, and two sensors can sit at the same station. Reject on
+   *missing fields or missing provenance*, never on numerical equality.
 8. **Telemetry channels are present, not just surveys.** If `aTFA`, `CInc` and
    `CAzm` are missing, the delivery is static surveys again and none of §1.0
    is unlocked, whatever the file is called.
@@ -239,8 +276,10 @@ Recoverable without any new delivery, and already implemented in
 - **Per-well vertical-section azimuth**, from the landed principal axis. Needed
   per well: one shared azimuth mis-projects by p90 37.6°, which is 3,050 ft of
   VSEC error over a 5,000 ft lateral.
-- **Azimuth trust weight** `sin(I)·sin(A_mag)` — corpus median 0.688, with
-  ~130 wells near N–S where azimuth is reliable. Use that subset to validate
+- **Azimuth error sensitivity** `sin(I)·sin(A_mag)` — **higher means worse**, corpus
+  median 0.688, with ~130 wells near N–S (low values) where azimuth is
+  reliable. It is an error multiplier, not a confidence: weighting by it
+  directly favours the least reliable headings. Use that subset to validate
   any geometry-dependent feature before trusting it corpus-wide.
 - **Per-well GR tool fingerprint** — the calibration quantum is distinct for
   all 80 wells sampled and proxies MWD configuration, hence vendor, crew and

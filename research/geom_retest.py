@@ -45,8 +45,9 @@ def geometry_block(w: dict, idx: np.ndarray, window: int) -> pd.DataFrame | None
 
     azi_u = unwrap_azimuth(s.azimuth_deg)
     try:
-        sect = derive_section_azimuth(df["X"].to_numpy(float), df["Y"].to_numpy(float),
-                                      df["Z"].to_numpy(float), s.inclination_deg)
+        sect = derive_section_azimuth(md, df["X"].to_numpy(float),
+                                      df["Y"].to_numpy(float),
+                                      df["Z"].to_numpy(float), survey=s)
     except Exception:
         return None
 
@@ -66,7 +67,7 @@ def geometry_block(w: dict, idx: np.ndarray, window: int) -> pd.DataFrame | None
     inc0 = float(np.interp(anchor_md, s.md, s.inclination_deg))
     azi0 = float(np.interp(anchor_md, s.md, azi_u))
 
-    trust = azimuth_error_multiplier(np.interp(target, s.md, s.azimuth_deg), inc, MAG_TO_GRID)
+    azi_sensitivity = azimuth_error_multiplier(np.interp(target, s.md, s.azimuth_deg), inc, MAG_TO_GRID)
     return pd.DataFrame({
         "g_inc": inc,
         "g_inc_dev": inc - 90.0,          # toe-up positive, toe-down negative
@@ -77,7 +78,7 @@ def geometry_block(w: dict, idx: np.ndarray, window: int) -> pd.DataFrame | None
         "g_build": build,
         "g_turn": turn,
         "g_inc_anchor": np.full(len(idx), inc0),
-        "g_trust": trust,
+        "g_azi_sensitivity": azi_sensitivity,
     })
 
 

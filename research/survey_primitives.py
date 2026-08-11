@@ -98,19 +98,37 @@ def windowed_survey(
         )
     spacing = np.diff(md)
     if not np.allclose(spacing, spacing[0], atol=1e-6):
+        raise SurveyPrimitiveError("md spacing is not uniform")
+    sample_ft = float(spacing[0])
+    if sample_ft <= 0:
+        raise SurveyPrimitiveError(f"md must increase; spacing is {sample_ft}")
+
+    # window_ft is a physical MD baseline, not an index count. Deriving the
+    # stride keeps the reported window (and its artifact floor) honest on any
+    # grid: on a 2 ft grid a stride of 96 would span 192 ft while still
+    # claiming 96.
+    stride_exact = window_ft / sample_ft
+    stride = int(round(stride_exact))
+    if abs(stride_exact - stride) > 1e-6 or stride < 1:
         raise SurveyPrimitiveError(
-            "md spacing is not uniform; window_ft is an index stride here"
+            f"window {window_ft} ft is not a whole multiple of the "
+            f"{sample_ft} ft md spacing"
+        )
+    if len(md) <= stride + 1:
+        raise SurveyPrimitiveError(
+            f"need more than {stride + 1} rows for a {window_ft} ft window "
+            f"on {sample_ft} ft spacing, got {len(md)}"
         )
 
     points = np.column_stack((x, y, z))
-    step = points[window_ft:] - points[:-window_ft]
+    step = points[stride:] - points[:-stride]
     length = np.linalg.norm(step, axis=1)
     usable = length > COORD_QUANTUM_FT * 10
     if not usable.any():
         raise SurveyPrimitiveError("no window advances far enough to have a direction")
 
     step, length = step[usable], length[usable]
-    centre = 0.5 * (md[:-window_ft][usable] + md[window_ft:][usable])
+    centre = 0.5 * (md[:-stride][usable] + md[stride:][usable])
 
     # Down is -z. Do NOT take abs(): >90 deg is toe-up and must survive.
     inclination = np.degrees(np.arccos(np.clip(-step[:, 2] / length, -1.0, 1.0)))
@@ -139,10 +157,11 @@ def unwrap_azimuth(azimuth_deg: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def derive_section_azimuth(
+    md: NDArray[np.float64],
     x: NDArray[np.float64],
     y: NDArray[np.float64],
     z: NDArray[np.float64],
-    inclination_deg: NDArray[np.float64] | None = None,
+    survey: WindowedSurvey | None = None,
     landed_threshold_deg: float = 85.0,
 ) -> float:
     """This well's own vertical-section azimuth, from its coordinates alone.
@@ -157,19 +176,22 @@ def derive_section_azimuth(
     principal axis is unaffected by which way the well was drilled along the
     line -- pads drill both directions on one azimuth.
     """
-    x, y, z = (np.asarray(a, dtype=float) for a in (x, y, z))
-    finite = np.isfinite(x) & np.isfinite(y) & np.isfinite(z)
-    x, y = x[finite], y[finite]
+    md, x, y, z = (np.asarray(a, dtype=float) for a in (md, x, y, z))
+    if not (len(md) == len(x) == len(y) == len(z)):
+        raise SurveyPrimitiveError("md, x, y and z must be the same length")
+    finite = np.isfinite(md) & np.isfinite(x) & np.isfinite(y) & np.isfinite(z)
+    md, x, y = md[finite], x[finite], y[finite]
     if len(x) < 50:
         raise SurveyPrimitiveError("need at least 50 finite points for an azimuth")
 
-    if inclination_deg is not None:
-        inc = np.asarray(inclination_deg, dtype=float)
-        landed = inc > landed_threshold_deg
+    if survey is not None:
+        # Survey values sit at window centres, so array position does not
+        # correspond to coordinate row -- inferring it from lengths shifts the
+        # selection by half a window. Interpolate onto md instead.
+        inc_at_md = np.interp(md, survey.md, survey.inclination_deg)
+        landed = inc_at_md > landed_threshold_deg
         if landed.sum() >= 50:
-            # inclination is at window centres; map back by proportion
-            keep = np.linspace(0, len(x) - 1, len(inc)).astype(int)[landed]
-            x, y = x[keep], y[keep]
+            x, y = x[landed], y[landed]
 
     pts = np.column_stack((x, y))
     pts = pts - pts.mean(axis=0)
@@ -199,9 +221,13 @@ def azimuth_error_multiplier(
     """Relative sensitivity of azimuth to axial magnetic interference.
 
     Axial interference enters azimuth as ``dBz*sin(I)*sin(A)/(B*cos(dip))``, so
-    the geometry-dependent part is ``sin(I)*sin(A_magnetic)``: zero drilling due
-    north or south, maximal drilling east or west. Returns 0..1, a per-well
-    trust weight rather than an absolute error.
+    the geometry-dependent part is ``sin(I)*sin(A_magnetic)``.
+
+    Returns 0..1 where **higher means worse**: 0 drilling due north or south
+    (immune), 1 drilling due east or west (maximally sensitive). This is an
+    error *sensitivity*, not a trust or confidence weight -- a consumer that
+    treats it as trust weights every heading backwards. To weight by
+    reliability, use ``1 - multiplier`` or restrict to low values.
     """
     magnetic = (np.asarray(azimuth_deg, dtype=float) - mag_to_grid_deg) % 360.0
     return np.abs(
