@@ -74,10 +74,14 @@ pre-review code, and this document as the record of the gap.
 
 ## Pre-review source digests
 
-Recoverable from git history — the state immediately before the review pass:
+No archaeology needed: the `source_sha256` blocks in the committed protocol
+records **are** the pre-review digests. Leaving them unrewritten is what
+preserves them.
 
 ```
-git show 7616edd:research/results/anchored_structural_field_protocol.json
+python -c "import json;print(json.load(open('research/results/anchored_structural_field_protocol.json'))['source_sha256'])"
 ```
 
-That commit is the last one in which `source_sha256` matched the working tree.
+To identify which of the 14 have since drifted, compare those values against
+`hashlib.sha256` of each file in the current tree. As of this document, 5 still
+match and 9 do not.
