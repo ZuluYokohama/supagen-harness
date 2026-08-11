@@ -50,7 +50,10 @@ gives a better-supported figure for the same model:
 | hold last TVT | 10.66 | 12.81 | 22.97 |
 | oracle constant *(uses labels)* | 6.92 | 7.86 | 13.11 |
 
-Beats hold on **71.0%** of wells. Reproduce with `scratchpad/confirm.py`.
+Beats hold on **71.0%** of wells. Protocol: 4-fold `GroupKFold` over well id, each
+fold fitting via `model.fit` and calibrating shrinkage on its own grouped OOF, then
+scoring with `per_well_rmse`. The driver was a scratch script and is not in the
+repo; `cli.evaluate` reproduces only the single-holdout table above.
 
 **Treat this as ~8.8–9.0 median, not 8.81.** Re-running the same model with a
 finer evaluation stride and different fold construction gives 8.97 / 10.93 /
@@ -134,7 +137,9 @@ still improving when it overfit at 510 — becomes the more interesting revisit.
 > split against one fixed holdout, single run per size, and read 300 → 510 as flat
 > (9.25 → 9.23). Repeating it across folds shows that was noise: the 400-well point
 > had bounced *up* to 9.37 on that split, flattening a curve that is actually
-> monotone. Reproduce with `scratchpad/curve_cv.py`.
+> monotone. The driver was a scratch script and is not in the repo; the protocol
+> is as described above — subsample the training wells inside each CV fold at
+> each size, shrinkage pinned at 0.85, and score the fold's own holdout.
 
 ## A note on method, learned twice
 
