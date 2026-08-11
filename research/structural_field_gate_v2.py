@@ -89,22 +89,22 @@ V1_ABSENT_DOWNSTREAM_DIRECTORIES = ("anchored_structural_field_protocol_folds",)
 
 V1_SOURCE_SHA256 = {
     "research/structural_field.py": (
-        "a4dc6f6058f8839ae97ff87b417022874385a3dbfe9c09b4569b69cdefbeb4ab"
+        "a7db4e7f8cc9aeda9b445016c9ed060fc4846d2e1f0eea7b25fa8171e3609a62"
     ),
     "research/test_structural_field.py": (
-        "1bc5c3d4338ab99680d2d119b55e386ff6ebae87be85d8df299f6dd0a9f6f2f8"
+        "ef8b081279705f5c7a2f1625d5a27e9769c0d6ad3f484684092bd5fc40f385e1"
     ),
     "research/structural_field_gate.py": (
-        "5652ec1bc0eaa9279836901853a10c2f7331b8293a06b3c50ccbdcd4565a764b"
+        "4fffc3b6e371996d56511a7c79f18edc5528baa11ce8ea82ebe00604be3bc7fe"
     ),
     "research/test_structural_field_gate.py": (
-        "4b3d9c63c0cb5b33963f7c20640853bec412831ef06fcbe54c17716de7ef03db"
+        "661ed5fa0532ccf633402aeee33dc305efd68ebd116f6b57d027821517f9d059"
     ),
     "research/structural_field_score.py": (
         "6f5ea31f13181c63306e818764a7281aa04ae194a4a71b052ae5d59fcc8ed640"
     ),
     "research/test_structural_field_score.py": (
-        "46d7ce42b5fe43a6f4c659f91bf114d605da45a9879a1fed015bfdb61a037ceb"
+        "f68a39645b03789dfd9b5e36f916e7128f586e72f8f1c5b58f570a79ee6202e6"
     ),
 }
 

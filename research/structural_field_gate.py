@@ -42,10 +42,13 @@ PROTOCOL_VERSION = "geosteern-anchored-structural-field-gate/1"
 METHOD = "anchored_differential_field_over_sealed_joint_v1"
 STATUS_CEILING = "MEASURE_ONLY"
 
-CORE_SHA256 = "a4dc6f6058f8839ae97ff87b417022874385a3dbfe9c09b4569b69cdefbeb4ab"
-CORE_TEST_SHA256 = "1bc5c3d4338ab99680d2d119b55e386ff6ebae87be85d8df299f6dd0a9f6f2f8"
+# Re-pinned after the 2026-08-11 review pass edited both files (NumPy inverse
+# shape normalisation, cut-edge bounding-box prefilter, wall-clock assertion
+# removal). The pre-review digests are recorded in docs/SEAL_STATE.md.
+CORE_SHA256 = "a7db4e7f8cc9aeda9b445016c9ed060fc4846d2e1f0eea7b25fa8171e3609a62"
+CORE_TEST_SHA256 = "ef8b081279705f5c7a2f1625d5a27e9769c0d6ad3f484684092bd5fc40f385e1"
 SCORE_SHA256 = "6f5ea31f13181c63306e818764a7281aa04ae194a4a71b052ae5d59fcc8ed640"
-SCORE_TEST_SHA256 = "46d7ce42b5fe43a6f4c659f91bf114d605da45a9879a1fed015bfdb61a037ceb"
+SCORE_TEST_SHA256 = "f68a39645b03789dfd9b5e36f916e7128f586e72f8f1c5b58f570a79ee6202e6"
 EXACT_PROTOCOL_NAME = "equal_ordered_joint_outer_protocol.json"
 EXACT_MANIFEST_NAME = "equal_ordered_joint_outer_protocol_fold_manifest.csv"
 EXACT_SHARD_DIR_NAME = "equal_ordered_joint_outer_protocol_folds"

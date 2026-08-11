@@ -15,6 +15,14 @@ of those differences.  It is not q0.90 of paired RMSE differences.
 
 The status ceiling is ``MEASURE_ONLY``.  Results can only be ``MEASURE_ONLY``
 or ``STOP`` and can never promote production ``OPEN``.
+
+This module duplicates much of :mod:`research.structural_field_score` on
+purpose.  The v1 protocol seals that file's exact bytes through
+``SCORER_SOURCE_FILES``, so factoring the shared logic into a common helper
+would change those bytes and invalidate the v1 lineage the v2 gate binds to.
+The duplication is the cost of keeping v1 verifiable.  Any change to a shared
+metric must therefore be applied to *both* scorers, or they will silently
+disagree.
 """
 
 from __future__ import annotations

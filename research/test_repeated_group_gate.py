@@ -235,8 +235,8 @@ def test_outer_test_rows_are_rejected_from_static_fit_before_lightgbm() -> None:
     )
     with pytest.raises(ProtocolError, match="non-training wells"):
         _fit_base_fold(
-            [r"C:\train\aaaaaaaa__horizontal_well.csv"],
-            [r"C:\train\bbbbbbbb__horizontal_well.csv"],
+            ["train/aaaaaaaa__horizontal_well.csv"],
+            ["train/bbbbbbbb__horizontal_well.csv"],
             {"aaaaaaaa": "group-a", "bbbbbbbb": "group-b"},
             matrix,
         )
@@ -247,8 +247,8 @@ def test_outer_prediction_record_uses_sanitized_inference_well_id(
 ) -> None:
     train_ids = ["aaaaaaaa", "bbbbbbbb", "cccccccc", "dddddddd"]
     test_id = "eeeeeeee"
-    train_files = [rf"C:\train\{wid}__horizontal_well.csv" for wid in train_ids]
-    test_files = [rf"C:\train\{test_id}__horizontal_well.csv"]
+    train_files = [f"train/{wid}__horizontal_well.csv" for wid in train_ids]
+    test_files = [f"train/{test_id}__horizontal_well.csv"]
     matrix = (
         pd.DataFrame({"feature": [1.0, 2.0, 3.0, 4.0]}),
         np.array([1.0, 2.0, 3.0, 4.0]),

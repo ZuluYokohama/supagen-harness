@@ -178,7 +178,11 @@ def test_region_uses_retained_training_and_never_repurposes_embargo() -> None:
 
     source = inspect.getsource(gate._run_one_fold)
     assert "training_ids, validation_ids, embargo_ids = _fold_roles" in source
-    assert "universe" not in source
+    # The fold must take its roles from _fold_roles and never re-derive them
+    # from a universe set. Check executable text only, so a comment or docstring
+    # that happens to mention the word cannot fail this.
+    code_only = "\n".join(line.split("#", 1)[0] for line in source.splitlines())
+    assert "universe" not in code_only
     assert "train_files" in source
     assert "set(training_group_by_well) & set(embargo_ids)" in source
 
@@ -327,7 +331,7 @@ def test_all_ten_shards_are_inventoried_before_truth(tmp_path: Path) -> None:
     incomplete_payload = dict(incomplete)
     incomplete_payload.pop("pretruth_inventory_sha256")
     incomplete["pretruth_inventory_sha256"] = gate._inventory_digest(incomplete_payload)
-    with pytest.raises(gate.ProtocolError, match="incomplete|identities"):
+    with pytest.raises(gate.ProtocolError, match=r"incomplete|identities"):
         gate._validate_pretruth_inventory(incomplete)
 
 
@@ -378,12 +382,21 @@ def test_run_has_no_validation_truth_and_aggregate_crosses_boundary_once() -> No
     assert "group_gate._fit_base_fold" in fit_source
     assert "group_gate._fit_joint_correction" in fit_source
     assert "all_spatial_manifest_sha256" in run_source
-    assert aggregate_source.index("validated.append") < aggregate_source.index(
-        "pretruth_inventory = _build_pretruth_artifact_inventory"
+    # Assert presence first: str.index would otherwise raise a bare ValueError
+    # that says nothing about which stage went missing.
+    ordered_stages = (
+        "validated.append",
+        "pretruth_inventory = _build_pretruth_artifact_inventory",
+        "_score_sealed_predictions",
     )
-    assert aggregate_source.index(
-        "pretruth_inventory = _build_pretruth_artifact_inventory"
-    ) < aggregate_source.index("_score_sealed_predictions")
+    positions = []
+    for stage in ordered_stages:
+        position = aggregate_source.find(stage)
+        assert position >= 0, f"aggregate stage missing from source: {stage}"
+        positions.append(position)
+    assert positions == sorted(positions), (
+        f"aggregate stages out of order: {ordered_stages}"
+    )
     assert "expected exactly {expected_scored_rows}" in aggregate_source
 
 

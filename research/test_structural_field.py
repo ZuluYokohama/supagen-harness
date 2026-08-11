@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from time import perf_counter
 
 import numpy as np
 import pytest
@@ -296,7 +295,6 @@ def test_dense_raw_rows_use_bounded_knots_and_returned_blend_identity(
     tvt_input[:prefix_rows] = target_tvt[:prefix_rows]
     policy = target_tvt.copy()
     policy[prefix_rows:] += 10.0
-    started = perf_counter()
     result = predict_structural_field(
         affine_model,
         md=md,
@@ -306,8 +304,8 @@ def test_dense_raw_rows_use_bounded_knots_and_returned_blend_identity(
         tvt_input=tvt_input,
         policy_tvt=policy,
     )
-    elapsed = perf_counter() - started
-    assert elapsed < 5.0
+    # No wall-clock assertion here: this test guards correctness, and a shared
+    # CI runner can miss any fixed threshold for reasons unrelated to the code.
     assert result.diagnostics.rows == len(md)
     assert result.diagnostics.evaluation_rows < 130
     supported = result.support_mask

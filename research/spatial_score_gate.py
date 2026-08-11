@@ -2346,7 +2346,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     freeze.add_argument(
         "--data-dir",
         type=Path,
-        default=Path(r"C:\PRIMEdEV-1\GeoSteerN-Codex"),
+        required=True,
+        help="directory containing train/ and test/",
     )
     freeze.add_argument(
         "--manifest-dir",

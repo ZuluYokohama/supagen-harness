@@ -417,7 +417,19 @@ def test_ten_model_roles_exclude_heldout_label_end_to_end(
     assert len(roles["leave_two_roles"]) == 6
     assert len(fit_roles) == 10
     assert all(set(first[fold]) == set(ids) for fold in range(4))
-    assert all(not ({"w0", "w1"} & role) for role in fit_roles[:1])
+    # Check all ten fitted roles, not just the first. Every role must be a union
+    # of whole folds -- a role holding part of a fold would leak the rest.
+    for role in fit_roles:
+        excluded = set(range(4)) - {folds[well_id] for well_id in role}
+        assert role == {
+            well_id for well_id in ids if folds[well_id] not in excluded
+        }
+    # Fold 0 is exactly {w0, w1}, so every role excluding it must hold out both.
+    fold_zero_roles = [
+        role for role in fit_roles if 0 not in {folds[well_id] for well_id in role}
+    ]
+    assert len(fold_zero_roles) == 4
+    assert all(not ({"w0", "w1"} & role) for role in fold_zero_roles)
     assert len(prediction_routes) == 32
     assert all(folds[well_id] in excluded for excluded, well_id in prediction_routes)
 

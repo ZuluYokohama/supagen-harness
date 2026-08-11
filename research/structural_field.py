@@ -416,6 +416,9 @@ def _inducing_nodes(
     for _ in range(20):
         keys = np.floor((xy - origin) / cell).astype(np.int64)
         unique, inverse = np.unique(keys, axis=0, return_inverse=True)
+        # NumPy has shipped both 1-D and (n, 1) shapes for the axis= form of
+        # return_inverse; bincount and add.at below require 1-D either way.
+        inverse = np.reshape(inverse, -1)
         if len(unique) <= config.max_nodes:
             break
         cell *= max(1.05, np.sqrt(len(unique) / config.max_nodes) * 1.01)
@@ -1319,9 +1322,24 @@ def _cut_fallback_mask(
     mask = np.zeros(len(xy), dtype=bool)
     cut_edges = model.edges[model.cut_edge_mask]
     crossings = 0
-    for start_index, end_index in cut_edges:
-        start = model.nodes_xy[start_index]
-        end = model.nodes_xy[end_index]
+    if len(xy) == 0 or len(cut_edges) == 0:
+        return mask, crossings
+
+    # The scan below is O(cut edges x rows). An edge whose bounding box misses
+    # the trajectory's own box, grown by the fallback radius, can be neither
+    # within that radius of any row nor crossed by any segment -- box gap on
+    # some axis lower-bounds the true distance. Dropping those edges first
+    # leaves both mask and crossings bit-identical.
+    radius = float(model.config.cut_fallback_radius_ft)
+    starts_all = model.nodes_xy[cut_edges[:, 0]]
+    ends_all = model.nodes_xy[cut_edges[:, 1]]
+    low = xy.min(axis=0) - radius
+    high = xy.max(axis=0) + radius
+    edge_low = np.minimum(starts_all, ends_all)
+    edge_high = np.maximum(starts_all, ends_all)
+    near = np.all((edge_high >= low) & (edge_low <= high), axis=1)
+
+    for start, end in zip(starts_all[near], ends_all[near], strict=True):
         mask |= (
             _point_segment_distance(xy, start, end)
             <= model.config.cut_fallback_radius_ft

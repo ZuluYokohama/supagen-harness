@@ -637,6 +637,8 @@ def test_success_seals_once_and_independent_audit_reconstructs(
         "pad",
         "tampered",
         "row_identity",
+        "comparator",
+        "candidate_formula",
         "membership",
         "nonfinite",
         "protocol",
@@ -669,6 +671,22 @@ def test_global_barrier_failures_precede_any_truth_loader(
             run,
             identity,
             lambda arrays: arrays["row_index"].__setitem__(0, 3),
+        )
+    elif attack == "comparator":
+        _reseal_prediction(
+            run,
+            identity,
+            lambda arrays: arrays["base_prediction"].__setitem__(
+                0, arrays["base_prediction"][0] + 1.0e-12
+            ),
+        )
+    elif attack == "candidate_formula":
+        _reseal_prediction(
+            run,
+            identity,
+            lambda arrays: arrays["candidate_prediction"].__setitem__(
+                0, arrays["candidate_prediction"][0] + 1.0e-9
+            ),
         )
     elif attack == "membership":
         shard = json.loads(shard_path.read_text(encoding="utf-8"))
