@@ -125,10 +125,16 @@ Mean ± sd across folds:
 | 400 | 9.14 ± 0.44 | 11.15 ± 0.33 | 67.4% |
 | 580 | 8.78 ± 0.50 | 10.89 ± 0.57 | 72.5% |
 
-**The curve is still descending at 580 wells.** Going 300 → 580 improves the
-median by **+0.60 ft** (per fold: 0.45, 0.31, 1.03), against a fold-to-fold sd of
-0.38 — so the gain clears the noise, and every size step is monotone in both
-median and beats-hold (54.8% → 72.5%).
+**The curve is still descending at 580 wells.** The fold-mean median falls from
+9.25 at 300 wells to 8.78 at 580 — a **+0.47 ft** gain — and every size step is
+monotone in both median and beats-hold (54.8% → 72.5%).
+
+Treat that magnitude cautiously. It is comparable to the per-size spread across
+folds (sd 0.50 at 580, 0.54 at 300), and the per-fold deltas recorded at the
+time (0.45, 0.31, 1.03) average 0.60, which cannot be reconciled with the
+table's 0.47 — a fourth fold's delta went unrecorded, and the driver script no
+longer exists to recover it. The monotone trend across six sizes is the durable
+claim; the size of the gain is not pinned down.
 
 More wells should therefore help, and the learned sequence encoder — which was
 still improving when it overfit at 510 — becomes the more interesting revisit.
